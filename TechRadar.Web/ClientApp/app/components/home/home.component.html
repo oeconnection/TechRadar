@@ -1,0 +1,26 @@
+<h1>Welcome to the OEC Technology Radar Collection!</h1>
+<p>
+    The technology radars are a set of documentation that allows technical associates to communicate technology
+    and tools that are in use or should be looked at for future use. To view a full radar, simply click on the radar
+    title or choose it from the navigation dropdown. If the a more detailed view of the quadrant is needed, simply
+    click on the quadrant name below.
+</p>
+
+<div *ngFor="let radar of radars">
+    <a [routerLink]="['/radar', radar.radarId]"><h3>{{ radar.name }}</h3></a>
+    <p>{{ radar.description }}</p>
+
+    <h4><strong>Cycles</strong></h4>
+    <ul>
+        <li *ngFor="let cycle of radar.cycles"><strong>{{ cycle.fullName }}</strong> - {{ cycle.description }}</li>
+    </ul>
+
+    <h4><strong>Quadrants</strong></h4>
+    <ul>
+        <li *ngFor="let quadrant of radar.quadrants">
+            <a [routerLink]="['/radar', radar.id, quadrant.quadrantNumber]"><strong>{{ quadrant.name }}</strong></a> - {{ quadrant.description }}
+        </li>
+    </ul>
+    <hr />
+</div>
+   

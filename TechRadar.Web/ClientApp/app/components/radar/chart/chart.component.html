@@ -1,0 +1,17 @@
+﻿<div #chart [ngClass]="chartAlignment">
+    <svg [attr.width]="chartData?.size" [attr.height]="chartData?.size">
+        <svg:g radar-cycles [chartModel]="chartData"></svg:g>
+        <svg:a  
+           class="blip-group" 
+           *ngFor="let chartBlip of blips" 
+           radar-blip 
+           [model]="chartBlip"
+           [tooltip]="chartBlip.name"
+           placement="top"
+           container="body"
+           (mouseover)="onMouseOverBlip(chartBlip.id)"
+           (mouseout)="onMouseOutBlip()"
+           [attr.opacity]="blipOpacity(chartBlip.id)"
+           ></svg:a> 
+    </svg>
+</div>

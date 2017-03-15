@@ -1,0 +1,45 @@
+>>> .jumbotron.first {
+    background-color: #83ad78;
+    stroke: #fff;
+}
+
+>>> .jumbotron.second {
+    background-color: #3db5be;
+    stroke: #fff;
+}
+
+>>> .jumbotron.third {
+    background-color: #e88744;
+    stroke: #fff;
+}
+
+>>> .jumbotron.fourth {
+    background-color: #8d2145;
+    stroke: #fff;
+}
+
+>>> .jumbotron.full {
+    stroke: #fff;
+}
+
+.page-header {
+    margin-top: 20px;
+}
+
+.page-header > h2 > a, .page-header > h2 > a:visited {
+    color: #000;
+    text-decoration: none;
+}
+
+.page-header > h2 > a:hover {
+    color: #4189C7;
+    text-decoration: none;
+}
+
+.blips-small {
+    font-size: 11px;
+}
+
+.blips-large {
+    font-size: 14px;
+}

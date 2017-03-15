@@ -1,0 +1,37 @@
+﻿<div id="quadrant-blip-list" [ngClass]="['panel', panelClass]">
+    <a [routerLink]="['/radar', radarId, quadrantData.quadrantNumber]"><div class="panel-heading">{{ quadrantData.name }}</div></a>
+    <div class="panel-body">
+        <ul class="list-unstyled" *ngFor="let cycle of cycles">
+            <li [ngClass]="['ring', quadrantData.cssClass]">
+                {{ cycle.fullName }}
+
+                <ul class="list-unstyled" *ngFor="let blip of quadrantData.blips">
+                    <li *ngIf="blip.cycle.name === cycle.name">
+                        <div
+                               (mouseover)="onMouseOverBlip(blip.id)"
+                               (mouseout)="onMouseOutBlip()">
+                            <a class="blip-name-link"
+                               role="button"
+                               data-toggle="collapse"
+                               href="#collapse{{ blip.id }}"
+                               attr.aria-expanded="false"
+                               attr.aria-controls="collapse{{ blip.id }}">
+                                <div [ngClass]="{ 'active-link': isActiveBlip(blip.id), 'full-link': true }"
+                                     attr.data-blip-id="{{ blip.id }}" attr.id="blip-link-{{ blip.id }}">
+                                    {{ blip.id }}. {{ blip.name }} <span *ngIf="blip.isNew" [ngClass]="['badge', quadrantData.cssClass]">new</span>
+                                </div>
+                            </a>
+
+                            <div class="collapse" id="collapse{{ blip.id }}">
+                                <div class="well blip-description">
+                                    {{ blip.description }}
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+<!--<i *ngIf="blip.isNew" [ngClass]="['fa', 'fa-exclamation-circle', quadrantData.cssClass]"></i>-->

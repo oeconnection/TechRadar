@@ -1,0 +1,26 @@
+<div class="container-fluid left">
+    <div class="page-header">
+        <h2><a [routerLink]="['/radar', radarId]">{{ radarName }}</a><span *ngIf="isQuadrantOnly"> - <small>{{ chartData.quadrant.name }}</small></span></h2>
+        <p>{{ radarDescription }}<span *ngIf="isQuadrantOnly"> {{ chartData.quadrant.description }}</span></p>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-3" *ngIf="showQuadrantsList">
+            <quadrant-list class="blips-small" [quadrantData]="chartData.getQuadrant(1)" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
+            <quadrant-list class="blips-small" [quadrantData]="chartData.getQuadrant(4)" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
+        </div>
+        <div class="col-lg-6" *ngIf="showQuadrantListOnLeft">
+            <quadrant-list class="blips-large" [quadrantData]="chartData.quadrant" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
+        </div>
+        <div class="col-lg-6" #chartArea>
+            <radar-chart [chartData]="chartData"></radar-chart>
+        </div>
+        <div class="col-lg-6" *ngIf="showQuadrantListOnRight">
+            <quadrant-list class="blips-large" [quadrantData]="chartData.quadrant" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
+        </div>
+        <div class="col-lg-3" *ngIf="showQuadrantsList">
+            <quadrant-list class="blips-small" [quadrantData]="chartData.getQuadrant(2)" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
+            <quadrant-list class="blips-small" [quadrantData]="chartData.getQuadrant(3)" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
+        </div>
+    </div>
+</div>

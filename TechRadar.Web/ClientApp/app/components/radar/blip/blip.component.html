@@ -1,0 +1,30 @@
+﻿
+    <svg:polygon *ngIf="chartBlip.isNew"
+             [attr.points]="chartBlip.points()"
+             [attr.class]="chartBlip.cssClass"
+             stroke-width="1.5"
+             opacity="1">
+    </svg:polygon>
+    <svg:circle *ngIf="!chartBlip.isNew"
+            [attr.cx]="chartBlip.shape.x"
+            [attr.cy]="chartBlip.shape.y"
+            [attr.class]="chartBlip.cssClass"
+            stroke-width="1.5"
+            [attr.r]="10 + chartBlip.size"
+            >
+    </svg:circle>
+
+    <svg:text [attr.x]="chartBlip.text.x"
+          [attr.y]="chartBlip.text.y"
+          class="blip-name"
+          text-anchor="left">
+        {{ chartBlip.id }}
+    </svg:text>
+
+    <svg:text [attr.x]="chartBlip.shape.x"
+              [attr.y]="chartBlip.shape.y + 4"
+              class="blip-text"
+              text-anchor="middle">
+        {{ chartBlip.id }}<svg:title>{{ chartBlip.blipTitle() }}</svg:title>
+    </svg:text>
+
