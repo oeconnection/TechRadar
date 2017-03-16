@@ -11,7 +11,8 @@ namespace TechRadar.Services.Models
     public class Radar
     {
         [BsonId]
-        public ObjectId Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
 
         [BsonElement("radarId")]
         public string RadarId { get; set; }

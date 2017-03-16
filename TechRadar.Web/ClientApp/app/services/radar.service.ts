@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Radar, Blip } from '../models';
 import { Observable, Subject } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/Rx';
+import { ObjectId } from 'mongodb'
 
 @Injectable()
 export class RadarService {
@@ -24,7 +25,7 @@ export class RadarService {
     }
 
     private toBlip(item: any): Blip {
-        return new Blip(item.radarId, item.name, item.description, item.quadrants, item.cycles);
+        return new Blip(item.id, item.name, item.description, item.size, item.added, item.cycleId, item.quadrantId);
     }
 
     private mapBlipList(response: Response) {
@@ -34,13 +35,13 @@ export class RadarService {
         if (response.status == 400) {
             return "FAILURE";
         } else if (response.status == 200) {
-            this.dataCache.radarList = response.json().map(this.toRadar);
-            return this.dataCache.radarList;
+            return response.json().map(this.toBlip);
         }
     }
 
     private toRadar(item: any): Radar {
-        return new Radar(item.radarId, item.name, item.description, item.quadrants, item.cycles);
+        var radar = new Radar(item.id, item.radarId, item.name, item.description, item.quadrants, item.cycles);
+        return radar;
     }
 
     private mapRadarList(response: Response) {
@@ -85,11 +86,8 @@ export class RadarService {
         }
     }
 
-    private findSingleRadar(list: Radar[], name: string): Radar {
-        if (list && list.length > 0) {
-            return list[0];
-        }
-
+    private findSingleRadar(radars: Radar[], name: string): Radar {
+        return radars.find(x => x.radarId == name);
     }
 
     getRadar(name: string): Observable<Radar> {
@@ -97,9 +95,15 @@ export class RadarService {
     }
 
     getRadarBlips(name: string): Observable<Array<Blip>> {
-        //return this.http.get(this.radarsUrl + '/radar/' + name + '/blips')
-        //    .map((response) => this.mapRadarList(response))
-        //    .share(); // make it shared so more than one subscriber can get the result
+        return this.http.get(this.radarsUrl + '/radar/' + name + '/blips')
+            .map((response) => this.mapBlipList(response))
+            .share(); 
+    }
+
+    getRadarQuadrantBlips(name: string, quadrantNumber: number): Observable<Array<Blip>> {
+        return this.http.get(this.radarsUrl + '/radar/' + name + '/blips/' + quadrantNumber)
+            .map((response) => this.mapBlipList(response))
+            .share();
     }
 
     setActiveBlip(blip: number): void {

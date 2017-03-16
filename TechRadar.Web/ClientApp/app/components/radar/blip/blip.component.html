@@ -18,13 +18,13 @@
           [attr.y]="chartBlip.text.y"
           class="blip-name"
           text-anchor="left">
-        {{ chartBlip.id }}
+        {{ chartBlip.blipNumber }}
     </svg:text>
 
     <svg:text [attr.x]="chartBlip.shape.x"
               [attr.y]="chartBlip.shape.y + 4"
               class="blip-text"
               text-anchor="middle">
-        {{ chartBlip.id }}<svg:title>{{ chartBlip.blipTitle() }}</svg:title>
+        {{ chartBlip.blipNumber }}<svg:title>{{ chartBlip.blipTitle() }}</svg:title>
     </svg:text>
 

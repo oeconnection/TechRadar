@@ -1,12 +1,12 @@
-﻿<div id="quadrant-blip-list" [ngClass]="['panel', panelClass]">
+﻿<div id="quadrant-blip-list" [ngClass]="['panel', panelClass]" *ngIf="quadrantData">
     <a [routerLink]="['/radar', radarId, quadrantData.quadrantNumber]"><div class="panel-heading">{{ quadrantData.name }}</div></a>
     <div class="panel-body">
         <ul class="list-unstyled" *ngFor="let cycle of cycles">
             <li [ngClass]="['ring', quadrantData.cssClass]">
                 {{ cycle.fullName }}
 
-                <ul class="list-unstyled" *ngFor="let blip of quadrantData.blips">
-                    <li *ngIf="blip.cycle.name === cycle.name">
+                <ul class="list-unstyled" *ngFor="let blip of getBlipsByCycleId(cycle.id)">
+                    <li>
                         <div
                                (mouseover)="onMouseOverBlip(blip.id)"
                                (mouseout)="onMouseOutBlip()">
@@ -18,7 +18,7 @@
                                attr.aria-controls="collapse{{ blip.id }}">
                                 <div [ngClass]="{ 'active-link': isActiveBlip(blip.id), 'full-link': true }"
                                      attr.data-blip-id="{{ blip.id }}" attr.id="blip-link-{{ blip.id }}">
-                                    {{ blip.id }}. {{ blip.name }} <span *ngIf="blip.isNew" [ngClass]="['badge', quadrantData.cssClass]">new</span>
+                                    {{ blip.blipNumber }}. {{ blip.name }} <span *ngIf="blip.isNew" [ngClass]="['badge', quadrantData.cssClass]">new</span>
                                 </div>
                             </a>
 

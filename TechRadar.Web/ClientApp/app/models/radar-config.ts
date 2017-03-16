@@ -1,6 +1,9 @@
-﻿import { Radar } from './';
+﻿import { Radar, Blip } from './';
 
 export interface RadarConfig {
     settings: { quadrant: number, size: number, name: string };
-    dataset: Radar;
+    dataset: {
+        radar: Radar,
+        blips: Blip[]
+    };
 }

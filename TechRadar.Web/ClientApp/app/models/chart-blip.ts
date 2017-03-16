@@ -6,15 +6,17 @@ export class ChartBlip extends Blip {
     cssClass: string;
     style: string;
     opacity: number;
+    blipNumber: number;
 
-    constructor(blip: Blip, shape: { x: number, y: number }, text: { x: number, y: number }, cssClass: string, opacity: number) {
-        super(blip.id, blip.name, blip.cycle, blip.isNew, blip.description, blip.size);
+    constructor(blip: Blip, shape: { x: number, y: number }, text: { x: number, y: number }, cssClass: string, opacity: number, blipNumber: number) {
+        super(blip.id, blip.name, blip.description, blip.size, blip.added, blip.cycleId, blip.quadrantId);
 
         this.shape = shape;
         this.text = text;
         this.cssClass = cssClass;
         this.style = `'display': 'none'`;
         this.opacity = opacity;
+        this.blipNumber = blipNumber;
     }
 
     public points(): string {
@@ -30,7 +32,7 @@ export class ChartBlip extends Blip {
     }
 
     public tooltipName(): string {
-        return 'tooltip' + this.id;
+        return 'tooltip' + this.blipNumber;
     } 
 
     public blipTitle(): string {

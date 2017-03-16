@@ -29,29 +29,21 @@ export class ChartComponent implements OnChanges, OnInit {
     }
 
     ngOnInit(): void {
-        debugger;
-
         this.radarService.getActiveBlip().subscribe(blip => {
             if (!(this.mouseOnBlip == blip)) {
                 this.mouseOnBlip = blip;
             }
         });
-        //if (this.chartData) {
-        //    this.setupViewModel();
-        //}
-
     }
 
     ngOnChanges(): void {
-        debugger;
         if (this.chartData) {
             this.setupViewModel();
         }
     }
 
     private setupViewModel(): void {
-        debugger;
-        this.blips = this.chartData.allBlips();
+        this.blips = this.chartData.blips;
 
         if (this.chartData.isQuadrantOnly) {
             this.chartAlignment = this.chartData.quadrant.chartAlignment;

@@ -7,7 +7,8 @@ namespace TechRadar.Services.Models
     public class Quadrant
     {
         [BsonId]
-        public ObjectId Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
 
         [BsonElement("quadrantNumber")]
         public int QuadrantNumber { get; set; }

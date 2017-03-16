@@ -1,23 +1,28 @@
 import { Cycle } from './cycle';
+import moment = require("moment");
 
 export class Blip {
+    id: string;
     name: string;
     description: string;
-    isNew: boolean;
     added: Date;
-    cycle: Cycle;
-    id: number;
     size: number;
+    quadrantId: string;
+    cycleId: string;
+    isNew: boolean;
 
-    constructor(id: number, name: string, cycle: Cycle, isNew?: boolean, description?: string, size?: number, added?: Date) {
+    constructor(id: string, name: string, description: string, size: number, added: Date, cycleId: string, quadrantId: string) {
         this.id = id;
 
         this.name = name;
-        this.cycle = cycle;
-
         this.description = description ? description : '';
-        this.isNew = isNew ? true : false;
-
+        this.added = added;
         this.size = size ? size : 1;
+
+        this.cycleId = cycleId;
+        this.quadrantId = quadrantId;
+
+        var diff = moment(new Date()).diff(moment(this.added), 'months');
+        this.isNew = diff <= 3;
     }
 }

@@ -9,9 +9,10 @@ import {
     NgZone
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Radar, Quadrant, RadarConfig, ChartModel } from '../../../models';
+import { Radar, Quadrant, RadarConfig, ChartModel, Blip } from '../../../models';
 import { RadarService } from '../../../services';
 import { D3Service, D3 } from 'd3-ng2-service';
+import { Observable } from 'rxjs/Rx';
 
 @Component({
     selector: 'app-radar',
@@ -25,7 +26,8 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     private radarName: string;
     private radarDescription: string;
     private quadrant: number;
-    private sub: any;
+    private routingParams: any;
+    private dataSub: any;
     private radarData: Radar;
     private isQuadrantOnly: boolean;
     private chartConfig: RadarConfig;
@@ -37,6 +39,7 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     private d3: D3; 
     private width: number;
     private height: number;
+    private blips: Blip[];
 
     constructor(private route: ActivatedRoute, private radarService: RadarService, private d3Service: D3Service) {
         this.d3 = d3Service.getD3(); 
@@ -49,34 +52,52 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     ngOnInit() {
-        this.sub = this.route.params.subscribe(params => {
+        this.getData();
+    }
+
+    ngOnDestroy(): void {
+        this.dataSub.unsubscribe();
+    }
+
+    private getData() {
+        this.routingParams = this.route.params.subscribe(params => {
             this.radarId = params['name'];
             this.quadrant = +params['quadrantNumber'];
 
             this.isQuadrantOnly = this.quadrant > 0;
 
-            this.sub = this.radarService.getRadar(this.radarId).subscribe(data => {
-                this.radarData = data;
-                if (data) {
-                    this.setModel();
-                    this.radarName = data.name;
-                    this.radarDescription = data.description;
-                };
-            });
+            var blipObservable: Observable<Blip[]>;
+            if (this.isQuadrantOnly) {
+                blipObservable = this.radarService.getRadarBlips(this.radarId);
+            } else {
+                blipObservable = this.radarService.getRadarQuadrantBlips(this.radarId, this.quadrant);
+            }
+
+            this.dataSub = Observable.forkJoin(
+                this.radarService.getRadar(this.radarId),
+                blipObservable).subscribe(data => {
+                    this.radarData = data[0];
+                    this.blips = data[1];
+
+                    if (this.radarData) {
+                        this.setModel();
+                        this.radarName = this.radarData.name;
+                        this.radarDescription = this.radarData.description;
+                    };
+                });
         });
     }
 
-    ngOnDestroy(): void {
-        this.sub.unsubscribe();
-    }
-
-    setModel() {
+    private setModel() {
         let chartConfig = {
             settings: {
                 quadrant: this.quadrant,
                 size: this.height, 
                 name: this.radarName,
-            }, dataset: this.radarData
+            }, dataset: {
+                radar: this.radarData,
+                blips: this.blips
+            }
         };
         this.chartData = new ChartModel(chartConfig, this.d3);
         this.showQuadrantListOnLeft = (this.quadrant == 2 || this.quadrant == 3);
@@ -93,4 +114,5 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
             this.chartAlignmentClass = '';
         }
     }
+
 }

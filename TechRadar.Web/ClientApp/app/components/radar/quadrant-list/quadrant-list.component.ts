@@ -7,7 +7,7 @@
     ElementRef,
     ViewChild
 } from '@angular/core';
-import { Radar, Quadrant, RadarConfig, ChartQuadrant, ChartModel, ChartCycle } from '../../../models';
+import { Radar, Quadrant, RadarConfig, ChartQuadrant, ChartModel, ChartCycle, ChartBlip } from '../../../models';
 import { RadarService } from '../../../services';
 
 @Component({
@@ -15,15 +15,19 @@ import { RadarService } from '../../../services';
     templateUrl: './quadrant-list.component.html',
     styleUrls: ['./quadrant-list.component.css']
 })
-export class QuadrantListComponent implements OnInit {
-    @Input() quadrantData: ChartQuadrant;
-    @Input() cycles: Array<ChartCycle>;
-    @Input() radarId: string;
+export class QuadrantListComponent implements OnChanges {
+    @Input() chartData: ChartModel;
+    @Input() quadrant: number;
 
+    private quadrantData: ChartQuadrant;
+    private blips: ChartBlip[];
+    private cycles: Array<ChartCycle>;
+    private radarId: string;
     private panelClass: string;
     private activeBlip: number;
 
     constructor(private radarService: RadarService) {
+        this.panelClass = '';
         this.activeBlip = null;
 
         this.radarService.getActiveBlip().subscribe(blip => {
@@ -33,13 +37,20 @@ export class QuadrantListComponent implements OnInit {
         });
     }
 
-    ngOnInit() {
-        if (this.quadrantData) {
-            this.setup();
-        }
+    ngOnChanges() {
+        this.setup();
     }
 
     private setup(): void {
+        if (this.chartData.isQuadrantOnly) {
+            this.quadrantData = this.chartData.quadrant;
+        } else {
+            this.quadrantData = this.chartData.findQuadrantByNumber(this.quadrant);
+        }
+        this.blips = this.chartData.findBlipsByQuadrantId(this.quadrantData.id);
+        this.cycles = this.chartData.cycles;
+        this.radarId = this.chartData.radar.radarId;
+
         this.panelClass = 'panel-' + this.quadrantData.cssClass;
     }
 
@@ -71,5 +82,9 @@ export class QuadrantListComponent implements OnInit {
 
     public isActiveBlip(blip: number): boolean {
         return this.activeBlip == blip;
+    }
+
+    private getBlipsByCycleId(id: string): ChartBlip[] {
+        return this.blips.filter(x => x.cycleId == id);
     }
 }

@@ -6,21 +6,21 @@
 
     <div class="row">
         <div class="col-lg-3" *ngIf="showQuadrantsList">
-            <quadrant-list class="blips-small" [quadrantData]="chartData.getQuadrant(1)" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
-            <quadrant-list class="blips-small" [quadrantData]="chartData.getQuadrant(4)" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
+            <quadrant-list class="blips-small" [chartData]="chartData" [quadrant]="1"></quadrant-list>
+            <quadrant-list class="blips-small" [chartData]="chartData" [quadrant]="4"></quadrant-list>
         </div>
         <div class="col-lg-6" *ngIf="showQuadrantListOnLeft">
-            <quadrant-list class="blips-large" [quadrantData]="chartData.quadrant" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
+            <quadrant-list class="blips-large" [chartData]="chartData" [quadrant]="chartData.quadrantNumber"></quadrant-list>
         </div>
         <div class="col-lg-6" #chartArea>
             <radar-chart [chartData]="chartData"></radar-chart>
         </div>
         <div class="col-lg-6" *ngIf="showQuadrantListOnRight">
-            <quadrant-list class="blips-large" [quadrantData]="chartData.quadrant" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
+            <quadrant-list class="blips-large"  [chartData]="chartData" [quadrant]="chartData.quadrantNumber"></quadrant-list>
         </div>
         <div class="col-lg-3" *ngIf="showQuadrantsList">
-            <quadrant-list class="blips-small" [quadrantData]="chartData.getQuadrant(2)" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
-            <quadrant-list class="blips-small" [quadrantData]="chartData.getQuadrant(3)" [cycles]="chartData.cycles" [radarId]="chartData.id"></quadrant-list>
+            <quadrant-list class="blips-small" [chartData]="chartData" [quadrant]="2"></quadrant-list>
+            <quadrant-list class="blips-small" [chartData]="chartData" [quadrant]="3"></quadrant-list>
         </div>
     </div>
 </div>

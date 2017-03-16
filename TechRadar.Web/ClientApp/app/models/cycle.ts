@@ -1,4 +1,5 @@
 export class Cycle {
+    id: string;
     name: string;
     fullName: string;
     description: string;
@@ -6,6 +7,7 @@ export class Cycle {
     size: number;
 
     constructor(cycleInfo: any) {
+        this.id = cycleInfo.id;
         this.name = cycleInfo.name;
         this.fullName = cycleInfo.fullName;
         this.description = cycleInfo.description;

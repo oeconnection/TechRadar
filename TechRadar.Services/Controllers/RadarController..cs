@@ -43,7 +43,39 @@ namespace TechRadar.Services.Controllers
             {
                 MongoDBContext dbContext = new MongoDBContext();
 
-                var blips = dbContext.Blips.Find(m => m.RadarId == radar.Id).ToList().Take(1);
+                var blips = dbContext.Blips.Find(m => m.RadarId == radar.Id).ToList();
+
+                return blips.ToList();
+            }
+
+            return new List<Blip>();
+        }
+
+        // GET api/radar/5/blips/3
+        [HttpGet("{id}/blips/{quadrantNumber}")]
+        public IEnumerable<Blip> GetBlips(string id, int quadrantNumber)
+        {
+            var radar = Get(id);
+            Quadrant quadrant;
+
+            var filterBuilder = Builders<Blip>.Filter;
+
+            if (radar != null)
+            {
+                var filter = filterBuilder.Eq(x => x.RadarId, radar.Id);
+
+                if (radar.Quadrants != null)
+                {
+                    quadrant = radar.Quadrants.FirstOrDefault<Quadrant>(x => x.QuadrantNumber == quadrantNumber);
+                    if(quadrant != null)
+                    {
+                        filter = filter & filterBuilder.Eq(x => x.QuadrantId, quadrant.Id);
+                    }
+                }
+
+                MongoDBContext dbContext = new MongoDBContext();
+
+                var blips = dbContext.Blips.Find(filter).ToList();
 
                 return blips.ToList();
             }

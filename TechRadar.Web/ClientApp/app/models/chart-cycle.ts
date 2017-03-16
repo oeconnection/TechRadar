@@ -18,6 +18,7 @@ export class ChartCycle extends Cycle {
 
     constructor(cycleInfo: any) {
         super({
+            id: cycleInfo.cycle.id,
             name: cycleInfo.cycle.name,
             fullName: cycleInfo.cycle.fullName,
             description: cycleInfo.cycle.description,
@@ -79,5 +80,4 @@ export class ChartCycle extends Cycle {
     public transformString(): string {
         return 'translate(' + this.transform.x.toString() + ', ' + this.transform.y.toString() + ')';
     }
-
 }

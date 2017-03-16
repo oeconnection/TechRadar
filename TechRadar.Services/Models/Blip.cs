@@ -11,7 +11,8 @@ namespace TechRadar.Services.Models
     public class Blip
     {
         [BsonId]
-        public ObjectId Id { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; set; }
 
         [BsonElement("name")]
         public string Name { get; set; }
@@ -27,12 +28,15 @@ namespace TechRadar.Services.Models
         public int Size { get; set; }
 
         [BsonElement("radar")]
-        public ObjectId RadarId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string RadarId { get; set; }
 
         [BsonElement("quadrant")]
-        public ObjectId QuadrantId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string QuadrantId { get; set; }
 
         [BsonElement("cycle")]
-        public ObjectId CycleId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string CycleId { get; set; }
     }
 }
