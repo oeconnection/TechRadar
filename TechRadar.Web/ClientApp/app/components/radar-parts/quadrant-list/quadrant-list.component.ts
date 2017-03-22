@@ -42,16 +42,14 @@ export class QuadrantListComponent implements OnChanges {
     }
 
     private setup(): void {
-        if (this.chartData.isQuadrantOnly) {
-            this.quadrantData = this.chartData.quadrant;
-        } else {
+        if (this.chartData) {
             this.quadrantData = this.chartData.findQuadrantByNumber(this.quadrant);
-        }
-        this.blips = this.chartData.findBlipsByQuadrantId(this.quadrantData.id);
-        this.cycles = this.chartData.cycles;
-        this.radarId = this.chartData.radar.radarId;
+            this.blips = this.chartData.findBlipsByQuadrantId(this.quadrantData.id);
+            this.cycles = this.chartData.cycles;
+            this.radarId = this.chartData.radar.radarId;
 
-        this.panelClass = 'panel-' + this.quadrantData.cssClass;
+            this.panelClass = 'panel-' + this.quadrantData.cssClass;
+        }
     }
 
     public onMouseOverBlip(blip: number): void {

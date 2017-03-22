@@ -10,8 +10,7 @@ export class ChartCycle extends Cycle {
     transform: { x: number, y: number };
     centerOfRing: { x: number, y: number };
     quadrant: ChartQuadrant;
-
-    private isQuadrantOnly: boolean;
+    lineY: number;
     private radius: number;
     private pathContext: any;
     private transformationBase: { x: number, y: number };
@@ -28,12 +27,11 @@ export class ChartCycle extends Cycle {
         this.transformationBase = cycleInfo.transform;
         this.pathContext = cycleInfo.pathContext;
         this.quadrantNumber = cycleInfo.quadrantNumber;
-        this.quadrant = cycleInfo.quadrant;
+        this.lineY = isNaN(cycleInfo.horizontalLine) ? 0 : cycleInfo.horizontalLine;
         this.outerRadius = cycleInfo.outerRadius;
         this.innerRadius = cycleInfo.innerRadius;
         this.ringArea = cycleInfo.ringArea;
         this.fill = cycleInfo.fill;
-        this.isQuadrantOnly = cycleInfo.isQuadrantOnly;
         this.radius = cycleInfo.radius;
 
         this.buildCircle();
@@ -45,16 +43,17 @@ export class ChartCycle extends Cycle {
             endRadian: number,
             lineY: number;
 
-        if (this.isQuadrantOnly) {
+        lineY = this.lineY;
+        if (this.isQuadrantOnly()) {
             radianCalculation = (0.5 * (this.quadrantNumber - 1));
             startRadian = ((radianCalculation - 0.5) * Math.PI);
             endRadian = (radianCalculation * Math.PI);
-            lineY = this.quadrant.horizontalLine.y;
         } else {
             startRadian = -0.5 * Math.PI;
             endRadian = 1.5 * Math.PI;
-            lineY = this.radius;
         }
+
+        //console.log("Path Builder: IR: %s | OR: %s | SR: %s | ER: %s", this.innerRadius, this.outerRadius, startRadian, endRadian);
 
         let arc = this.pathContext
             .innerRadius(this.innerRadius)
@@ -65,6 +64,7 @@ export class ChartCycle extends Cycle {
         let transformX = this.transformationBase.x * this.radius;
         let transformY = this.transformationBase.y * this.radius;
         let textStart = Math.abs((this.radius - this.outerRadius) + ((this.outerRadius - this.innerRadius) / 2));
+        if (isNaN(textStart)) textStart = 0;
 
         this.path = arc();
         this.centerOfRing = {
@@ -77,7 +77,20 @@ export class ChartCycle extends Cycle {
         }
     }
 
+    private isQuadrantOnly(): boolean {
+        return (!isNaN(this.quadrantNumber) && this.quadrantNumber > 0);
+    }
+
     public transformString(): string {
-        return 'translate(' + this.transform.x.toString() + ', ' + this.transform.y.toString() + ')';
+        //debugger;
+        var x = isNaN(this.transform.x) ? 0 : this.transform.x;
+        var y = isNaN(this.transform.y) ? 0 : this.transform.y;
+
+        return 'translate(' + x.toString() + ', ' + y.toString() + ')';
+    }
+
+    public setQuadrantNumber(quadrantNumber: number): void {
+        this.quadrantNumber = quadrantNumber;
+        this.buildCircle();
     }
 }

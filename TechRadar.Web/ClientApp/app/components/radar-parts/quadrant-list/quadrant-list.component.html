@@ -1,5 +1,5 @@
 ﻿<div id="quadrant-blip-list" [ngClass]="['panel', panelClass]" *ngIf="quadrantData">
-    <a [routerLink]="['/radar', radarId, quadrantData.quadrantNumber]"><div class="panel-heading">{{ quadrantData.name }}</div></a>
+    <a [routerLink]="['/radar', radarId]" [queryParams]="{ quad: quadrantData.quadrantNumber }"><div class="panel-heading">{{ quadrantData.name }}</div></a>
     <div class="panel-body">
         <ul class="list-unstyled" *ngFor="let cycle of cycles">
             <li [ngClass]="['ring', quadrantData.cssClass]">

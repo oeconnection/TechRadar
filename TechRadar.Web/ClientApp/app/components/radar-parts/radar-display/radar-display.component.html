@@ -1,0 +1,20 @@
+<div class="container-fluid left" *ngIf="show">
+    <div class="page-header">
+        <h2><a [routerLink]="['/radar', radarId]">{{ radarName }}</a><span *ngIf="isQuadrantOnly()"> - <small>{{ chartData.soloQuadrant().name }}</small></span></h2>
+        <p>{{ radarDescription }}<span *ngIf="isQuadrantOnly()"> {{ chartData.soloQuadrant().description }}</span></p>
+    </div>
+
+    <div class="row">
+        <div [ngClass]="isQuadrantOnly() ? 'col-lg-6' : 'col-lg-3'" *ngIf="showQuadrantLists([1,4])">
+            <quadrant-list [ngClass]="isQuadrantOnly() ? 'blips-large' : 'blips-small'" [chartData]="chartData" [quadrant]="1" *ngIf="showQuadrantList(1)"></quadrant-list>
+            <quadrant-list [ngClass]="isQuadrantOnly() ? 'blips-large' : 'blips-small'" [chartData]="chartData" [quadrant]="4" *ngIf="showQuadrantList(4)"></quadrant-list>
+        </div>
+        <div class="col-lg-6" #chartArea>
+            <radar-chart [chartData]="chartData" [quadrant]="quadrant" *ngIf="showChart"></radar-chart>
+        </div>
+        <div [ngClass]="isQuadrantOnly() ? 'col-lg-6' : 'col-lg-3'" *ngIf="showQuadrantLists([2,3])">
+            <quadrant-list [ngClass]="isQuadrantOnly() ? 'blips-large' : 'blips-small'" [chartData]="chartData" [quadrant]="2" *ngIf="showQuadrantList(2)"></quadrant-list>
+            <quadrant-list [ngClass]="isQuadrantOnly() ? 'blips-large' : 'blips-small'" [chartData]="chartData" [quadrant]="3" *ngIf="showQuadrantList(3)"></quadrant-list>
+        </div>
+    </div>
+</div>

@@ -7,7 +7,7 @@ import { ObjectId } from 'mongodb'
 
 @Injectable()
 export class RadarService {
-    private radarsUrl: string = 'http://localhost:46825/api';
+    private radarsUrl: string = 'http://w7lriderb:46825/api';
     private blipSubject: Subject<number> = new Subject<number>();
 
     private dataCache: {
@@ -70,6 +70,7 @@ export class RadarService {
     }
 
     getRadarList(): Observable<Array<Radar>> {
+        console.info("Getting Radars");
         if (this.dataCache.radarList) {
             // if data is available just return it as `Observable`
             return Observable.of(this.dataCache.radarList);
@@ -101,7 +102,13 @@ export class RadarService {
     }
 
     getRadarQuadrantBlips(name: string, quadrantNumber: number): Observable<Array<Blip>> {
-        return this.http.get(this.radarsUrl + '/radar/' + name + '/blips/' + quadrantNumber)
+        console.info("Getting Blips");
+        var url = this.radarsUrl + '/radar/' + name + '/blips/';
+        if (quadrantNumber) {
+            url = url + quadrantNumber;
+        }
+
+        return this.http.get(url)
             .map((response) => this.mapBlipList(response))
             .share();
     }

@@ -1,4 +1,4 @@
-﻿<svg:g transform="translate(0, 0)">
+﻿<svg:g transform="translate(0, 0)" *ngIf="showCycle()">
     <svg:path *ngFor="let ring of cycles"
           [attr.d]="ring.path"
           [attr.fill]="ring.fill"
@@ -6,21 +6,21 @@
     </svg:path>
 
     <svg:rect 
-              [attr.x]="horizontalLine?.x" 
-              [attr.y]="horizontalLine?.y" 
+              [attr.x]="horizontalLine.x" 
+              [attr.y]="horizontalLine.y" 
               [attr.width]="lineLength" 
               height="15">
     </svg:rect>
-    <svg:rect [attr.x]="verticalLine?.x"
-              [attr.y]="verticalLine?.y"
+    <svg:rect [attr.x]="verticalLine.x"
+              [attr.y]="verticalLine.y"
               width="15"
               [attr.height]="lineLength">
     </svg:rect>
 
     <svg:text *ngFor="let ring of cycles" 
           class="line-text" 
-          [attr.x]="ring?.centerOfRing?.x" 
-          [attr.y]="ring?.centerOfRing?.y" 
+          [attr.x]="ring.centerOfRing.x" 
+          [attr.y]="ring.centerOfRing.y" 
           text-anchor="middle">{{ ring.name }}</svg:text>
 </svg:g>
 

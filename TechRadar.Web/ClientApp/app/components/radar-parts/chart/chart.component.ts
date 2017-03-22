@@ -2,13 +2,14 @@
     Component,
     Input,
     OnChanges,
+    SimpleChanges,
     OnInit
 } from '@angular/core';
 
 import { D3Service, D3 } from 'd3-ng2-service';
 import { RadarConfig, ChartModel, ChartBlip } from '../../../models';
 import { RadarService } from '../../../services';
-
+import { isBrowser } from 'angular2-universal';
 
 @Component({
     selector: 'radar-chart',
@@ -18,14 +19,18 @@ import { RadarService } from '../../../services';
 
 export class ChartComponent implements OnChanges, OnInit {
     @Input() chartData: ChartModel;
+    @Input() quadrant: number;
 
     private chartAlignment: string;
     private mouseOnBlip: number;
     private blips: Array<ChartBlip>;
+    private show: boolean;
 
     constructor(private d3Service: D3Service, private radarService: RadarService) {
         this.mouseOnBlip = 0;
         this.blips = [];
+
+        this.show = false;
     }
 
     ngOnInit(): void {
@@ -36,20 +41,24 @@ export class ChartComponent implements OnChanges, OnInit {
         });
     }
 
-    ngOnChanges(): void {
+    ngOnChanges(changes: SimpleChanges): void {
         if (this.chartData) {
             this.setupViewModel();
         }
     }
 
     private setupViewModel(): void {
-        this.blips = this.chartData.blips;
-
-        if (this.chartData.isQuadrantOnly) {
-            this.chartAlignment = this.chartData.quadrant.chartAlignment;
+        this.show = false;
+        var soloQuadrant = this.chartData.soloQuadrant();
+        if (this.chartData.isQuadrantOnly()) {
+            this.chartAlignment = soloQuadrant.chartAlignment;
+            this.blips = this.chartData.blips.filter((item) => item.quadrantId == soloQuadrant.id);
         } else {
             this.chartAlignment = 'text-center';
+            this.blips = this.chartData.blips;
         }
+
+        this.show = true;
     }   
 
     public onMouseOverBlip(blip: number): void {

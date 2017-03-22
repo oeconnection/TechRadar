@@ -8,7 +8,6 @@ import Chance = require('chance');
 export class ChartModel {
     radar: Radar;
     blips: ChartBlip[];
-    isQuadrantOnly: boolean;
 
     id: string;
     name: string;
@@ -17,9 +16,9 @@ export class ChartModel {
     center: number;
     description: string;
 
-    quadrant: ChartQuadrant;
     quadrants: Array<ChartQuadrant>;
     cycles: Array<ChartCycle>;
+    rawBlips: Blip[];
 
     quadrantNumber: number;
     private d3: D3; 
@@ -29,29 +28,40 @@ export class ChartModel {
         this.buildModel(config);
     }
 
+    soloQuadrant(): ChartQuadrant {
+        return this.findQuadrantByNumber(this.quadrantNumber);
+    }
+
     private buildModel(config: RadarConfig) {
         this.radar = config.dataset.radar;
         this.id = this.radar.radarId;
-        this.isQuadrantOnly = !(!(config.settings.quadrant));
         this.name = config.settings.name;
         this.description = this.radar.description;
         this.size = config.settings.size;
         this.quadrantNumber = config.settings.quadrant;
-
         this.quadrants = [];
-        if (this.isQuadrantOnly) {
-            this.radius = config.settings.size;
-            this.center = Math.round(config.settings.size / 2);
-        } else {
-            this.radius = Math.round(config.settings.size / 2);
-            this.center = Math.round(config.settings.size / 2);
-        }
+        this.center = Math.round(config.settings.size / 2);
+        this.rawBlips = config.dataset.blips;
 
-        this.addCycles();
+        this.setRadius();
 
         this.addQuadrants();
 
-        this.addBlips(config.dataset.blips);
+        this.addCycles();
+
+        this.addBlips();
+    }
+
+    public isQuadrantOnly(): boolean {
+        return (!isNaN(this.quadrantNumber) && this.quadrantNumber > 0);
+    }
+
+    private setRadius(): void {
+        if (this.isQuadrantOnly()) {
+            this.radius = this.size;
+        } else {
+            this.radius = Math.round(this.size / 2);
+        }
     }
 
     private findCycleById(id: string): ChartCycle {
@@ -99,49 +109,23 @@ export class ChartModel {
 
     }
 
-    private sortBlipsOBSOLETE(a: Blip, b: Blip) {
-        let aQuadrant = this.radar.quadrants.find(x => _.isEqual(x.id, a.quadrantId));
-        let bQuadrant = this.radar.quadrants.find(x => _.isEqual(x.id, b.quadrantId));
-
-        console.log("Sorting Quadrants (%s vs %s)", aQuadrant.quadrantNumber, bQuadrant.quadrantNumber);
-        if (aQuadrant == null || bQuadrant == null) return 0;
-
-        if (aQuadrant.quadrantNumber < bQuadrant.quadrantNumber) return -1;
-        if (aQuadrant.quadrantNumber > bQuadrant.quadrantNumber) return 1;
-
-        // Sort on cycle
-        let aCycle = this.radar.cycles.find(x => _.isEqual(x.id, a.cycleId));
-        let bCycle = this.radar.cycles.find(x => _.isEqual(x.id, b.cycleId));
-
-        console.log("Sorting Cycles (%s vs %s)", aCycle.order, aCycle.order);
-        if (aCycle == null || bCycle == null) return 0;
-
-        if (aCycle.order < aCycle.order) return -1;
-        if (aCycle.order > aCycle.order) return 1;
-
-        console.log("Sorting Names (%s vs %s)", a.name, b.name);
-        if (a < b) return -1;
-        if (a > b) return 1;
-
-        return 0;
-    }
-
-    private addBlips(blips: Blip[]): void {
+    private addBlips(): void {
         let chartBlips: Array<ChartBlip>;
         chartBlips = [];
 
         var maxRadius, minRadius;
         var blipCounter = 0;
 
-        blips.sort((x, y) => this.sortBlips(x, y)).forEach((blip: ChartBlip) => {
+        this.rawBlips.sort((x, y) => this.sortBlips(x, y)).forEach((blip: ChartBlip) => {
             var cycle: ChartCycle,
                 quadrant: ChartQuadrant;
 
             blipCounter++;
             cycle = this.findCycleById(blip.cycleId);
+
             quadrant = this.findQuadrantById(blip.quadrantId);
 
-//            console.info("Sorting In Loop (# %s | Name: %s | Quad: %s | Cycle: %s )", blipCounter, blip.name, quadrant.quadrantNumber, cycle.order);
+            //console.info("Sorting In Loop (# %s | Name: %s | Quad: %s | Cycle: %s )", blipCounter, blip.name, quadrant.quadrantNumber, cycle.order);
 
             maxRadius = cycle.outerRadius;
             minRadius = cycle.innerRadius;
@@ -164,9 +148,9 @@ export class ChartModel {
             radius = chance.floating({ min: minRadius, max: maxRadius });
 
             var x: number, y: number;
-            if (this.isQuadrantOnly) {
-                x = this.quadrant.center.x + (radius * Math.cos(angleInRad) * this.quadrant.blipAdjustment.x);
-                y = this.quadrant.center.y + (radius * Math.sin(angleInRad) * this.quadrant.blipAdjustment.y);
+            if (this.isQuadrantOnly()) {
+                x = quadrant.center.x + (radius * Math.cos(angleInRad) * quadrant.blipAdjustment.x);
+                y = quadrant.center.y + (radius * Math.sin(angleInRad) * quadrant.blipAdjustment.y);
             } else {
                 x = this.center + (radius * Math.cos(angleInRad) * quadrant.blipAdjustment.x);
                 y = this.center + (radius * Math.sin(angleInRad) * quadrant.blipAdjustment.y);
@@ -191,49 +175,31 @@ export class ChartModel {
                 id: null,
                 name: '',
                 description: '',
-                toolTip: '',
                 quadrant: this.quadrantNumber,
-                isQuadrantOnly: this.isQuadrantOnly,
-                size: this.size,
-                chartRadius: this.radius,
-                chartCenter: this.center
+                size: this.size
             },
             datasets: {
                 quadrant: quadrant
             }
         };
 
-        if (this.isQuadrantOnly) {
-            var list = quadrants.filter(quad => quad.quadrantNumber === this.quadrantNumber);
+        this.radar.quadrants.sort((a, b) => { return a.quadrantNumber - b.quadrantNumber }).forEach((quad) => {
+            quadrantConfig.settings.id = quad.id;
+            quadrantConfig.settings.name = quad.name;
+            quadrantConfig.settings.description = quad.description;
+            quadrantConfig.settings.quadrant = quad.quadrantNumber;
+            quadrantConfig.datasets.quadrant = quad;
 
-            if (list && list.length > 0) {
-                quadrant = list[0];
-            }
-
-            quadrantConfig.settings.id = quadrant.id;
-            quadrantConfig.settings.name = quadrant.name;
-            quadrantConfig.settings.description = quadrant.description;
-            quadrantConfig.settings.quadrant = this.quadrantNumber;
-            quadrantConfig.datasets.quadrant = quadrant;
-
-            this.quadrant = new ChartQuadrant(quadrantConfig);
-        } else {
-            this.radar.quadrants.sort((a, b) => { return a.quadrantNumber - b.quadrantNumber }).forEach((quad) => {
-                quadrantConfig.settings.id = quad.id;
-                quadrantConfig.settings.name = quad.name;
-                quadrantConfig.settings.description = quad.description;
-                quadrantConfig.settings.quadrant = quad.quadrantNumber;
-                quadrantConfig.datasets.quadrant = quad;
-
-                this.quadrants.push(new ChartQuadrant(quadrantConfig));
-            });
-        }
+            this.quadrants.push(new ChartQuadrant(quadrantConfig));
+        });
     }
 
     private addCycles() {
         var fill: string;
         var pathContext = this.d3.arc();
         fill = "#a2a2a2";
+
+        var soloQuadrant = this.soloQuadrant();
 
         this.cycles = new Array<ChartCycle>();
 
@@ -243,11 +209,12 @@ export class ChartModel {
 
         this.radar.cycles.sort((a, b) => { return a.order - b.order }).forEach((cycle: Cycle, i: number) => {
             let transform: { x: number, y: number };
+            let horizontalLineY: number;
 
-            if (this.isQuadrantOnly) {
+            if (this.isQuadrantOnly()) {
                 transform = {
-                    x: this.quadrant.translate.x,
-                    y: this.quadrant.translate.y
+                    x: soloQuadrant.translate.x,
+                    y: soloQuadrant.translate.y
                 };
             } else {
                 transform = {
@@ -260,13 +227,12 @@ export class ChartModel {
                 pathContext: pathContext,
                 cycle: cycle,
                 quadrantNumber: this.quadrantNumber,
-                quadrant: this.quadrant,
+                horizontalLine: (this.isQuadrantOnly() ? soloQuadrant.horizontalLine.y : this.radius),
                 outerRadius: ringMeasures.outerRadius,
                 innerRadius: ringMeasures.innerRadius,
                 ringArea: ringMeasures.ringArea,
                 fill: fill,
                 transform: transform,
-                isQuadrantOnly: this.isQuadrantOnly,
                 radius: this.radius
             });
 
@@ -306,5 +272,20 @@ export class ChartModel {
 
     findBlipsByQuadrantId(id: string): ChartBlip[] {
         return this.blips.filter(blip => _.isEqual(blip.quadrantId, id));
+    }
+
+    setQuadrant(quadrantNumber: number): void {
+        this.quadrantNumber = quadrantNumber;
+
+        var quadrant = this.findQuadrantByNumber(quadrantNumber);
+
+        this.setRadius();
+
+        this.cycles = null;
+        this.addCycles();
+
+        this.blips = null;
+
+        this.addBlips();
     }
 }

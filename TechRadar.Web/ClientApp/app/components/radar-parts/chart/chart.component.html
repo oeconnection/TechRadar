@@ -1,6 +1,6 @@
-﻿<div #chart [ngClass]="chartAlignment">
+﻿<div #chart [ngClass]="chartAlignment" *ngIf="show">
     <svg [attr.width]="chartData?.size" [attr.height]="chartData?.size">
-        <svg:g radar-cycles [chartModel]="chartData"></svg:g>
+        <svg:g radar-cycles [chartModel]="chartData" [quadrant]="quadrant"></svg:g>
         <svg:a  
            class="blip-group" 
            *ngFor="let chartBlip of blips" 
