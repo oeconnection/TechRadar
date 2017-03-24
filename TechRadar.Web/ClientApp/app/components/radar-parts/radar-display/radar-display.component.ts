@@ -24,7 +24,7 @@ import { isBrowser } from 'angular2-universal';
 })
 export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     @ViewChild('chartArea') chartElement: ElementRef;
-    @Input() radarId: string;
+    @Input() code: string;
     @Input() quadrant: number;
 
     private showChart: boolean;
@@ -50,7 +50,7 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     ngOnChanges(changes: SimpleChanges) {
         var subscribers: any[];
 
-        if (changes['radarId']) {
+        if (changes['code']) {
             this.getData();
         } else {
             if (changes['quadrant']) {
@@ -74,8 +74,8 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     private getData() {
         this.showChart = false;
         this.dataSub = Observable.forkJoin(
-            this.radarService.getRadar(this.radarId),
-            this.radarService.getRadarBlips(this.radarId)
+            this.radarService.getRadar(this.code),
+            this.radarService.getRadarBlips(this.code)
         ).subscribe(data => {
             this.radarData = data[0];
             this.blips = data[1];

@@ -21,7 +21,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class='fa fa-globe'></span> Radars <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li *ngFor="let radar of radars">
-                                <a [routerLink]="['/radar', radar.radarId]">{{ radar.name }}</a>
+                                <a [routerLink]="['/radar', radar.code]">{{ radar.name }}</a>
                             </li>
                         </ul>
                     </li>

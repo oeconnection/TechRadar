@@ -32,6 +32,14 @@ namespace TechRadar.Services
             MongoDBContext.DatabaseName = Configuration.GetSection("MongoConnection:DatabaseName").Value;
             MongoDBContext.IsSSL = Convert.ToBoolean(Configuration.GetSection("MongoConnection:IsSSL").Value);
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowCors",
+                        builder => builder.AllowAnyOrigin()
+                                    .AllowAnyMethod()
+                                    .AllowAnyHeader());
+            });
+
             // Add framework services.
             services.AddMvc();
         }
@@ -52,8 +60,7 @@ namespace TechRadar.Services
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseCors(builder =>
-                builder.AllowAnyOrigin());
+            app.UseCors("AllowCors");
 
             app.UseStaticFiles();
 

@@ -1,13 +1,13 @@
-import { Http, Response, Headers } from '@angular/http';
+import { Http, Response, Headers, RequestOptions, Jsonp } from '@angular/http';
 import { Injectable } from '@angular/core';
-import { Radar, Blip } from '../models';
+import { IRadar, Radar, Blip } from '../models';
 import { Observable, Subject } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/Rx';
 import { ObjectId } from 'mongodb'
 
 @Injectable()
 export class RadarService {
-    private radarsUrl: string = 'http://w7lriderb:46825/api';
+    private baseUrl: string = 'http://w7lriderb:46825/api';
     private blipSubject: Subject<number> = new Subject<number>();
 
     private dataCache: {
@@ -17,13 +17,16 @@ export class RadarService {
     private observable: any;
     private radarObservable: any;
 
-    constructor(private http: Http) {
+    constructor(private http: Http, private jsonp: Jsonp) {
+        this.resetCache();
+    }
+
+    private resetCache() {
         this.dataCache = {
             radarList: null,
             activeBlip: null
         }
     }
-
     private toBlip(item: any): Blip {
         return new Blip(item.id, item.name, item.description, item.size, item.added, item.cycleId, item.quadrantId);
     }
@@ -40,7 +43,7 @@ export class RadarService {
     }
 
     private toRadar(item: any): Radar {
-        var radar = new Radar(item.id, item.radarId, item.name, item.description, item.quadrants, item.cycles);
+        var radar = new Radar(item.id, item.code, item.name, item.description, item.quadrants, item.cycles);
         return radar;
     }
 
@@ -80,7 +83,7 @@ export class RadarService {
             return this.observable;
         } else {
             // create the request, store the `Observable` for subsequent subscribers
-            this.observable = this.http.get(this.radarsUrl + '/radar')
+            this.observable = this.http.get(this.baseUrl + '/radar')
                 .map((response) => this.mapRadarList(response))
                 .share(); // make it shared so more than one subscriber can get the result
             return this.observable;
@@ -88,7 +91,7 @@ export class RadarService {
     }
 
     private findSingleRadar(radars: Radar[], name: string): Radar {
-        return radars.find(x => x.radarId == name);
+        return radars.find(x => x.code == name);
     }
 
     getRadar(name: string): Observable<Radar> {
@@ -96,14 +99,14 @@ export class RadarService {
     }
 
     getRadarBlips(name: string): Observable<Array<Blip>> {
-        return this.http.get(this.radarsUrl + '/radar/' + name + '/blips')
+        return this.http.get(this.baseUrl + '/radar/' + name + '/blips')
             .map((response) => this.mapBlipList(response))
             .share(); 
     }
 
     getRadarQuadrantBlips(name: string, quadrantNumber: number): Observable<Array<Blip>> {
         console.info("Getting Blips");
-        var url = this.radarsUrl + '/radar/' + name + '/blips/';
+        var url = this.baseUrl + '/radar/' + name + '/blips/';
         if (quadrantNumber) {
             url = url + quadrantNumber;
         }
@@ -122,4 +125,34 @@ export class RadarService {
         return this.blipSubject.asObservable();
     }
 
+    saveRadar(radar: IRadar): Observable<Radar> {
+        let headers = new Headers({ 'Content-Type': 'application/json' });
+        let options = new RequestOptions({ headers: headers });
+
+        const url = `${this.baseUrl}/radar`;
+        return this.http.put(url, radar, options)
+            .map(() => radar)
+            .do(data => {
+                this.resetCache();
+                console.log('updateRadar: ' + JSON.stringify(data));
+            })
+            .catch(this.handleError);
+    }
+
+    //private createRadar(product: IProduct, options: RequestOptions): Observable<IProduct> {
+    //    product.id = undefined;
+    //    return this.http.post(this.baseUrl, product, options)
+    //        .map(this.extractData)
+    //        .do(data => console.log('createProduct: ' + JSON.stringify(data)))
+    //        .catch(this.handleError);
+    //}
+
+    private updateRadar(radar: IRadar, options: RequestOptions): Observable<IRadar> {
+    //    const url = `${this.baseUrl}/${radar.id}`;
+    //    return this.http.put(url, product, options)
+    //        .map(() => product)
+    //        .do(data => console.log('updateProduct: ' + JSON.stringify(data)))
+    //        .catch(this.handleError);
+        return null;
+    }
 }

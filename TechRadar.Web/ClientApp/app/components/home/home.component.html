@@ -7,7 +7,13 @@
 </p>
 
 <div *ngFor="let radar of radars">
-    <a [routerLink]="['/radar', radar.radarId]"><h3>{{ radar.name }}</h3></a>
+    <h3>
+        <a *ngIf="isRadarReady(radar)" [routerLink]="['/radar', radar.code]">{{ radar.name }}</a> 
+        <span *ngIf="!isRadarReady(radar)" class="text-danger">{{ radar.name }}
+            <span class="text-danger"> <small>Incomplete </small><i class="fa fa-exclamation-circle"></i></span>
+        </span>
+        <a [routerLink]="['/edit/radar', radar.code]"><i class="fa fa-pencil-square-o fa-1"></i></a>
+    </h3>
     <p>{{ radar.description }}</p>
 
     <h4><strong>Cycles</strong></h4>

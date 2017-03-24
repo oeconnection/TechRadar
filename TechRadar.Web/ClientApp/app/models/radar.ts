@@ -4,22 +4,22 @@ import { Cycle } from './cycle';
 
 export class Radar {
     id: string;
-    radarId: string;
+    code: string;
     name: string;
     description: string;
     quadrants: Quadrant[];
     cycles: Cycle[];
     blips: Blip[];
-    private blipNumber: number;
+//    private blipNumber: number;
 
-    constructor(id: string, radarId: string, name: string, description: string, quadrants?: Quadrant[], cycles?: Cycle[]) {
+    constructor(id: string, code: string, name: string, description: string, quadrants?: Quadrant[], cycles?: Cycle[]) {
         this.id = id;
-        this.radarId = radarId;
+        this.code = code;
         this.name = name;
         this.description = description;
         this.cycles = cycles;
         this.quadrants = quadrants;
-        this.blipNumber = 0;
+//        this.blipNumber = 0;
     }
 
     public hasQuadrants() {

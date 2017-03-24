@@ -8,7 +8,7 @@ import { isBrowser } from 'angular2-universal';
     templateUrl: './radar.component.html'
 })
 export class RadarComponent implements OnInit {
-    private radarId: string;
+    private code: string;
     private quadrant: number;
 
     constructor(private route: ActivatedRoute) {
@@ -16,7 +16,7 @@ export class RadarComponent implements OnInit {
 
     ngOnInit() {
         this.route.params.subscribe(params => {
-            this.radarId = params['name'];
+            this.code = params['code'];
         });
 
         this.route.queryParams.subscribe(params => {

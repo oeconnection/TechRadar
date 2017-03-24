@@ -8,3 +8,4 @@ export * from './chart-cycle';
 export * from './chart-model';
 export * from './chart-quadrant';
 
+export * from './radar.interface';

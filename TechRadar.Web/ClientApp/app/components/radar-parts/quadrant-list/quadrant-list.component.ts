@@ -22,7 +22,7 @@ export class QuadrantListComponent implements OnChanges {
     private quadrantData: ChartQuadrant;
     private blips: ChartBlip[];
     private cycles: Array<ChartCycle>;
-    private radarId: string;
+    private code: string;
     private panelClass: string;
     private activeBlip: number;
 
@@ -46,7 +46,7 @@ export class QuadrantListComponent implements OnChanges {
             this.quadrantData = this.chartData.findQuadrantByNumber(this.quadrant);
             this.blips = this.chartData.findBlipsByQuadrantId(this.quadrantData.id);
             this.cycles = this.chartData.cycles;
-            this.radarId = this.chartData.radar.radarId;
+            this.code = this.chartData.radar.code;
 
             this.panelClass = 'panel-' + this.quadrantData.cssClass;
         }

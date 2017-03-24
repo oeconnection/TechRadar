@@ -3,7 +3,9 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TechRadar.Services.Models;
+using Microsoft.AspNetCore.Cors;
 
 namespace TechRadar.Services.Controllers
 {
@@ -12,32 +14,32 @@ namespace TechRadar.Services.Controllers
     {
         // GET: api/radar
         [HttpGet]
-        public IEnumerable<Radar> Get()
+        public async Task<IEnumerable<Radar>> Get()
         {
             MongoDBContext dbContext = new MongoDBContext();
             var filter = new BsonDocument();
 
-            var radarList = dbContext.Radars.Find(m => true).ToList();
+            var radarList = await dbContext.Radars.Find(m => true).ToListAsync<Radar>();
 
             return radarList;
         }
 
         // GET api/radar/5
-        [HttpGet("{id}")]
-        public Radar Get(string id)
+        [HttpGet("{code}")]
+        public Radar Get(string code)
         {
             MongoDBContext dbContext = new MongoDBContext();
 
-            Radar radar = dbContext.Radars.Find(m => m.RadarId == id).ToList().FirstOrDefault<Radar>();
+            Radar radar = dbContext.Radars.Find(m => m.Code == code).ToList().FirstOrDefault<Radar>();
 
             return radar;
         }
 
-        // GET api/radar/5/blips
-        [HttpGet("{id}/blips")]
-        public IEnumerable<Blip> GetBlips(string id)
+        // GET api/radar/code/blips
+        [HttpGet("{code}/blips")]
+        public IEnumerable<Blip> GetBlips(string code)
         {
-            var radar = Get(id);
+            var radar = Get(code);
 
             if(radar != null)
             {
@@ -51,11 +53,11 @@ namespace TechRadar.Services.Controllers
             return new List<Blip>();
         }
 
-        // GET api/radar/5/blips/3
-        [HttpGet("{id}/blips/{quadrantNumber}")]
-        public IEnumerable<Blip> GetBlips(string id, int quadrantNumber)
+        // GET api/radar/code/blips/3
+        [HttpGet("{code}/blips/{quadrantNumber}")]
+        public IEnumerable<Blip> GetBlips(string code, int quadrantNumber)
         {
-            var radar = Get(id);
+            var radar = Get(code);
             Quadrant quadrant;
 
             var filterBuilder = Builders<Blip>.Filter;
@@ -89,16 +91,53 @@ namespace TechRadar.Services.Controllers
         {
         }
 
-        // PUT api/radar/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        // PUT api/radar/5545454
+        [HttpPut()]
+        public async Task<Radar> UpsertRadar([FromBody]Radar radar)
         {
+            if(radar == null)
+            {
+                return null;
+            }
+
+            MongoDBContext dbContext = new MongoDBContext();
+
+            var options = new FindOneAndUpdateOptions<Radar>
+            {
+                IsUpsert = true,
+                ReturnDocument = ReturnDocument.After
+            };
+
+            FilterDefinition<Radar> filter;
+            if (string.IsNullOrWhiteSpace(radar.Id))
+            {
+                // Add new
+                filter = Builders<Radar>.Filter.Eq(r => r.Id, ObjectId.GenerateNewId().ToString());
+            }
+            else
+            {
+                filter = Builders<Radar>.Filter.Eq(r => r.Id, radar.Id);
+            }
+            var update = Builders<Radar>.Update
+                .Set("name", radar.Name)
+                .Set("code", radar.Code)
+                .Set("description", radar.Description)
+                .CurrentDate("lastModified");
+
+            return await dbContext.Radars.FindOneAndUpdateAsync(filter, update, options);
         }
 
         // DELETE api/radar/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public void Delete(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return null;
+            }
+
+            MongoDBContext dbContext = new MongoDBContext();
+
         }
     }
 }

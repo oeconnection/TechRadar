@@ -34,7 +34,7 @@ export class ChartModel {
 
     private buildModel(config: RadarConfig) {
         this.radar = config.dataset.radar;
-        this.id = this.radar.radarId;
+        this.id = this.radar.code;
         this.name = config.settings.name;
         this.description = this.radar.description;
         this.size = config.settings.size;

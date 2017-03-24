@@ -9,9 +9,11 @@ import { RadarService, RadarResolve } from './services'
 import { D3Service } from 'd3-ng2-service';
 import { TooltipModule } from 'ng2-bootstrap';
 import { PaginationModule } from 'ng2-bootstrap';
-import { RadarListComponent } from './components/edit';
+//import { RadarListComponent } from './components/edit';
+import { RadarEditComponent } from './components/edit';
 import { RadarComponent } from './components/radar';
 import { Ng2TableModule } from 'ng2-table/ng2-table'
+import { ReactiveFormsModule } from "@angular/forms";
 
 @NgModule({
     bootstrap: [ AppComponent ],
@@ -22,21 +24,22 @@ import { Ng2TableModule } from 'ng2-table/ng2-table'
         ChartComponent,
         CycleComponent,
         QuadrantListComponent,
-        RadarListComponent,
+//        RadarListComponent,
+        RadarEditComponent,
         RadarComponent,
         BlipComponent,
         HomeComponent
     ],
     imports: [
         UniversalModule, // Must be first import. This automatically imports BrowserModule, HttpModule, and JsonpModule too.
+        ReactiveFormsModule,
         RouterModule.forRoot([
             { path: '', redirectTo: 'home', pathMatch: 'full' },
             { path: 'home', component: HomeComponent },
-            { path: 'radar/:name', component: RadarComponent },
-//            { path: 'radar/:name/:quadrantNumber', component: RadarDisplayComponent },
-            {
-                path: 'edit/radar', component: RadarListComponent
-            },
+            { path: 'radar/:code', component: RadarComponent },
+//            { path: 'edit/radar', component: RadarListComponent },
+            { path: 'edit/radar/:code', component: RadarEditComponent },
+            { path: 'edit/radar', component: RadarEditComponent },
             { path: '**', redirectTo: 'home' }
         ]),
         TooltipModule.forRoot(),

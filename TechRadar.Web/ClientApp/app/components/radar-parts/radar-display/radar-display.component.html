@@ -1,6 +1,6 @@
 <div class="container-fluid left" *ngIf="show">
     <div class="page-header">
-        <h2><a [routerLink]="['/radar', radarId]">{{ radarName }}</a><span *ngIf="isQuadrantOnly()"> - <small>{{ chartData.soloQuadrant().name }}</small></span></h2>
+        <h2><a [routerLink]="['/radar', code]">{{ radarName }}</a><span *ngIf="isQuadrantOnly()"> - <small>{{ chartData.soloQuadrant().name }}</small></span></h2>
         <p>{{ radarDescription }}<span *ngIf="isQuadrantOnly()"> {{ chartData.soloQuadrant().description }}</span></p>
     </div>
 

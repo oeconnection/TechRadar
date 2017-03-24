@@ -24,4 +24,8 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.sub.unsubscribe();
     }
 
+    isRadarReady(radar: Radar): boolean {
+        return !(radar.cycles == null || radar.quadrants == null);
+    }
+
 }
