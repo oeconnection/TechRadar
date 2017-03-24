@@ -139,20 +139,20 @@ export class RadarService {
             .catch(this.handleError);
     }
 
-    //private createRadar(product: IProduct, options: RequestOptions): Observable<IProduct> {
-    //    product.id = undefined;
-    //    return this.http.post(this.baseUrl, product, options)
-    //        .map(this.extractData)
-    //        .do(data => console.log('createProduct: ' + JSON.stringify(data)))
-    //        .catch(this.handleError);
-    //}
+    deleteRadar(radar: IRadar): Observable<any> {
+        let headers = new Headers({ 'Content-Type': 'application/json' });
+        let options = new RequestOptions({ headers: headers });
 
-    private updateRadar(radar: IRadar, options: RequestOptions): Observable<IRadar> {
-    //    const url = `${this.baseUrl}/${radar.id}`;
-    //    return this.http.put(url, product, options)
-    //        .map(() => product)
-    //        .do(data => console.log('updateProduct: ' + JSON.stringify(data)))
-    //        .catch(this.handleError);
-        return null;
+        if (radar == null) {
+            return;
+        }
+
+        const url = `${this.baseUrl}/radar/${radar.id}`;
+        return this.http.delete(url, options)
+            .do(() => {
+                this.resetCache();
+                console.log('deleteRadar: done');
+            })
+            .catch(this.handleError);
     }
 }

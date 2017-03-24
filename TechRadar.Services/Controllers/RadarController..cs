@@ -14,14 +14,14 @@ namespace TechRadar.Services.Controllers
     {
         // GET: api/radar
         [HttpGet]
-        public async Task<IEnumerable<Radar>> Get()
+        public async Task<IActionResult> Get()
         {
             MongoDBContext dbContext = new MongoDBContext();
             var filter = new BsonDocument();
 
             var radarList = await dbContext.Radars.Find(m => true).ToListAsync<Radar>();
 
-            return radarList;
+            return Ok(radarList);
         }
 
         // GET api/radar/5
@@ -93,7 +93,7 @@ namespace TechRadar.Services.Controllers
 
         // PUT api/radar/5545454
         [HttpPut()]
-        public async Task<Radar> UpsertRadar([FromBody]Radar radar)
+        public async Task<IActionResult> UpsertRadar([FromBody]Radar radar)
         {
             if(radar == null)
             {
@@ -124,20 +124,26 @@ namespace TechRadar.Services.Controllers
                 .Set("description", radar.Description)
                 .CurrentDate("lastModified");
 
-            return await dbContext.Radars.FindOneAndUpdateAsync(filter, update, options);
+            var results = await dbContext.Radars.FindOneAndUpdateAsync(filter, update, options);
+
+            return Ok(results);
         }
 
         // DELETE api/radar/5
         [HttpDelete("{id}")]
-        public void Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
-                return null;
+                return BadRequest();
             }
 
             MongoDBContext dbContext = new MongoDBContext();
+            var filter = Builders<Radar>.Filter.Eq(r => r.Id, id);
 
+            var result = await dbContext.Radars.FindOneAndDeleteAsync(r => r.Id == id);
+
+            return Ok(result);
         }
     }
 }

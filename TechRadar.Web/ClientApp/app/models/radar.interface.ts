@@ -7,4 +7,7 @@ export interface IRadar {
     code: string;
     name: string;
     description: string;
+
+    cycles: Cycle[];
+    quadrants: Quadrant[];
 }

@@ -26,6 +26,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
 
     displayMessage: { [key: string]: string } = {};
     private validationMessages: { [key: string]: { [key: string]: string } };
+    private alerts: any[] = [];
 
     constructor(private fb: FormBuilder,
         private route: ActivatedRoute,
@@ -96,6 +97,15 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         return true;
     }
 
+    addAlert(message: string, type = 'info', timeout = 5000, dismissible = false) {
+        this.alerts.push({
+            type: type,
+            message: message,
+            timeout: timeout,
+            dismissible: dismissible
+        });
+    }
+
     getRadar(code: string): void {
         if (code == undefined || code == null) {
             this.onRadarRetrieved(null);
@@ -139,14 +149,13 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     deleteRadar(): void {
         if (this.radar == undefined) {
             // Don't delete, it was never saved.
-            this.onSaveComplete(null);
+            this.onDeleteComplete();
         } else {
             if (confirm(`Really delete the radar: ${this.radar.name}?`)) {
-                //this.radarService.deleteRadar(this.radar.id)
-                //    .subscribe(
-                //    () => this.onSaveComplete(),
-                //    (error: any) => this.errorMessage = <any>error
-                //    );
+                this.radarService.deleteRadar(this.radar).subscribe(
+                    () => this.onDeleteComplete(),
+                    (error: any) => this.errorMessage = <any>error
+                    );
             }
         }
     }
@@ -165,16 +174,23 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    onSaveComplete(data: Radar): void {
-        var radarCode = '';
-        if (data != undefined) {
-            this.radar = data;
-            radarCode = this.radar.code;
-        }
-
+    onSaveComplete(radar: IRadar): void {
         // Reset the form to clear the flags
         this.radarForm.reset();
-        debugger;
-        this.router.navigate(['/edit/radar/' + radarCode]);
+
+        var radarCode = '';
+        if (radar != undefined) {
+            this.radar = radar;
+            radarCode = this.radar.code;
+            this.router.navigate(['/edit/radar/' + radarCode]);
+            this.addAlert('Radar saved', 'success');
+        } else {
+            this.addAlert('Radar save failed', 'danger');
+        }
+    }
+
+    onDeleteComplete(): void {
+        this.router.navigate(['/home']);
+//        this.addAlert('Radar deleted', 'success');
     }
 }
