@@ -1,7 +1,6 @@
 ﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Radar, Quadrant, Cycle } from '../../models';
-import { isBrowser } from 'angular2-universal';
 
 @Component({
     selector: 'radar',

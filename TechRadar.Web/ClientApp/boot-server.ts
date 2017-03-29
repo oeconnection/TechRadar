@@ -1,18 +1,18 @@
-import 'angular2-universal-polyfills';
-import 'angular2-universal-patch';
+//import 'angular2-universal-polyfills';
+//import 'angular2-universal-patch';
 import 'zone.js';
 import { createServerRenderer, RenderResult } from 'aspnet-prerendering';
 import { enableProdMode } from '@angular/core';
-import { platformNodeDynamic } from 'angular2-universal';
+import { platformDynamicServer } from '@angular/platform-server'
 import { AppModule } from './app/app.module';
 
 enableProdMode();
-const platform = platformNodeDynamic();
+const platform = platformDynamicServer();
 
 export default createServerRenderer(params => {
     return new Promise<RenderResult>((resolve, reject) => {
         const requestZone = Zone.current.fork({
-            name: 'angular-universal request',
+            name: 'angular-server request',
             properties: {
                 baseUrl: '/',
                 requestUrl: params.url,
@@ -27,7 +27,7 @@ export default createServerRenderer(params => {
             }
         });
 
-        return requestZone.run<Promise<string>>(() => platform.serializeModule(AppModule)).then(html => {
+        return requestZone.run<Promise<string>>(() => platform.bootstrapModule(AppModule)).then(html => {
             resolve({ html: html });
         }, reject);
     });

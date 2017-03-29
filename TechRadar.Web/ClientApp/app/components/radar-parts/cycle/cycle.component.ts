@@ -7,7 +7,6 @@
 } from '@angular/core';
 
 import { ChartModel, ChartQuadrant, ChartCycle } from '../../../models';
-import { isBrowser } from 'angular2-universal';
 
 @Component({
     selector: '[radar-cycles]',

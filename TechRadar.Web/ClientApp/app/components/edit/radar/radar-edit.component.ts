@@ -1,6 +1,7 @@
-﻿import { Component, OnInit, AfterViewInit, OnDestroy, ViewChildren, ElementRef } from '@angular/core';
+﻿import { Component, OnInit, AfterViewInit, OnDestroy, ViewChildren, ElementRef, ViewContainerRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormArray, Validators, FormControlName } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ToastsManager, Toast } from 'ng2-toastr/ng2-toastr';
 
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/observable/fromEvent';
@@ -10,6 +11,9 @@ import { Subscription } from 'rxjs/Subscription';
 
 import { IRadar, Radar, Quadrant, Cycle } from '../../../models';
 import { RadarService } from '../../../services';
+
+import { QuadrantEditableListComponent } from '../';
+import { GenericValidator } from '../../../shared';
 
 @Component({
     templateUrl: './radar-edit.component.html'
@@ -25,37 +29,39 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     private sub: Subscription;
 
     displayMessage: { [key: string]: string } = {};
-    private validationMessages: { [key: string]: { [key: string]: string } };
-    private alerts: any[] = [];
+    private validationMessages: { [key: string]: { [key: string]: string } } = {
+        code: {
+            required: 'Radar code is required.',
+            minlength: 'Radar code must be at least three characters.',
+            maxlength: 'Radar code cannot exceed 20 characters.'
+        },
+        name: {
+            required: 'Radar name is required.',
+            minlength: 'Radar name must be at least three characters.'
+        }
+    };
+
+    genericValidator: GenericValidator;
 
     constructor(private fb: FormBuilder,
         private route: ActivatedRoute,
         private router: Router,
-        private radarService: RadarService) {
-
-        // Defines all of the validation messages for the form.
-        // These could instead be retrieved from a file or database.
-        this.validationMessages = {
-            code: {
-                required: 'Radar code is required.',
-                minlength: 'Radar code must be at least three characters.',
-                maxlength: 'Radar code cannot exceed 20 characters.'
-            },
-            name: {
-                required: 'Radar name is required.',
-                minlength: 'Radar name must be at least three characters.'
-            }
-        };
+        private radarService: RadarService,
+        private toastr: ToastsManager,
+        private vcr: ViewContainerRef
+    ) {
+        this.toastr.setRootViewContainerRef(vcr);
+        this.genericValidator = new GenericValidator(this.validationMessages);
     }
 
     ngOnInit(): void {
         this.buildForm();
 
-        // Read the radar code from the route parameter
-        this.sub = this.route.params.subscribe(
+        // Read the radar id from the query parameter
+        this.sub = this.route.queryParams.subscribe(
             params => {
-                let code = params['code'];
-                this.getRadar(code);
+                let id = params['id'];
+                this.getRadar(id);
             }
         );
     }
@@ -65,14 +71,14 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngAfterViewInit(): void {
-        //// Watch for the blur event from any input element on the form.
-        //let controlBlurs: Observable<any>[] = this.formInputElements
-        //    .map((formControl: ElementRef) => Observable.fromEvent(formControl.nativeElement, 'blur'));
+        // Watch for the blur event from any input element on the form.
+        let controlBlurs: Observable<any>[] = this.formInputElements
+            .map((formControl: ElementRef) => Observable.fromEvent(formControl.nativeElement, 'blur'));
 
-        //// Merge the blur event observable with the valueChanges observable
-        //Observable.merge(this.radarForm.valueChanges, ...controlBlurs).debounceTime(800).subscribe(value => {
-        //////    this.displayMessage = this.genericValidator.processMessages(this.radarForm);
-        //});
+        // Merge the blur event observable with the valueChanges observable
+        Observable.merge(this.radarForm.valueChanges, ...controlBlurs).debounceTime(800).subscribe(value => {
+            this.displayMessage = this.genericValidator.processMessages(this.radarForm);
+        });
     }
 
     private buildForm() {
@@ -91,26 +97,29 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
 
     }
 
+    onDeleteClick() {
+        this.deleteRadar();
+    }
+
+    onCancelClick() {
+        this.resetForm();
+    }
+
+    onFormSubmit() {
+        this.saveRadar();
+    }
+
     showChildren(): boolean {
         if (this.radar == undefined) return false;
 
         return true;
     }
 
-    addAlert(message: string, type = 'info', timeout = 5000, dismissible = false) {
-        this.alerts.push({
-            type: type,
-            message: message,
-            timeout: timeout,
-            dismissible: dismissible
-        });
-    }
-
-    getRadar(code: string): void {
-        if (code == undefined || code == null) {
+    getRadar(id: string): void {
+        if (id == undefined || id == null) {
             this.onRadarRetrieved(null);
         } else {
-            this.radarService.getRadar(code).subscribe(
+            this.radarService.getRadarById(id).subscribe(
                 (radar: IRadar) => this.onRadarRetrieved(radar),
                 (error: any) => this.errorMessage = <any>error
             );
@@ -118,26 +127,27 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     onRadarRetrieved(radar: IRadar): void {
+        this.radar = radar;
+
+        this.resetForm();
+    }
+
+    private resetForm() {
         if (this.radarForm) {
             this.radarForm.reset();
         }
-        this.radar = radar;
 
         if (this.radar == undefined) {
             this.pageTitle = 'Add Radar';
-        } else {
-            this.pageTitle = `Edit Radar: ${this.radar.name}`;
-        }
 
-        if (this.radar == undefined) {
-            // Update the data on the form
             this.radarForm.patchValue({
                 name: "",
                 code: "",
                 description: ""
             });
         } else {
-            // Update the data on the form
+            this.pageTitle = `Edit Radar: ${this.radar.name}`;
+
             this.radarForm.patchValue({
                 name: this.radar.name,
                 code: this.radar.code,
@@ -174,23 +184,41 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    onSaveComplete(radar: IRadar): void {
+    saveQuadrant(quadrant): void {
+        this.radarService.saveQuadrantToRadar(this.radar.id, quadrant).subscribe(
+            (data) => this.onSaveComplete(data),
+            (error: any) => this.errorMessage = <any>error
+        );
+    }
+
+    onSaveComplete(radar: Radar): void {
         // Reset the form to clear the flags
         this.radarForm.reset();
+        var navigate = false;
 
-        var radarCode = '';
-        if (radar != undefined) {
-            this.radar = radar;
-            radarCode = this.radar.code;
-            this.router.navigate(['/edit/radar/' + radarCode]);
-            this.addAlert('Radar saved', 'success');
+        if (radar == undefined || radar == null) {
+            this.onRadarRetrieved(this.radar);
+            this.toastr.error('Save failed');
         } else {
-            this.addAlert('Radar save failed', 'danger');
+            if (this.radar == undefined) {
+                navigate = true;
+            }
+
+            this.radar = radar;
+            this.onRadarRetrieved(radar);
+
+            this.toastr.success('Saved successful').then((toast: Toast) => {
+                if (navigate) {
+                    console.log("Navigated to %s", this.radar.id);
+                    this.router.navigate(['/edit/radar'], { queryParams: { id: this.radar.id } });
+                }
+            });
         }
     }
 
     onDeleteComplete(): void {
-        this.router.navigate(['/home']);
-//        this.addAlert('Radar deleted', 'success');
+        this.toastr.success('Deletion successful').then((toast: Toast) => {
+            this.router.navigate(['/edit/radar']);
+        });
     }
 }

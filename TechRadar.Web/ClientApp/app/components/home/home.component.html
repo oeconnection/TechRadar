@@ -12,7 +12,7 @@
         <span *ngIf="!isRadarReady(radar)" class="text-danger">{{ radar.name }}
             <span class="text-danger"> <small>Incomplete </small><i class="fa fa-exclamation-circle"></i></span>
         </span>
-        <a [routerLink]="['/edit/radar', radar.code]"><i class="fa fa-pencil-square-o fa-1"></i></a>
+        <a [routerLink]="['/edit/radar']" [queryParams]="{ id: radar.id }"><i class="fa fa-pencil-square-o fa-1"></i></a>
     </h3>
     <p>{{ radar.description }}</p>
 

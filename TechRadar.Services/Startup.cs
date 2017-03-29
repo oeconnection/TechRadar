@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using TechRadar.Services.Models;
 
 namespace TechRadar.Services
 {
@@ -31,6 +32,10 @@ namespace TechRadar.Services
             MongoDBContext.ConnectionString = Configuration.GetSection("MongoConnection:ConnectionString").Value;
             MongoDBContext.DatabaseName = Configuration.GetSection("MongoConnection:DatabaseName").Value;
             MongoDBContext.IsSSL = Convert.ToBoolean(Configuration.GetSection("MongoConnection:IsSSL").Value);
+
+            services.AddOptions();
+
+            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             services.AddCors(options =>
             {

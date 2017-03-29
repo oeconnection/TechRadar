@@ -8,7 +8,7 @@
     <div class="panel-body">
         <form class="form-horizontal"
               novalidate
-              (ngSubmit)="saveRadar()"
+              (ngSubmit)="onFormSubmit()"
               [formGroup]="radarForm">
             <fieldset>
                 <div class="form-group"
@@ -71,21 +71,21 @@
                             <button class="btn btn-primary"
                                     type="submit"
                                     style="width:80px;margin-right:10px"
-                                    [disabled]='!radarForm.valid'>
+                                    [disabled]='!(radarForm.dirty && radarForm.valid)'>
                                 Save
                             </button>
                         </span>
                         <span>
                             <a class="btn btn-default"
                                style="width:80px"
-                               [routerLink]="['/home']">
+                               (click)="onCancelClick()">
                                 Cancel
                             </a>
                         </span>
                         <span>
                             <a class="btn btn-danger"
                                style="width:80px"
-                               (click)="deleteRadar()">
+                               (click)="onDeleteClick()">
                                 Delete
                             </a>
                         </span>
@@ -98,81 +98,50 @@
 </div>
 
 
-<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-    <div class="panel panel-default" *ngIf="showChildren()">
-        <div class="panel-heading" role="tab" id="headingCycle">
-            <h4 class="panel-title">
-                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseCycle" aria-expanded="true" aria-controls="collapseCycle">
-                    Cycles
-                </a>
-            </h4>
+<div class="panel-group">
+    <div class="panel panel-info" *ngIf="showChildren()">
+        <div class="panel-heading">
+            <h4 class="panel-title pull-left">Quadrants</h4>
+            <div class="clearfix"></div>
         </div>
-        <div id="collapseCycle" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingCycle">
-            <div class="panel-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th class="hidden">Id</th>
-                            <th>Name</th>
-                            <th>Full Name</th>
-                            <th>Order</th>
-                            <th>Description</th>
-                            <th>Ring Size</th>
-                            <th>Tools</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let cycle of radar?.cycles">
-                            <td class="hidden">{{ cycle.id }}</td>
-                            <td>{{ cycle.name }}</td>
-                            <td>{{ cycle.fullName }}</td>
-                            <td>{{ cycle.order }}</td>
-                            <td>{{ cycle.description }}</td>
-                            <td>{{ cycle.size }}</td>
-                            <td>
-                                <button type="button" class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></button>
-                                <button type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="panel-body">
+            <quadrant-editable-list [quadrants]="radar.quadrants" (quadrantSaveEvent)="saveQuadrant($event)" ></quadrant-editable-list>
         </div>
     </div>
     <div class="panel panel-default" *ngIf="showChildren()">
-        <div class="panel-heading" role="tab" id="headingQuadrant">
-            <h4 class="panel-title">
-                <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseQuadrant" aria-expanded="false" aria-controls="collapseQuadrant">
-                    Quadrants
-                </a>
-            </h4>
+        <div class="panel-heading" id="headingCycle">
+            <h4 class="panel-title pull-left">Cycles</h4>
+            <button type="button" class="btn btn-xs btn-primary pull-right"><i class="fa fa-plus"></i>  Add New</button>
+            <div class="clearfix"></div>
         </div>
-        <div id="collapseQuadrant" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingQuadrant">
-            <div class="panel-body">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th class="hidden">Id</th>
-                            <th>Quadrant #</th>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Tools</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let quadrant of radar?.quadrants">
-                            <td class="hidden">{{ quadrant.id }}</td>
-                            <td>{{ quadrant.quadrantNumber }}</td>
-                            <td>{{ quadrant.name }}</td>
-                            <td>{{ quadrant.description }}</td>
-                            <td>
-                                <button type="button" class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></button>
-                                <button type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="panel-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="hidden">Id</th>
+                        <th>Name</th>
+                        <th>Full Name</th>
+                        <th>Order</th>
+                        <th>Description</th>
+                        <th>Ring Size</th>
+                        <th>Tools</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cycle of radar?.cycles">
+                        <td class="hidden">{{ cycle.id }}</td>
+                        <td>{{ cycle.name }}</td>
+                        <td>{{ cycle.fullName }}</td>
+                        <td>{{ cycle.order }}</td>
+                        <td>{{ cycle.description }}</td>
+                        <td>{{ cycle.size }}</td>
+                        <td>
+                            <button type="button" class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></button>
+                            <button type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

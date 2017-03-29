@@ -9,7 +9,6 @@
 import { D3Service, D3 } from 'd3-ng2-service';
 import { RadarConfig, ChartModel, ChartBlip } from '../../../models';
 import { RadarService } from '../../../services';
-import { isBrowser } from 'angular2-universal';
 
 @Component({
     selector: 'radar-chart',

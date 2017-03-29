@@ -1,6 +1,7 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpModule, JsonpModule } from '@angular/http';
 import { RouterModule } from '@angular/router';
-import { UniversalModule } from 'angular2-universal';
+import { BrowserModule } from '@angular/platform-browser'
 import { AppComponent } from './components/app/app.component'
 import { NavMenuComponent } from './components/navmenu/navmenu.component';
 import { HomeComponent } from './components/home/home.component';
@@ -8,10 +9,12 @@ import { RadarDisplayComponent, ChartComponent, QuadrantListComponent, CycleComp
 import { RadarService, RadarResolve } from './services'
 import { D3Service } from 'd3-ng2-service';
 import { TooltipModule, PaginationModule, AlertModule } from 'ng2-bootstrap';
-import { RadarEditComponent } from './components/edit';
+import { RadarEditComponent, QuadrantEditableListComponent } from './components/edit';
 import { RadarComponent } from './components/radar';
-import { Ng2TableModule } from 'ng2-table/ng2-table'
 import { ReactiveFormsModule } from "@angular/forms";
+import { platformServer } from '@angular/platform-server';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ToastModule } from 'ng2-toastr/ng2-toastr';
 
 @NgModule({
     bootstrap: [ AppComponent ],
@@ -22,28 +25,28 @@ import { ReactiveFormsModule } from "@angular/forms";
         ChartComponent,
         CycleComponent,
         QuadrantListComponent,
-//        RadarListComponent,
         RadarEditComponent,
+        QuadrantEditableListComponent,
         RadarComponent,
         BlipComponent,
         HomeComponent
     ],
     imports: [
-        UniversalModule, // Must be first import. This automatically imports BrowserModule, HttpModule, and JsonpModule too.
+        BrowserModule,
+        BrowserAnimationsModule,
+        HttpModule,
+        JsonpModule,
         ReactiveFormsModule,
         RouterModule.forRoot([
             { path: '', redirectTo: 'home', pathMatch: 'full' },
             { path: 'home', component: HomeComponent },
             { path: 'radar/:code', component: RadarComponent },
-//            { path: 'edit/radar', component: RadarListComponent },
-            { path: 'edit/radar/:code', component: RadarEditComponent },
             { path: 'edit/radar', component: RadarEditComponent },
             { path: '**', redirectTo: 'home' }
         ]),
+        ToastModule.forRoot(),
         TooltipModule.forRoot(),
-        PaginationModule.forRoot(),
-        AlertModule.forRoot(),
-        Ng2TableModule
+        PaginationModule.forRoot()
     ],
     providers: [D3Service, RadarService],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]

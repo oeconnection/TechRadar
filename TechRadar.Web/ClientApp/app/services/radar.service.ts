@@ -1,6 +1,6 @@
 import { Http, Response, Headers, RequestOptions, Jsonp } from '@angular/http';
 import { Injectable } from '@angular/core';
-import { IRadar, Radar, Blip } from '../models';
+import { IRadar, Radar, Blip, Quadrant } from '../models';
 import { Observable, Subject } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/Rx';
 import { ObjectId } from 'mongodb'
@@ -45,6 +45,18 @@ export class RadarService {
     private toRadar(item: any): Radar {
         var radar = new Radar(item.id, item.code, item.name, item.description, item.quadrants, item.cycles);
         return radar;
+    }
+
+    private toQuadrant(item: any): Quadrant {
+        debugger;
+        var quadrant = new Quadrant({
+            id: item.id,
+            quadrantNumber: item.quadrantNumber,
+            name: item.name,
+            description: item.description
+        });
+
+        return quadrant;
     }
 
     private mapRadarList(response: Response) {
@@ -94,6 +106,14 @@ export class RadarService {
         return radars.find(x => x.code == name);
     }
 
+    private findSingleRadarById(radars: Radar[], id: string): Radar {
+        return radars.find(x => x.id == id);
+    }
+
+    getRadarById(id: string): Observable<Radar> {
+        return this.getRadarList().map((list) => this.findSingleRadarById(list, id));
+    }
+
     getRadar(name: string): Observable<Radar> {
         return this.getRadarList().map((list) => this.findSingleRadar(list, name));
     }
@@ -125,13 +145,14 @@ export class RadarService {
         return this.blipSubject.asObservable();
     }
 
-    saveRadar(radar: IRadar): Observable<Radar> {
+    saveRadar(radar: Radar): Observable<Radar> {
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
 
         const url = `${this.baseUrl}/radar`;
+
         return this.http.put(url, radar, options)
-            .map(() => radar)
+            .map((data) => this.toRadar(data.json()))
             .do(data => {
                 this.resetCache();
                 console.log('updateRadar: ' + JSON.stringify(data));
@@ -152,6 +173,20 @@ export class RadarService {
             .do(() => {
                 this.resetCache();
                 console.log('deleteRadar: done');
+            })
+            .catch(this.handleError);
+    }
+
+    saveQuadrantToRadar(radarId: string, quadrant: Quadrant): Observable<Radar> {
+        let headers = new Headers({ 'Content-Type': 'application/json' });
+        let options = new RequestOptions({ headers: headers });
+
+        const url = `${this.baseUrl}/radar/${radarId}/quadrant`;
+
+        return this.http.put(url, quadrant, options)
+            .map((data) => this.toRadar(data.json()))
+            .do(data => {
+                this.resetCache();
             })
             .catch(this.handleError);
     }

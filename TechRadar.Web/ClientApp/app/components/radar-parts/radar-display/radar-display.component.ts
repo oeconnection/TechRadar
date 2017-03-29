@@ -15,7 +15,7 @@ import { Radar, Quadrant, RadarConfig, ChartModel, Blip } from '../../../models'
 import { RadarService } from '../../../services';
 import { D3Service, D3 } from 'd3-ng2-service';
 import { Observable } from 'rxjs/Rx';
-import { isBrowser } from 'angular2-universal';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
     selector: 'app-radar',
@@ -110,7 +110,7 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     private setProperties() {
-        if (isBrowser) {
+        if (isPlatformBrowser) {
             this.width = window.innerWidth;
             this.height = window.innerHeight - 220;
         }
