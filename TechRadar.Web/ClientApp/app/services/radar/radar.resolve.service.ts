@@ -4,8 +4,8 @@ import {
     Router, Resolve,
     ActivatedRouteSnapshot
 } from '@angular/router';
-import { Radar } from '../models/';
-import { RadarService } from './';
+import { Radar } from '../../models/';
+import { RadarService } from './radar.service';
 
 @Injectable()
 export class RadarResolve implements Resolve<Radar> {

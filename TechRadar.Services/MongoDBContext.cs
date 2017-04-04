@@ -40,7 +40,6 @@ namespace TechRadar.Services
                 return _database.GetCollection<Radar>("Radars");
             }
         }
-
         public IMongoCollection<Cycle> Cycles
         {
             get

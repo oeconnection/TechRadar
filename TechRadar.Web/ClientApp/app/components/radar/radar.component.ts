@@ -7,7 +7,7 @@ import { Radar, Quadrant, Cycle } from '../../models';
     templateUrl: './radar.component.html'
 })
 export class RadarComponent implements OnInit {
-    private code: string;
+    private id: string;
     private quadrant: number;
 
     constructor(private route: ActivatedRoute) {
@@ -15,7 +15,7 @@ export class RadarComponent implements OnInit {
 
     ngOnInit() {
         this.route.params.subscribe(params => {
-            this.code = params['code'];
+            this.id = params['id'];
         });
 
         this.route.queryParams.subscribe(params => {

@@ -13,7 +13,7 @@ import { RadarService } from '../../../services';
 @Component({
     selector: 'quadrant-list',
     templateUrl: './quadrant-list.component.html',
-    styleUrls: ['./quadrant-list.component.css']
+    styleUrls: ['./quadrant-list.component.scss']
 })
 export class QuadrantListComponent implements OnChanges {
     @Input() chartData: ChartModel;
@@ -22,7 +22,7 @@ export class QuadrantListComponent implements OnChanges {
     private quadrantData: ChartQuadrant;
     private blips: ChartBlip[];
     private cycles: Array<ChartCycle>;
-    private code: string;
+    private radarId: string;
     private panelClass: string;
     private activeBlip: number;
 
@@ -46,7 +46,7 @@ export class QuadrantListComponent implements OnChanges {
             this.quadrantData = this.chartData.findQuadrantByNumber(this.quadrant);
             this.blips = this.chartData.findBlipsByQuadrantId(this.quadrantData.id);
             this.cycles = this.chartData.cycles;
-            this.code = this.chartData.radar.code;
+            this.radarId = this.chartData.radar.id;
 
             this.panelClass = 'panel-' + this.quadrantData.cssClass;
         }

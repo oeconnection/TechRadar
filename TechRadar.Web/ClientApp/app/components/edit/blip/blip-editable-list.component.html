@@ -1,0 +1,142 @@
+﻿<div class="panel panel-info">
+    <div class="panel-heading" id="headingBlip">
+        <h4 class="panel-title pull-left">Blips</h4>
+        <button type="button"
+                class="btn btn-xs btn-primary pull-right"
+                *ngIf="!isEditingInProgress()"
+                (click)="addBlip()">
+            <i class="fa fa-plus"></i>  Add New
+        </button>
+        <div class="clearfix"></div>
+    </div>
+    <div class="panel-body">
+        <form class="form-horizontal"
+              novalidate autocomplete="off"
+              (ngSubmit)="saveBlip()"
+              [formGroup]="blipForm">
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="hidden">Id</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th width="120px">Blip Usage Rank</th>
+                        <th>Added</th>
+                        <th>Cycle</th>
+                        <th>Quadrant</th>
+                        <th width="75px">Tools</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let blip of blips" [ngClass]="{'info': blip.id == undefined }">
+                        <td class="hidden">
+                            <span>{{ blip.id }}</span>
+                            <input class="form-control"
+                                   id="id"
+                                   type="hidden"
+                                   formControlName="id" />
+                        </td>
+                        <td>
+                            <div [ngClass]="{'has-error': displayMessage.name }">
+                                <span *ngIf="!isEditing(blip.id)">{{ blip.name }}</span>
+                                <input *ngIf="isEditing(blip.id)"
+                                       placeholder="Name (required)"
+                                       class="form-control"
+                                       id="name"
+                                       type="text"
+                                       formControlName="name" />
+                                <span class="help-block" *ngIf="displayMessage.name && isEditing(blip.id)">
+                                    {{displayMessage.name}}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <span *ngIf="!isEditing(blip.id)">{{ blip.description }}</span>
+                            <textarea *ngIf="isEditing(blip.id)"
+                                      class="form-control"
+                                      id="description"
+                                      rows="2"
+                                      formControlName="description"></textarea>
+                        </td>
+                        <td>
+                            <div [ngClass]="{'has-error': displayMessage.size }">
+                                <span *ngIf="!isEditing(blip.id)">{{ blip.size }}</span>
+                                <input *ngIf="isEditing(blip.id)"
+                                       placeholder="Ring Size % (required)"
+                                       class="form-control"
+                                       id="size"
+                                       type="number"
+                                       formControlName="size" />
+                                <span class="help-block" *ngIf="displayMessage.size && isEditing(blip.id)">
+                                    {{displayMessage.size}}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            {{ blip.added | date:'shortDate' }}
+                        </td>
+                        <td>
+                            <div [ngClass]="{'has-error': displayMessage.cycleId }">
+                                <span *ngIf="!isEditing(blip.id)">{{ getCycleName(blip.cycleId) }}</span>
+                                <select *ngIf="isEditing(blip.id)" 
+                                        class="form-control"
+                                        id="cycleId"
+                                        formControlName="cycleId">
+                                    <option *ngFor="let cycle of radar.cycles" [ngValue]="cycle.id">{{ cycle.name }}</option>
+
+                                </select>
+                                <span class="help-block" *ngIf="displayMessage.cycleId && isEditing(blip.id)">
+                                    {{displayMessage.cycleId}}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div [ngClass]="{'has-error': displayMessage.quadrantId }">
+                                <span *ngIf="!isEditing(blip.id)">{{ getQuadrantName(blip.quadrantId) }}</span>
+                                <select *ngIf="isEditing(blip.id)"
+                                        class="form-control"
+                                        id="quadrantId"
+                                        formControlName="quadrantId">
+                                    <option *ngFor="let quadrant of radar.quadrants" [ngValue]="quadrant.id">{{ quadrant.name }}</option>
+
+                                </select>
+                                <span class="help-block" *ngIf="displayMessage.quadrantId && isEditing(blip.id)">
+                                    {{displayMessage.quadrantId}}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <button type="button"
+                                    *ngIf="!isEditingInProgress()"
+                                    class="btn btn-xs btn-primary"
+                                    (click)="onBlipEditClicked($event, blip.id)">
+                                <i class="fa fa-pencil-square-o"></i>
+                            </button>
+                            <button type="button"
+                                    [disabled]='!(blipForm.dirty && blipForm.valid)'
+                                    *ngIf="isEditing(blip.id)"
+                                    class="btn btn-xs btn-primary"
+                                    (click)="onBlipSaveClicked($event, blip.id)">
+                                <i class="fa fa-check"></i>
+                            </button>
+                            <button type="button"
+                                    *ngIf="isEditing(blip.id)"
+                                    class="btn btn-xs btn-default"
+                                    (click)="onBlipCancelClicked($event, blip.id)">
+                                <i class="fa fa-remove"></i>
+                            </button>
+                            <button type="button"
+                                    *ngIf="!isEditingInProgress()"
+                                    class="btn btn-xs btn-danger"
+                                    (click)="onBlipDeleteClicked($event, blip)">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                            <div class='has-error' *ngIf='errorMessage'>{{errorMessage}}</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>

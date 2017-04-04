@@ -1,0 +1,59 @@
+﻿circle.first, polygon.first {
+    fill: #83ad78;
+    stroke: #fff;
+}
+
+circle.second, polygon.second {
+    fill: #3db5be;
+    stroke: #fff;
+}
+
+circle.third, polygon.third {
+    fill: #e88744;
+    stroke: #fff;
+}
+
+circle.fourth, polygon.fourth {
+    fill: #8d2145;
+    stroke: #fff;
+}
+
+rect {
+    fill: azure;
+    opacity: 0.5;
+}
+
+text.first {
+    fill: #83ad78;
+}
+
+text.second {
+    fill: #3db5be;
+}
+
+text.third {
+    fill: #e88744;
+}
+
+text.fourth {
+    fill: #8d2145;
+}
+
+text.first, text.second, text.third, text.fourth {
+    font-size: 10px;
+    font-weight: 900;
+}
+
+text.blip-text {
+    font-size: 9px;
+    font-style: italic;
+    fill: #fff;
+}
+
+text.blip-name {
+    font-size: 12px;
+    font-weight: bold;
+    fill: #000;
+    display: none;
+}
+

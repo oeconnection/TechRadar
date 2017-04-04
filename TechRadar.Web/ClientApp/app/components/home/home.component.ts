@@ -5,7 +5,7 @@ import { Radar, Quadrant, Cycle } from '../../models';
 @Component({
     selector: 'home',
     templateUrl: './home.component.html',
-    styleUrls: ['./home.component.css']
+    styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit, OnDestroy {
     private sub: any;

@@ -7,7 +7,7 @@
 
     <div class="panel-body">
         <form class="form-horizontal"
-              novalidate
+              novalidate autocomplete="off"
               (ngSubmit)="onFormSubmit()"
               [formGroup]="radarForm">
             <fieldset>
@@ -28,17 +28,17 @@
                 </div>
 
                 <div class="form-group"
-                     [ngClass]="{'has-error': displayMessage.code}">
-                    <label class="col-md-2 control-label" for="codeId">Radar Code</label>
+                     [ngClass]="{'has-error': displayMessage.group }">
+                    <label class="col-md-2 control-label" for="group">Group Name</label>
 
                     <div class="col-md-8">
                         <input class="form-control"
-                               id="codeId"
+                               id="group"
                                type="text"
-                               placeholder="Code (required)"
-                               formControlName="code" />
-                        <span class="help-block" *ngIf="displayMessage.code">
-                            {{displayMessage.code}}
+                               placeholder="Group (required)"
+                               formControlName="group" />
+                        <span class="help-block" *ngIf="displayMessage.group">
+                            {{displayMessage.group}}
                         </span>
                     </div>
                 </div>
@@ -65,13 +65,14 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="form-group">
                     <div class="col-md-4 col-md-offset-2">
                         <span>
                             <button class="btn btn-primary"
                                     type="submit"
                                     style="width:80px;margin-right:10px"
-                                    [disabled]='!(radarForm.dirty && radarForm.valid)'>
+                                    [disabled]="!(radarForm.dirty && radarForm.valid)">
                                 Save
                             </button>
                         </span>
@@ -83,11 +84,13 @@
                             </a>
                         </span>
                         <span>
-                            <a class="btn btn-danger"
+                            <button class="btn btn-danger"
+                               type="button"
                                style="width:80px"
+                               [disabled]="isDeleteDisabled()"
                                (click)="onDeleteClick()">
                                 Delete
-                            </a>
+                            </button>
                         </span>
                     </div>
                 </div>
@@ -99,55 +102,9 @@
 
 
 <div class="panel-group">
-    <div class="panel panel-info" *ngIf="showChildren()">
-        <div class="panel-heading">
-            <h4 class="panel-title pull-left">Quadrants</h4>
-            <div class="clearfix"></div>
-        </div>
-        <div class="panel-body">
-            <quadrant-editable-list [quadrants]="radar.quadrants" (quadrantSaveEvent)="saveQuadrant($event)" ></quadrant-editable-list>
-        </div>
-    </div>
-    <div class="panel panel-default" *ngIf="showChildren()">
-        <div class="panel-heading" id="headingCycle">
-            <h4 class="panel-title pull-left">Cycles</h4>
-            <button type="button" class="btn btn-xs btn-primary pull-right"><i class="fa fa-plus"></i>  Add New</button>
-            <div class="clearfix"></div>
-        </div>
-        <div class="panel-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th class="hidden">Id</th>
-                        <th>Name</th>
-                        <th>Full Name</th>
-                        <th>Order</th>
-                        <th>Description</th>
-                        <th>Ring Size</th>
-                        <th>Tools</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let cycle of radar?.cycles">
-                        <td class="hidden">{{ cycle.id }}</td>
-                        <td>{{ cycle.name }}</td>
-                        <td>{{ cycle.fullName }}</td>
-                        <td>{{ cycle.order }}</td>
-                        <td>{{ cycle.description }}</td>
-                        <td>{{ cycle.size }}</td>
-                        <td>
-                            <button type="button" class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></button>
-                            <button type="button" class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+    <cycle-editable-list *ngIf="showChildren()" [cycles]="radar.cycles" (cycleSaveEvent)="saveCycle($event)" (cycleDeleteEvent)="deleteCycle($event)"></cycle-editable-list>
 
-<br>Dirty: {{ radarForm.dirty }}
-<br>Touched: {{ radarForm.touched }}
-<br>Valid: {{ radarForm.valid }}
-<br>Value: {{ radarForm.value | json }}
-<br>Radar: {{ radar | json }}
+    <quadrant-editable-list *ngIf="showChildren()" [quadrants]="radar.quadrants" (quadrantSaveEvent)="saveQuadrant($event)"></quadrant-editable-list>
+
+    <blip-editable-list *ngIf="showChildren()" [radar]="radar" [blips]="blips" (blipSaveEvent)="saveBlip($event)" (blipDeleteEvent)="deleteBlip($event)"></blip-editable-list>
+</div>

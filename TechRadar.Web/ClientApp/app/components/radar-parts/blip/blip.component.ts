@@ -12,7 +12,7 @@ import { ChartCycle, ChartModel, ChartBlip } from '../../../models';
 @Component({
     selector: '[radar-blip]',
     templateUrl: './blip.component.html',
-    styleUrls: ['./blip.component.css']
+    styleUrls: ['./blip.component.scss']
 })
 
 export class BlipComponent implements OnChanges {

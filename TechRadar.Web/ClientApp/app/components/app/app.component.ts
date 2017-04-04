@@ -1,17 +1,20 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RadarService } from '../../services';
 import { Radar, Quadrant, Cycle, ChartModel } from '../../models';
+import { ImageLoaderService, ThemePreloaderService, ThemeSpinnerService } from '../../services';
 
 @Component({
     selector: 'app',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.css']
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit, OnDestroy {
     private sub: any;
     private radars: Array<Radar>;
 
-    constructor(private radarService: RadarService) {
+    constructor(private radarService: RadarService,
+        private _imageLoader: ImageLoaderService,
+        private _spinner: ThemeSpinnerService,) {
     }
 
     ngOnInit() {
@@ -24,4 +27,10 @@ export class AppComponent implements OnInit, OnDestroy {
         this.sub.unsubscribe();
     }
 
+    public ngAfterViewInit(): void {
+        // hide spinner once all loaders are completed
+        ThemePreloaderService.load().then((values) => {
+            this._spinner.hide();
+        });
+    }
 }

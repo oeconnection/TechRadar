@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const merge = require('webpack-merge');
 const CheckerPlugin = require('awesome-typescript-loader').CheckerPlugin;
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = (env) => {
     // Configuration in common to both client-side and server-side bundles
@@ -18,11 +19,35 @@ module.exports = (env) => {
             rules: [
                 { test: /\.ts$/, include: /ClientApp/, use: ['awesome-typescript-loader?silent=true', 'angular2-template-loader'] },
                 { test: /\.html$/, use: 'html-loader?minimize=false' },
-                { test: /\.css$/, use: ['to-string-loader', 'css-loader'] },
+                {
+                    test: /\.css$/,
+                    use: ['raw-loader']
+                },
+
+                {
+                    test: /\.scss$/,
+                    use: ['raw-loader', 'sass-loader']
+                },
+
+                {
+                    test: /initial\.scss$/,
+                    use: ExtractTextPlugin.extract({
+                        fallback: 'style-loader',
+                        use: 'css-loader!sass-loader?sourceMap'
+                    })
+                },
+                //{ test: /\.css$/, use: ['to-string-loader', 'css-loader'] },
+                {
+                    test: /\.woff(2)?(\?v=.+)?$/,
+                    use: 'url-loader?limit=10000&mimetype=application/font-woff'
+                },
                 { test: /\.(png|jpg|jpeg|gif|svg)$/, use: 'url-loader?limit=25000' }
             ]
         },
-        plugins: [new CheckerPlugin()]
+        plugins: [
+            new ExtractTextPlugin({ filename: 'initial.css', allChunks: true }),
+            new CheckerPlugin()
+        ]
     };
 
     // Configuration for client-side bundle suitable for running in browsers

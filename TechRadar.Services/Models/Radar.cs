@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Collections.Generic;
 
 namespace TechRadar.Services.Models
 {
@@ -14,11 +11,11 @@ namespace TechRadar.Services.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
-        [BsonElement("code")]
-        public string Code { get; set; }
-
         [BsonElement("name")]
         public string Name { get; set; }
+
+        [BsonElement("group")]
+        public string Group { get; set; }
 
         [BsonElement("description")]
         public string Description { get; set; }

@@ -13,7 +13,7 @@ import { RadarService } from '../../../services';
 @Component({
     selector: 'radar-chart',
     templateUrl: './chart.component.html',
-    styleUrls: ['./chart.component.css']
+    styleUrls: ['./chart.component.scss']
 })
 
 export class ChartComponent implements OnChanges, OnInit {

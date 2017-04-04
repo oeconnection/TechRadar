@@ -9,7 +9,7 @@ export class ChartBlip extends Blip {
     blipNumber: number;
 
     constructor(blip: Blip, shape: { x: number, y: number }, text: { x: number, y: number }, cssClass: string, opacity: number, blipNumber: number) {
-        super(blip.id, blip.name, blip.description, blip.size, blip.added, blip.cycleId, blip.quadrantId);
+        super(blip.id, blip.name, blip.description, blip.size, blip.added, blip.cycleId, blip.quadrantId, blip.radarId);
 
         this.shape = shape;
         this.text = text;

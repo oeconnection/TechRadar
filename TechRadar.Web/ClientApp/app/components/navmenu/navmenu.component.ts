@@ -4,7 +4,7 @@ import { Radar } from '../../models';
 @Component({
     selector: 'nav-menu',
     templateUrl: './navmenu.component.html',
-    styleUrls: ['./navmenu.component.css']
+    styleUrls: ['./navmenu.component.scss']
 })
 export class NavMenuComponent implements OnChanges {
     @Input() radars: Array<Radar>;
@@ -12,7 +12,7 @@ export class NavMenuComponent implements OnChanges {
     private logoImageUrl: string;
 
     constructor() {
-        this.logoImageUrl = require('../../../assets/images/OECRadarLogo.png');
+        this.logoImageUrl = require('../../../assets/images/radar-logo.png');
     }
 
     ngOnChanges() {

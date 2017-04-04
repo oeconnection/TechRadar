@@ -12,7 +12,7 @@ import { Radar, Quadrant } from '../../../models';
 @Component({
   selector: 'app-radar-detail',
   templateUrl: './radar-detail.component.html',
-  styleUrls: ['./radar-detail.component.css'],
+  styleUrls: ['./radar-detail.component.scss'],
   providers: [RadarService]
 })
 export class RadarDetailComponent implements OnInit, OnDestroy {

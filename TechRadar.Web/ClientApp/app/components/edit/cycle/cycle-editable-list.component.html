@@ -1,0 +1,136 @@
+﻿<div class="panel panel-info">
+    <div class="panel-heading" id="headingCycle">
+        <h4 class="panel-title pull-left">Cycles</h4>
+        <button type="button" 
+                class="btn btn-xs btn-primary pull-right" 
+                *ngIf="!isEditingInProgress()"
+                (click)="addCycle()">
+            <i class="fa fa-plus"></i>  Add New
+        </button>
+        <div class="clearfix"></div>
+    </div>
+    <div class="panel-body">
+        <form class="form-horizontal"
+              novalidate autocomplete="off"
+              (ngSubmit)="saveCycle()"
+              [formGroup]="cycleForm">
+
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="hidden">Id</th>
+                        <th width="75px">Order</th>
+                        <th>Name</th>
+                        <th>Full Name</th>
+                        <th>Description</th>
+                        <th width="120px">Ring Size (%)</th>
+                        <th width="75px">Tools</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cycle of cycles" [ngClass]="{'info': cycle.id == undefined }">
+                        <td class="hidden">
+                            <span>{{ cycle.id }}</span>
+                            <input class="form-control"
+                                   id="id"
+                                   type="hidden"
+                                   formControlName="id" />
+                        </td>
+                        <td>
+                            <div [ngClass]="{'has-error': displayMessage.order }">
+                                <span *ngIf="!isEditing(cycle.id)">{{ cycle.order }}</span>
+                                <input *ngIf="isEditing(cycle.id)"
+                                       placeholder="Order (required)"
+                                       class="form-control"
+                                       id="order"
+                                       type="number"
+                                       formControlName="order" />
+                                <span class="help-block" *ngIf="displayMessage.order && isEditing(cycle.id)">
+                                    {{displayMessage.order}}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div [ngClass]="{'has-error': displayMessage.name }">
+                                <span *ngIf="!isEditing(cycle.id)">{{ cycle.name }}</span>
+                                <input *ngIf="isEditing(cycle.id)"
+                                       placeholder="Name (required)"
+                                       class="form-control"
+                                       id="name"
+                                       type="text"
+                                       formControlName="name" />
+                                <span class="help-block" *ngIf="displayMessage.name && isEditing(cycle.id)">
+                                    {{displayMessage.name}}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div [ngClass]="{'has-error': displayMessage.fullName }">
+                                <span *ngIf="!isEditing(cycle.id)">{{ cycle.fullName }}</span>
+                                <input *ngIf="isEditing(cycle.id)"
+                                       placeholder="Full Name (required)"
+                                       class="form-control"
+                                       id="fullName"
+                                       type="text"
+                                       formControlName="fullName" />
+                                <span class="help-block" *ngIf="displayMessage.name && isEditing(cycle.id)">
+                                    {{displayMessage.fullName}}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <span *ngIf="!isEditing(cycle.id)">{{ cycle.description }}</span>
+                            <textarea *ngIf="isEditing(cycle.id)"
+                                      class="form-control"
+                                      id="description"
+                                      rows="2"
+                                      formControlName="description"></textarea>
+                        </td>
+                        <td>
+                            <div [ngClass]="{'has-error': displayMessage.size }">
+                                <span *ngIf="!isEditing(cycle.id)">{{ cycle.size }}</span>
+                                <input *ngIf="isEditing(cycle.id)"
+                                       placeholder="Ring Size % (required)"
+                                       class="form-control"
+                                       id="size"
+                                       type="number"
+                                       formControlName="size" />
+                                <span class="help-block" *ngIf="displayMessage.size && isEditing(cycle.id)">
+                                    {{displayMessage.size}}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <button type="button"
+                                    *ngIf="!isEditingInProgress()"
+                                    class="btn btn-xs btn-primary"
+                                    (click)="onCycleEditClicked($event, cycle.id)">
+                                <i class="fa fa-pencil-square-o"></i>
+                            </button>
+                            <button type="button"
+                                    [disabled]='!(cycleForm.dirty && cycleForm.valid)'
+                                    *ngIf="isEditing(cycle.id)"
+                                    class="btn btn-xs btn-primary"
+                                    (click)="onCycleSaveClicked($event, cycle.id)">
+                                <i class="fa fa-check"></i>
+                            </button>
+                            <button type="button"
+                                    *ngIf="isEditing(cycle.id)"
+                                    class="btn btn-xs btn-default"
+                                    (click)="onCycleCancelClicked($event, cycle.id)">
+                                <i class="fa fa-remove"></i>
+                            </button>
+                            <button type="button"
+                                    *ngIf="!isEditingInProgress()"
+                                    class="btn btn-xs btn-danger"
+                                    (click)="onCycleDeleteClicked($event, cycle)">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                            <div class='has-error' *ngIf='errorMessage'>{{errorMessage}}</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>

@@ -12,10 +12,6 @@ export class ChartQuadrant extends Quadrant {
     translate: { x: number, y: number };
     verticalLine: { x: number, y: number };
 
-    //private isQuadrantOnly: boolean;
-    //private chartCenter: number;
-    //private chartRadius: number;
-
     constructor(config: any) {
         let quadrantInfo = {
             id: config.settings.id,
@@ -25,9 +21,6 @@ export class ChartQuadrant extends Quadrant {
         }
         super(quadrantInfo);
 
-        //this.isQuadrantOnly = config.settings.isQuadrantOnly;
-        //this.chartCenter = config.settings.chartCenter;
-        //this.chartRadius = config.settings.chartRadius;
         this.size = config.settings.size;
 
         this.setProperties(quadrantInfo);

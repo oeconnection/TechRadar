@@ -4,8 +4,8 @@ import { Cycle } from './cycle';
 
 export interface IRadar {
     id: string;
-    code: string;
     name: string;
+    group: string;
     description: string;
 
     cycles: Cycle[];

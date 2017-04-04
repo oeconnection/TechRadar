@@ -1,6 +1,6 @@
 import { Http, Response, Headers, RequestOptions, Jsonp } from '@angular/http';
 import { Injectable } from '@angular/core';
-import { IRadar, Radar, Blip, Quadrant } from '../models';
+import { IRadar, Radar, Blip, Quadrant, Cycle } from '../../models';
 import { Observable, Subject } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/Rx';
 import { ObjectId } from 'mongodb'
@@ -28,7 +28,7 @@ export class RadarService {
         }
     }
     private toBlip(item: any): Blip {
-        return new Blip(item.id, item.name, item.description, item.size, item.added, item.cycleId, item.quadrantId);
+        return new Blip(item.id, item.name, item.description, item.size, item.added, item.cycleId, item.quadrantId, item.radarId);
     }
 
     private mapBlipList(response: Response) {
@@ -43,20 +43,8 @@ export class RadarService {
     }
 
     private toRadar(item: any): Radar {
-        var radar = new Radar(item.id, item.code, item.name, item.description, item.quadrants, item.cycles);
+        var radar = new Radar(item.id, item.name, item.group, item.description, item.quadrants, item.cycles);
         return radar;
-    }
-
-    private toQuadrant(item: any): Quadrant {
-        debugger;
-        var quadrant = new Quadrant({
-            id: item.id,
-            quadrantNumber: item.quadrantNumber,
-            name: item.name,
-            description: item.description
-        });
-
-        return quadrant;
     }
 
     private mapRadarList(response: Response) {
@@ -102,31 +90,23 @@ export class RadarService {
         }
     }
 
-    private findSingleRadar(radars: Radar[], name: string): Radar {
-        return radars.find(x => x.code == name);
-    }
-
-    private findSingleRadarById(radars: Radar[], id: string): Radar {
+    private findSingleRadar(radars: Radar[], id: string): Radar {
         return radars.find(x => x.id == id);
     }
 
-    getRadarById(id: string): Observable<Radar> {
-        return this.getRadarList().map((list) => this.findSingleRadarById(list, id));
+    getRadar(id: string): Observable<Radar> {
+        return this.getRadarList().map((list) => this.findSingleRadar(list, id));
     }
 
-    getRadar(name: string): Observable<Radar> {
-        return this.getRadarList().map((list) => this.findSingleRadar(list, name));
-    }
-
-    getRadarBlips(name: string): Observable<Array<Blip>> {
-        return this.http.get(this.baseUrl + '/radar/' + name + '/blips')
+    getRadarBlips(id: string): Observable<Array<Blip>> {
+        return this.http.get(this.baseUrl + '/radar/' + id + '/blips')
             .map((response) => this.mapBlipList(response))
             .share(); 
     }
 
-    getRadarQuadrantBlips(name: string, quadrantNumber: number): Observable<Array<Blip>> {
+    getRadarQuadrantBlips(id: string, quadrantNumber: number): Observable<Array<Blip>> {
         console.info("Getting Blips");
-        var url = this.baseUrl + '/radar/' + name + '/blips/';
+        var url = this.baseUrl + '/radar/' + id + '/blips/';
         if (quadrantNumber) {
             url = url + quadrantNumber;
         }
@@ -172,7 +152,6 @@ export class RadarService {
         return this.http.delete(url, options)
             .do(() => {
                 this.resetCache();
-                console.log('deleteRadar: done');
             })
             .catch(this.handleError);
     }
@@ -187,6 +166,62 @@ export class RadarService {
             .map((data) => this.toRadar(data.json()))
             .do(data => {
                 this.resetCache();
+            })
+            .catch(this.handleError);
+    }
+
+    saveCycleToRadar(radarId: string, cycle: Cycle): Observable<Radar> {
+        let headers = new Headers({ 'Content-Type': 'application/json' });
+        let options = new RequestOptions({ headers: headers });
+
+        const url = `${this.baseUrl}/radar/${radarId}/cycle`;
+
+        return this.http.put(url, cycle, options)
+            .map((data) => this.toRadar(data.json()))
+            .do(data => {
+                this.resetCache();
+            })
+            .catch(this.handleError);
+    }
+
+    deleteCycleFromRadar(radarId: string, cycleId: string): Observable<Radar> {
+        let headers = new Headers({ 'Content-Type': 'application/json' });
+        let options = new RequestOptions({ headers: headers });
+
+        const url = `${this.baseUrl}/radar/${radarId}/cycle/${cycleId}`;
+
+        return this.http.delete(url, options)
+            .map((data) => this.toRadar(data.json()))
+            .do(data => {
+                this.resetCache();
+            })
+            .catch(this.handleError);
+    }
+
+    saveBlipToRadar(radarId: string, blip: Blip): Observable<Radar> {
+        let headers = new Headers({ 'Content-Type': 'application/json' });
+        let options = new RequestOptions({ headers: headers });
+
+        const url = `${this.baseUrl}/radar/${radarId}/blip`;
+
+        return this.http.put(url, blip, options)
+            .map((data) => this.toBlip(data.json()))
+            .do(data => {
+                //this.resetCache();
+            })
+            .catch(this.handleError);
+    }
+
+    deleteBlipFromRadar(radarId: string, blipId: string): Observable<Radar> {
+        let headers = new Headers({ 'Content-Type': 'application/json' });
+        let options = new RequestOptions({ headers: headers });
+
+        const url = `${this.baseUrl}/radar/${radarId}/blip/${blipId}`;
+
+        return this.http.delete(url, options)
+            .map((data) => this.toBlip(data.json()))
+            .do(data => {
+                //this.resetCache();
             })
             .catch(this.handleError);
     }

@@ -8,7 +8,7 @@
 
 <div *ngFor="let radar of radars">
     <h3>
-        <a *ngIf="isRadarReady(radar)" [routerLink]="['/radar', radar.code]">{{ radar.name }}</a> 
+        <a *ngIf="isRadarReady(radar)" [routerLink]="['/radar', radar.id]">{{ radar.name }}</a> 
         <span *ngIf="!isRadarReady(radar)" class="text-danger">{{ radar.name }}
             <span class="text-danger"> <small>Incomplete </small><i class="fa fa-exclamation-circle"></i></span>
         </span>

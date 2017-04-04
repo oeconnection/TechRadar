@@ -11,7 +11,7 @@ import { ChartModel, ChartQuadrant, ChartCycle } from '../../../models';
 @Component({
     selector: '[radar-cycles]',
     templateUrl: './cycle.component.html',
-    styleUrls: ['./cycle.component.css']
+    styleUrls: ['./cycle.component.scss']
 })
 
 export class CycleComponent implements OnChanges, OnInit {
@@ -84,4 +84,45 @@ export class CycleComponent implements OnChanges, OnInit {
             this.lineLength = 0;
         }
     }
+
+    //private buildCircle() {
+    //    let radianCalculation: number;
+    //    let startRadian: number,
+    //        endRadian: number,
+    //        lineY: number;
+
+    //    lineY = this.lineY;
+    //    if (this.isQuadrantOnly()) {
+    //        radianCalculation = (0.5 * (this.quadrantNumber - 1));
+    //        startRadian = ((radianCalculation - 0.5) * Math.PI);
+    //        endRadian = (radianCalculation * Math.PI);
+    //    } else {
+    //        startRadian = -0.5 * Math.PI;
+    //        endRadian = 1.5 * Math.PI;
+    //    }
+
+    //    //console.log("Path Builder: IR: %s | OR: %s | SR: %s | ER: %s", this.innerRadius, this.outerRadius, startRadian, endRadian);
+
+    //    let arc = this.pathContext
+    //        .innerRadius(this.innerRadius)
+    //        .outerRadius(this.outerRadius)
+    //        .startAngle(startRadian)
+    //        .endAngle(endRadian);
+
+    //    let transformX = this.transformationBase.x * this.radius;
+    //    let transformY = this.transformationBase.y * this.radius;
+    //    let textStart = Math.abs((this.radius - this.outerRadius) + ((this.outerRadius - this.innerRadius) / 2));
+    //    if (isNaN(textStart)) textStart = 0;
+
+    //    this.path = arc();
+    //    this.centerOfRing = {
+    //        x: textStart,
+    //        y: lineY + 10
+    //    };
+    //    this.transform = {
+    //        x: transformX,
+    //        y: transformY
+    //    }
+    //}
+
 }
