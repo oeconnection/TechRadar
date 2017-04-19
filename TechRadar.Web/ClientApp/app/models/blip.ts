@@ -11,6 +11,7 @@ export class Blip {
     cycleId: string;
     radarId: string;
     isNew: boolean;
+    blipNumber: number;
 
     constructor(id: string, name: string, description: string, size: number, added: Date, cycleId: string, quadrantId: string, radarId: string) {
         this.id = id;

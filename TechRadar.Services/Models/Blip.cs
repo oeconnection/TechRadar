@@ -21,7 +21,7 @@ namespace TechRadar.Services.Models
         public string Description { get; set; }
 
         [BsonElement("added")]
-        [BsonDateTimeOptions(DateOnly =true)]
+        [BsonDateTimeOptions(Kind=DateTimeKind.Local)]
         public DateTime Added { get; set; }
 
         [BsonElement("size")]

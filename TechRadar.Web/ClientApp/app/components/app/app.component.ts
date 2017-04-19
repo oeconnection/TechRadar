@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RadarService } from '../../services';
-import { Radar, Quadrant, Cycle, ChartModel } from '../../models';
+import { Radar } from '../../models';
 import { ImageLoaderService, ThemePreloaderService, ThemeSpinnerService } from '../../services';
 
 @Component({

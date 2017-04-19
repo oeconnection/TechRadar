@@ -3,11 +3,12 @@
     Input,
     OnChanges,
     SimpleChanges,
-    OnInit
+    OnInit,
+    ElementRef
 } from '@angular/core';
 
 import { D3Service, D3 } from 'd3-ng2-service';
-import { RadarConfig, ChartModel, ChartBlip } from '../../../models';
+import { Radar, Blip } from '../../../models';
 import { RadarService } from '../../../services';
 
 @Component({
@@ -17,15 +18,26 @@ import { RadarService } from '../../../services';
 })
 
 export class ChartComponent implements OnChanges, OnInit {
-    @Input() chartData: ChartModel;
+    @Input() data: Radar;
     @Input() quadrant: number;
+    @Input() width: number;
 
+    private parentNativeElement: any;
     private chartAlignment: string;
     private mouseOnBlip: number;
-    private blips: Array<ChartBlip>;
+    private blips: Array<Blip>;
     private show: boolean;
 
-    constructor(private d3Service: D3Service, private radarService: RadarService) {
+    private quadrantCssClass: string;
+    private horizontalLine: { x: number, y: number };
+    private titleAnchor: string;
+    private titlePosition: { x: number, y: number };
+    private translate: { x: number, y: number };
+    private verticalLine: { x: number, y: number };
+
+    constructor(private d3Service: D3Service, private radarService: RadarService, private element: ElementRef) {
+        this.parentNativeElement = element.nativeElement;
+
         this.mouseOnBlip = 0;
         this.blips = [];
 
@@ -33,58 +45,76 @@ export class ChartComponent implements OnChanges, OnInit {
     }
 
     ngOnInit(): void {
-        this.radarService.getActiveBlip().subscribe(blip => {
-            if (!(this.mouseOnBlip == blip)) {
-                this.mouseOnBlip = blip;
-            }
-        });
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (this.chartData) {
-            this.setupViewModel();
-        }
+        this.setupViewModel();
+    }
+
+    private isQuadrantOnly(): boolean {
+        if (isNaN(this.quadrant)) return false;
+
+        return this.quadrant > 0;
     }
 
     private setupViewModel(): void {
         this.show = false;
-        var soloQuadrant = this.chartData.soloQuadrant();
-        if (this.chartData.isQuadrantOnly()) {
-            this.chartAlignment = soloQuadrant.chartAlignment;
-            this.blips = this.chartData.blips.filter((item) => item.quadrantId == soloQuadrant.id);
-        } else {
-            this.chartAlignment = 'text-center';
-            this.blips = this.chartData.blips;
-        }
+
+        this.setProperties();
+
+        this.blips = this.data.blips;
 
         this.show = true;
     }   
 
-    public onMouseOverBlip(blip: number): void {
-        if (!(this.mouseOnBlip == blip)) {
-            this.mouseOnBlip = blip;
-            this.radarService.setActiveBlip(blip);
-        }
-    }
+    private setProperties(): void {
+        if (this.isQuadrantOnly()) {
+            switch (this.quadrant) {
+                case 1:
+                    this.verticalLine = { x: this.width - 15, y: 0 };
+                    this.horizontalLine = { x: 0, y: this.width - 15 };
+                    this.quadrantCssClass = 'first';
+                    this.titlePosition = { x: 10, y: 10 };
+                    this.titleAnchor = 'start';
+                    this.chartAlignment = 'text-right';
+                    break;
 
-    public onMouseOutBlip(): void {
-        if (!(this.mouseOnBlip == 0)) {
-            this.mouseOnBlip = 0;
-            this.radarService.setActiveBlip(0);
-        }
-    }
+                case 2:
+                    this.verticalLine = { x: 0, y: 0 };
+                    this.horizontalLine = { x: 0, y: this.width - 15 };
+                    this.quadrantCssClass = 'second';
+                    this.titlePosition = { x: this.width - 10, y: 10 };
+                    this.titleAnchor = 'end';
+                    this.chartAlignment = 'text-left';
+                    break;
 
-    public blipOpacity(blip: number): number {
-        if (this.mouseOnBlip == 0) {
-            return 1;
-        }
+                case 3:
+                    this.verticalLine = { x: this.width - 15, y: 0 };
+                    this.horizontalLine = { x: 0, y: 0 };
+                    this.quadrantCssClass = 'third';
+                    this.titlePosition = { x: this.width - 10, y: this.width - 10 };
+                    this.titleAnchor = 'end';
+                    this.chartAlignment = 'text-left';
+                    break;
 
-        if (this.mouseOnBlip == blip) {
-            return 1;
+                case 4:
+                    this.verticalLine = { x: this.width - 15, y: 0 };
+                    this.horizontalLine = { x: 0, y: 0 };
+                    this.quadrantCssClass = 'fourth';
+                    this.titlePosition = { x: 10, y: this.width - 10 };
+                    this.titleAnchor = 'start';
+                    this.chartAlignment = 'text-right';
+                    break;
+            }
         } else {
-            return .5;
+            this.verticalLine = { x: (this.width / 2) - 15, y: 0 };
+            this.horizontalLine = { x: 0, y: (this.width / 2) };
+            this.quadrantCssClass = 'fourth';
+            this.titlePosition = { x: 10, y: this.width - 10 };
+            this.titleAnchor = 'start';
+            this.chartAlignment = 'text-center';
         }
-
     }
+
  
 }

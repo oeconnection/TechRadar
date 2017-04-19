@@ -11,7 +11,7 @@ import {
     NgZone
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Radar, Quadrant, RadarConfig, ChartModel, Blip } from '../../../models';
+import { Radar, Quadrant, RadarConfig, Blip } from '../../../models';
 import { RadarService } from '../../../services';
 import { D3Service, D3 } from 'd3-ng2-service';
 import { Observable } from 'rxjs/Rx';
@@ -35,7 +35,6 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     private dataSub: any;
     private radarData: Radar;
     private chartConfig: RadarConfig;
-    private chartData: ChartModel;
     private width: number;
     private height: number;
     private blips: Blip[];
@@ -54,7 +53,8 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
             this.getData();
         } else {
             if (changes['quadrant']) {
-                this.chartData.setQuadrant(changes['quadrant'].currentValue);
+                this.quadrant = changes['quadrant'].currentValue;
+              //  this.chartData.setQuadrant(changes['quadrant'].currentValue);
             }
         }
 
@@ -65,6 +65,25 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
 
     ngOnDestroy(): void {
         this.dataSub.unsubscribe();
+    }
+
+    private quadrantName() {
+        if (this.radarData != null && this.isQuadrantOnly())
+        {
+            var quadrant = this.radarData.findQuadrantByNumber(this.quadrant);
+            return quadrant == null ? null : quadrant.name;
+        } else {
+            return null;
+        }
+    }
+
+    private quadrantDescription() {
+        if (this.radarData != null && this.isQuadrantOnly()) {
+            var quadrant = this.radarData.findQuadrantByNumber(this.quadrant);
+            return quadrant == null ? null : quadrant.description;
+        } else {
+            return null;
+        }
     }
 
     private isQuadrantOnly() {
@@ -78,14 +97,13 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
             this.radarService.getRadarBlips(this.id)
         ).subscribe(data => {
             this.radarData = data[0];
-            this.blips = data[1];
+            this.setBlipData(data[1]);
 
             if (this.radarData) {
                 this.setProperties();
-
-                this.buildChartData();
             };
             this.showChart = true;
+            console.log("Show should be true");
         });
     }
 
@@ -117,25 +135,39 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
 
         this.radarName = this.radarData.name;
         this.radarDescription = this.radarData.description;
+
+        this.radarData.blips = this.blips;
     }
 
-    private buildChartData() {
-        this.show = false;
-        let chartConfig = {
-            settings: {
-                quadrant: this.quadrant,
-                size: this.height,
-                name: this.radarName,
-            }, dataset: {
-                radar: this.radarData,
-                blips: this.blips
-            }
-        };
+    private sortBlip(blipA: Blip, blipB: Blip): number {
+        // Get Cycle and quadrant
+        let quadA = this.radarData.findQuadrantById(blipA.quadrantId);
+        let quadB = this.radarData.findQuadrantById(blipB.quadrantId);
+        let cycleA = this.radarData.findCycleById(blipA.cycleId);
+        let cycleB = this.radarData.findCycleById(blipB.cycleId);
 
-        var chart = new ChartModel(chartConfig, this.d3);
-        this.chartData = chart;
+        if (quadA.quadrantNumber < quadB.quadrantNumber) return -1;
+        if (quadA.quadrantNumber > quadB.quadrantNumber) return 1;
 
-        this.show = true;
+        if (cycleA.order < cycleB.order) return -1;
+        if (cycleA.order > cycleB.order) return 1;
+
+        if (blipA.name.toLowerCase < blipB.name.toLowerCase) return -1;
+        if (blipA.name.toLowerCase > blipB.name.toLowerCase) return 1;
+
+        return 0;
     }
+
+    private setBlipData(blips: Blip[]): void {
+        let blipNumber = 1;
+        this.blips = new Array<Blip>();
+        blips.sort((a: Blip, b: Blip) => { return this.sortBlip(a, b); }).forEach((blip: Blip): void => {
+            let newBlip = blip;
+            newBlip.blipNumber = blipNumber++;
+            this.blips.push(newBlip);
+        })
+    }
+
 
 }
+

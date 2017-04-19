@@ -2,13 +2,13 @@
     <a [routerLink]="['/radar', radarId]" [queryParams]="{ quad: quadrantData.quadrantNumber }"><div class="panel-heading">{{ quadrantData.name }}</div></a>
     <div class="panel-body">
         <ul class="list-unstyled" *ngFor="let cycle of cycles">
-            <li [ngClass]="['ring', quadrantData.cssClass]">
+            <li [ngClass]="['ring', getBlipClassNameByQuadrant(quadrantData)]">
                 {{ cycle.fullName }}
 
                 <ul class="list-unstyled" *ngFor="let blip of getBlipsByCycleId(cycle.id)">
                     <li>
                         <div
-                               (mouseover)="onMouseOverBlip(blip.id)"
+                               (mouseover)="onMouseOverBlip(blip)"
                                (mouseout)="onMouseOutBlip()">
                             <a class="blip-name-link"
                                role="button"
@@ -16,9 +16,9 @@
                                href="#collapse{{ blip.id }}"
                                attr.aria-expanded="false"
                                attr.aria-controls="collapse{{ blip.id }}">
-                                <div [ngClass]="{ 'active-link': isActiveBlip(blip.id), 'full-link': true }"
+                                <div [ngClass]="{ 'active-link': isActiveBlip(blip.blipNumber), 'full-link': true }"
                                      attr.data-blip-id="{{ blip.id }}" attr.id="blip-link-{{ blip.id }}">
-                                    {{ blip.blipNumber }}. {{ blip.name }} <span *ngIf="blip.isNew" [ngClass]="['badge', quadrantData.cssClass]">new</span>
+                                    {{ blip.blipNumber }}. {{ blip.name }} <span *ngIf="blip.isNew" [ngClass]="['badge', getBlipClassNameByQuadrant(quadrantData)]">new</span>
                                 </div>
                             </a>
 

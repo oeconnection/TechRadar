@@ -57,3 +57,23 @@ text.blip-name {
     display: none;
 }
 
+div.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 6px;
+    background: black;
+    color: white;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+}
+
+/* Turn off every features */
+#carte:hover .blip-group {
+    opacity: 0.5;
+}
+
+/* Turn on the one you are specifically hovering */
+#carte:hover .blip-group:hover {
+    opacity: 1;
+}

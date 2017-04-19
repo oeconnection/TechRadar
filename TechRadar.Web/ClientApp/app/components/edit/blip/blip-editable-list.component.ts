@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, ViewChildren, ElementRef, ViewContainerRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
+﻿import { Component, OnInit, ViewChildren, ElementRef, ViewContainerRef, Input, Output, EventEmitter, AfterViewInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, FormControl, FormArray, Validators, FormControlName } from '@angular/forms';
 import { ToastsManager, Toast } from 'ng2-toastr/ng2-toastr';
 
@@ -8,16 +8,20 @@ import 'rxjs/add/observable/merge';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
 
-import { Radar, Blip } from '../../../models';
+import { Radar, Cycle, Quadrant, Blip, IListItem } from '../../../models';
 import * as _ from 'underscore';
 import { GenericValidator } from '../../../shared';
 import { CustomValidators } from 'ng2-validation';
 import { DialogService } from "ng2-bootstrap-modal";
 import { ConfirmDialogComponent } from '../../modal'
 
+import { Ng2SmartTableModule, LocalDataSource } from 'ng2-smart-table';
+
 @Component({
     selector: 'blip-editable-list',
-    templateUrl: './blip-editable-list.component.html'
+    templateUrl: './blip-editable-list.component.html',
+    styleUrls: ['./blip-editable-list.component.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class BlipEditableListComponent implements OnInit, AfterViewInit {
     @ViewChildren(FormControlName, { read: ElementRef }) formInputElements: ElementRef[];
@@ -33,6 +37,12 @@ export class BlipEditableListComponent implements OnInit, AfterViewInit {
     blipInEditMode: string;
 
     private newBlipId: string = 'newid';
+
+    source: LocalDataSource; // add a property to the component
+    settings = {};
+    private cycleList: IListItem[] = new Array<IListItem>();
+    private quadrantList: IListItem[] = new Array<IListItem>();
+    private usageSizeList: IListItem[] = new Array<IListItem>();
 
     private validationMessages: { [key: string]: { [key: string]: string } } = {
         name: {
@@ -66,17 +76,216 @@ export class BlipEditableListComponent implements OnInit, AfterViewInit {
     }
 
     ngOnInit(): void {
-        this.buildForm();
+        //   this.buildForm();
+        this.setTableSettings();
+       // this.source = new LocalDataSource(this.blips); // create the source
+        
     }
 
     ngAfterViewInit(): void {
-        // Watch for the blur event from any input element on the form.
-        let controlBlurs: Observable<any>[] = this.formInputElements
-            .map((formControl: ElementRef) => Observable.fromEvent(formControl.nativeElement, 'blur'));
+        //// Watch for the blur event from any input element on the form.
+        //let controlBlurs: Observable<any>[] = this.formInputElements
+        //    .map((formControl: ElementRef) => Observable.fromEvent(formControl.nativeElement, 'blur'));
 
-        // Merge the blur event observable with the valueChanges observable
-        Observable.merge(this.blipForm.valueChanges, ...controlBlurs).debounceTime(800).subscribe(value => {
-            this.displayMessage = this.genericValidator.processMessages(this.blipForm);
+        //// Merge the blur event observable with the valueChanges observable
+        //Observable.merge(this.blipForm.valueChanges, ...controlBlurs).debounceTime(800).subscribe(value => {
+        //    this.displayMessage = this.genericValidator.processMessages(this.blipForm);
+        //});
+    }
+
+    private buildLists() {
+        this.radar.cycles.forEach((cycle: Cycle) => {
+            this.cycleList.push({ value: cycle.id, title: cycle.fullName });
+        });
+
+        this.radar.quadrants.forEach((quadrant: Quadrant) => {
+            this.quadrantList.push({ value: quadrant.id, title: quadrant.name });
+        });
+
+        this.usageSizeList = [
+            { value: 1, title: '1 - Least used' },
+            { value: 2, title: '2' },
+            { value: 3, title: '3' },
+            { value: 4, title: '4' },
+            { value: 5, title: '5 - Widely used' }
+        ];
+
+    }
+
+    private setTableSettings() {
+        this.buildLists();
+
+        this.settings = {
+            mode: 'inline',
+            attr: {
+                class: 'table table-striped'
+            },
+            actions: {
+                position: 'right'
+            },
+            edit: {
+                confirmSave: true,
+                editButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></div>`,
+                cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`,
+                saveButtonContent: `<div class="btn btn-xs btn-info"><i class="fa fa-check"></i></button>`
+            },
+            delete: {
+                confirmDelete: true,
+                deleteButtonContent: `<div class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>`
+            },
+            add: {
+                addButtonContent: `<div class="btn btn-sm btn-primary"><i class="fa fa-plus"></i> Add New</button>`,
+                createButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></div>`,
+                cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`
+            },
+            columns: {
+                name: {
+                    title: 'Name',
+                    editable: true,
+                    class: 'col-md-3'
+                },
+                description: {
+                    title: 'Description',
+                    editable: true,
+                    class: 'col-md-3'
+                },
+                cycleId: {
+                    title: 'Cycle',
+                    editable: true,
+                    type: 'html',
+                    editor: {
+                        type: 'list',
+                        config: {
+                            list: this.cycleList
+                        }
+                    },
+                    valuePrepareFunction: (value) => {
+                        let display = value;
+
+                        this.cycleList.forEach((item, index) => {
+                            if (item.value == value) {
+                                display = item.title;
+                            }
+
+                        });
+                        return display;        
+                    },
+                    filter: {
+                        type: 'list',
+                        config: {
+                            selectText: 'Select Cycle...',
+                            list: this.cycleList
+                        }
+                    },
+                    class: 'col-md-2'
+                },
+                quadrantId: {
+                    title: 'Quadrant',
+                    editable: true,
+                    type: 'html',
+                    editor: {
+                        type: 'list',
+                        config: {
+                            list: this.quadrantList
+                        }
+                    },
+                    valuePrepareFunction: (value) => {
+                        let display = value;
+
+                        this.quadrantList.forEach((item, index) => {
+                            if (item.value == value) {
+                                display = item.title;
+                            }
+
+                        });
+                        return display;
+                    },
+                    filter: {
+                        type: 'list',
+                        config: {
+                            selectText: 'Select Quadrant...',
+                            list: this.quadrantList
+                        }
+                    },
+                    class: 'col-md-2'
+                },
+                size: {
+                    title: 'Usage',
+                    editable: true,
+                    type: 'html',
+                    editor: {
+                        type: 'list',
+                        config: {
+                            list: this.usageSizeList
+                        }
+                    },
+                    valuePrepareFunction: (value) => {
+                        let display = value;
+
+                        this.usageSizeList.forEach((item, index) => {
+                            if (item.value == value) {
+                                display = item.title;
+                            }
+
+                        });
+                        return display;
+                    },
+                    filter: {
+                        type: 'list',
+                        config: {
+                            selectText: 'Select...',
+                            list: this.usageSizeList
+                        }
+                    },
+                    class: 'col-md-1'
+                },
+                blipNumber: {
+                    title: '#',
+                    editable: false
+                }
+            }
+        };
+
+    }
+
+    private validateForm(data: Blip): string[] {
+        let errorMessages: string[] = new Array<string>();
+
+        if (data.name == undefined || data.name.length === 0) {
+            errorMessages.push(this.validationMessages["name"]["required"]);
+        }
+
+        if (data.name.length < 2) {
+            errorMessages.push(this.validationMessages["name"]["minlength"]);
+        }
+
+        if (data.size == undefined || data.size === 0) {
+            errorMessages.push(this.validationMessages["size"]["required"]);
+        }
+
+        if (data.name.length < 2) {
+            errorMessages.push(this.validationMessages["name"]["minlength"]);
+        }
+
+
+        return errorMessages;
+    }
+
+    onSaveConfirmEvent(event) {
+        this.dialogService.addDialog(ConfirmDialogComponent, {
+            title: 'Confirmation',
+            message: `Save blip ${event.newData['name']}?`
+        }).subscribe((isConfirmed) => {
+            if (isConfirmed) {
+                let newData = event.newData;
+                newData.size = parseInt(newData.size);
+                newData.blipNumber = event.data.blipNumber;
+                debugger;
+                this.blipSaveEvent.emit(newData);
+                event.confirm.resolve(newData);
+            } else {
+                event.confirm.reject();
+            }
         });
     }
 

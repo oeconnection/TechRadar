@@ -1,16 +1,20 @@
 ﻿<div class="panel panel-info">
     <div class="panel-heading" id="headingBlip">
         <h4 class="panel-title pull-left">Blips</h4>
-        <button type="button"
+        <!--<button type="button"
                 class="btn btn-xs btn-primary pull-right"
                 *ngIf="!isEditingInProgress()"
                 (click)="addBlip()">
             <i class="fa fa-plus"></i>  Add New
-        </button>
+        </button>-->
         <div class="clearfix"></div>
     </div>
     <div class="panel-body">
-        <form class="form-horizontal"
+        <ng2-smart-table [settings]="settings"
+                         [source]="blips"
+                         (editConfirm)="onSaveConfirmEvent($event)"></ng2-smart-table>
+
+        <!--<form class="form-horizontal"
               novalidate autocomplete="off"
               (ngSubmit)="saveBlip()"
               [formGroup]="blipForm">
@@ -137,6 +141,6 @@
                     </tr>
                 </tbody>
             </table>
-        </form>
+        </form>-->
     </div>
 </div>

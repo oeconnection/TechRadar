@@ -17,7 +17,8 @@ import { DialogService } from "ng2-bootstrap-modal";
 import { ConfirmDialogComponent } from '../../modal'
 
 @Component({
-    templateUrl: './radar-edit.component.html'
+    templateUrl: './radar-edit.component.html',
+    styleUrls: ['./radar-edit.component.scss']
 })
 export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChildren(FormControlName, { read: ElementRef }) formInputElements: ElementRef[];
@@ -29,6 +30,9 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     radar: IRadar;
     blips: Blip[];
     private sub: Subscription;
+    private radarName: string;
+    private radarDescription: string;
+    private radarId: string;
 
     displayMessage: { [key: string]: string } = {};
     private validationMessages: { [key: string]: { [key: string]: string } } = {
@@ -156,7 +160,11 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             ).subscribe(
                 (data) => {
                     this.onRadarRetrieved(data[0]);
-                    this.blips = data[1];
+                    this.blips = data[1].sort((a: Blip, b: Blip) => {
+                        if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) return -1;
+                        if (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) return 1;
+                        return 0;
+                    });
                 },
                 (error: any) => this.errorMessage = <any>error
                 )
@@ -165,6 +173,9 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
 
     onRadarRetrieved(radar: IRadar): void {
         this.radar = radar;
+        this.radarId = radar.id;
+        this.radarName = radar.name;
+        this.radarDescription = radar.description;
 
         this.resetForm();
     }
@@ -290,20 +301,68 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         }
     }
 
-    saveBlip(blip): void {
-        alert("Saving blip " + blip.name);
-        //this.radarService.saveBlipToRadar(this.radar.id, blip).subscribe(
-        //    (data) => this.onSaveComplete(data),
-        //    (error: any) => this.errorMessage = <any>error
-        //);
+    saveBlip(blip: Blip, callback): void {
+        this.radarService.saveBlipToRadar(this.radar.id, blip).subscribe(
+            (data) => this.onSaveBlipComplete(data),
+            (error: any) => this.errorMessage = <any>error
+        );
     }
 
     deleteBlip(blip): void {
-        alert("Deleting blip " + blip.name);
-        //this.radarService.deleteBlipFromRadar(this.radar.id, blip.id).subscribe(
-        //    (data) => this.onSubDeleteComplete(data),
-        //    (error: any) => this.errorMessage = <any>error
-        //);
+        this.radarService.deleteBlipFromRadar(this.radar.id, blip.id).subscribe(
+            (data) => this.onBlipDeleteComplete(data),
+            (error: any) => this.errorMessage = <any>error
+        );
     }
+
+    private inPlaceUpdateOfBlip(blip: Blip): void {
+        // Needed for grid to update correctly
+        this.blips.forEach((item, index, blips) => {
+            if (item.id === "newid" || blip.id === item.id) {
+                let existingBlip = this.blips[index];
+                existingBlip.id = blip.id;
+                existingBlip.name = blip.name;
+                existingBlip.description = blip.description;
+                existingBlip.added = blip.added;
+                existingBlip.cycleId = blip.cycleId;
+                existingBlip.quadrantId = blip.quadrantId;
+                existingBlip.radarId = blip.radarId;
+                existingBlip.size = blip.size;
+                existingBlip.blipNumber = blip.blipNumber;
+            }
+        });
+    }
+
+    onSaveBlipComplete(blip: Blip): void {
+        if (blip == undefined || blip == null) {
+            this.onRadarRetrieved(this.radar);
+            this.toastr.error('Save failed');
+        } else {
+            this.inPlaceUpdateOfBlip(blip);
+
+            this.onRadarRetrieved(this.radar);
+
+            this.toastr.success('Saved successful');
+        }
+    }
+
+    onBlipDeleteComplete(blip: Blip): void {
+        // Reset the form to clear the flags
+        if (blip == undefined || blip == null) {
+            this.onRadarRetrieved(this.radar);
+            this.toastr.error('Save failed');
+        } else {
+            this.blips.forEach((item, index, blips) => {
+                if (blip.id === item.id) {
+                    this.blips.splice(index, 1);
+                }
+            })
+
+            this.onRadarRetrieved(this.radar);
+
+            this.toastr.success('Delete successful');
+        }
+    }
+
 
 }

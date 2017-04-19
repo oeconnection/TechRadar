@@ -5,8 +5,8 @@ import { BrowserModule } from '@angular/platform-browser'
 import { AppComponent } from './components/app/app.component'
 import { NavMenuComponent } from './components/navmenu/navmenu.component';
 import { HomeComponent } from './components/home/home.component';
-import { RadarDisplayComponent, ChartComponent, QuadrantListComponent, CycleComponent, BlipComponent } from './components/radar-parts'
-import { RadarService, RadarResolve, ImageLoaderService, ThemePreloaderService, ThemeSpinnerService } from './services'
+import { RadarDisplayComponent, ChartComponent, QuadrantListComponent, CycleComponent, BlipComponent, RingComponent } from './components/radar-parts'
+import { RadarService, RadarResolve, ImageLoaderService, ThemePreloaderService, ThemeSpinnerService, GlobalState } from './services'
 import { D3Service } from 'd3-ng2-service';
 import { TooltipModule, PaginationModule, AlertModule } from 'ng2-bootstrap';
 import { RadarEditComponent, QuadrantEditableListComponent, CycleEditableListComponent, BlipEditableListComponent } from './components/edit';
@@ -17,6 +17,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastModule } from 'ng2-toastr/ng2-toastr';
 import { BootstrapModalModule } from 'ng2-bootstrap-modal';
 import { ConfirmDialogComponent } from './components/modal';
+import { Ng2SmartTableModule } from 'ng2-smart-table';
 
 @NgModule({
     bootstrap: [ AppComponent ],
@@ -33,6 +34,7 @@ import { ConfirmDialogComponent } from './components/modal';
         BlipEditableListComponent,
         RadarComponent,
         BlipComponent,
+        RingComponent,
         HomeComponent,
         ConfirmDialogComponent
     ],
@@ -48,13 +50,15 @@ import { ConfirmDialogComponent } from './components/modal';
             { path: 'home', component: HomeComponent },
             { path: 'radar/:id', component: RadarComponent },
             { path: 'edit/radar', component: RadarEditComponent },
+            { path: 'test', component: RingComponent },
             { path: '**', redirectTo: 'home' }
         ]),
         ToastModule.forRoot(),
         TooltipModule.forRoot(),
-        PaginationModule.forRoot()
+        PaginationModule.forRoot(),
+        Ng2SmartTableModule
     ],
-    providers: [D3Service, RadarService, ImageLoaderService, ThemeSpinnerService, ThemePreloaderService],
+    providers: [D3Service, RadarService, ImageLoaderService, ThemeSpinnerService, ThemePreloaderService, GlobalState],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     entryComponents: [
         ConfirmDialogComponent

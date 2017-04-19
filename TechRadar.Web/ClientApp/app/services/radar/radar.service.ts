@@ -27,8 +27,10 @@ export class RadarService {
             activeBlip: null
         }
     }
-    private toBlip(item: any): Blip {
-        return new Blip(item.id, item.name, item.description, item.size, item.added, item.cycleId, item.quadrantId, item.radarId);
+    private toBlip(item: any, index: number): Blip {
+        let blip = new Blip(item.id, item.name, item.description, item.size, item.added, item.cycleId, item.quadrantId, item.radarId);
+        blip.blipNumber = 1; // index + 1;
+        return blip;
     }
 
     private mapBlipList(response: Response) {
@@ -116,15 +118,6 @@ export class RadarService {
             .share();
     }
 
-    setActiveBlip(blip: number): void {
-        this.dataCache.activeBlip = blip;
-        this.blipSubject.next(blip);
-    }
-
-    getActiveBlip(): Observable<number> {
-        return this.blipSubject.asObservable();
-    }
-
     saveRadar(radar: Radar): Observable<Radar> {
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
@@ -198,28 +191,28 @@ export class RadarService {
             .catch(this.handleError);
     }
 
-    saveBlipToRadar(radarId: string, blip: Blip): Observable<Radar> {
+    saveBlipToRadar(radarId: string, blip: Blip): Observable<Blip> {
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
 
         const url = `${this.baseUrl}/radar/${radarId}/blip`;
 
         return this.http.put(url, blip, options)
-            .map((data) => this.toBlip(data.json()))
+            .map((data) => this.toBlip(data.json(), 0))
             .do(data => {
                 //this.resetCache();
             })
             .catch(this.handleError);
     }
 
-    deleteBlipFromRadar(radarId: string, blipId: string): Observable<Radar> {
+    deleteBlipFromRadar(radarId: string, blipId: string): Observable<Blip> {
         let headers = new Headers({ 'Content-Type': 'application/json' });
         let options = new RequestOptions({ headers: headers });
 
         const url = `${this.baseUrl}/radar/${radarId}/blip/${blipId}`;
 
         return this.http.delete(url, options)
-            .map((data) => this.toBlip(data.json()))
+            .map((data) => this.toBlip(data.json(), 0))
             .do(data => {
                 //this.resetCache();
             })

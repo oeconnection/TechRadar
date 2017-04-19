@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -360,9 +361,9 @@ namespace TechRadar.Services.Controllers
                     .Set("name", blip.Name)
                     .Set("description", blip.Description)
                     .Set("size", blip.Size)
-                    .Set("quadrant", blip.QuadrantId)
-                    .Set("cycle", blip.CycleId)
-                    .Set("radar", blip.RadarId)
+                    .Set("quadrant", ObjectId.Parse(blip.QuadrantId))
+                    .Set("cycle", ObjectId.Parse(blip.CycleId))
+                    .Set("radar", ObjectId.Parse(blip.RadarId))
                     .CurrentDate("added")
                     .CurrentDate("lastModified");
             }
@@ -374,9 +375,9 @@ namespace TechRadar.Services.Controllers
                     .Set("name", blip.Name)
                     .Set("description", blip.Description)
                     .Set("size", blip.Size)
-                    .Set("quadrant", blip.QuadrantId)
-                    .Set("cycle", blip.CycleId)
-                    .Set("radar", blip.RadarId)
+                    .Set("quadrant", ObjectId.Parse(blip.QuadrantId))
+                    .Set("cycle", ObjectId.Parse(blip.CycleId))
+                    .Set("radar", ObjectId.Parse(blip.RadarId))
                     .CurrentDate("lastModified");
             }
 

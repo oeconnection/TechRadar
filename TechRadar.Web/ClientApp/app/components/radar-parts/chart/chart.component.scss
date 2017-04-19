@@ -2,17 +2,16 @@
     font: 11px 'Open Sans';
 }
 
-:host >>> svg {
+svg {
     padding: 0px;
 }
 
-:host >>> svg path:hover {
+path:hover {
     stroke: none;
     fill: #aaaaaa;
 }
 
-:host >>> svg .blip-group {
+.blip-group {
     cursor: pointer;
     text-decoration: none;
 }
-

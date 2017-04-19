@@ -1,128 +1,167 @@
-﻿//import {
-//    Component,
-//    Input,
-//    SimpleChanges,
-//    OnChanges,
-//    OnInit
-//} from '@angular/core';
+﻿import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChange } from '@angular/core';
+import { D3Service, D3, D3DragEvent, D3ZoomEvent, Selection, Arc } from 'd3-ng2-service';
+import { phyllotaxis, PhyllotaxisPoint } from '../../../shared/phyllotaxis'
+import { Cycle } from '../../../models';
+import TinyColor = require('tinycolor2');
 
-//import { ChartModel, ChartQuadrant, ChartCycle, Cycle } from '../../../models';
+@Component({
+    selector: 'app-drag-zoom-2',
+    template: '<svg width="100%" height="100%"></svg>'
+})
 
-//@Component({
-//    selector: '[radar-cycle-ring]',
-//    templateUrl: './ring.component.html',
-//    styleUrls: ['./ring.component.scss']
-//})
+export class RingComponent {
+    @Input() width: number = 400;
+    @Input() height: number = 400;
+    @Input() phylloRadius: number = 7;
+    @Input() pointRadius: number = 2;
 
-//export class RingComponent implements OnChanges, OnInit {
-//    @Input() cycle: Cycle;
-//    @Input() quadrant: number;
+    private d3: D3;
+    private parentNativeElement: any;
+    private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
+    private d3G: Selection<SVGGElement, any, null, undefined>;
+    private points: PhyllotaxisPoint[];
 
-//    private radius: number;
-//    private horizontalLine: { x: number, y: number };
-//    private verticalLine: { x: number, y: number };
-//    private lineLength: number;
-//    private cycles: Array<ChartCycle>;
+    constructor(element: ElementRef, d3Service: D3Service) {
+        this.d3 = d3Service.getD3();
+        this.parentNativeElement = element.nativeElement;
+    }
 
-//    constructor() {
-//        this.cycles = [];
-//        this.radius = 0;
-//        this.horizontalLine = { x: 0, y: 0 };
-//        this.verticalLine = { x: 0, y: 0 };
-//    }
+    ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
+        if (
+            (changes['width'] && !changes['width'].isFirstChange()) ||
+            (changes['height'] && !changes['height'].isFirstChange())
+        ) {
+            if (this.d3Svg.empty && !this.d3Svg.empty()) {
+                this.changeLayout();
+            }
+        }
 
-//    ngOnInit(): void {
-//    }
+    }
 
-//    ngOnChanges(changes: SimpleChanges): void {
-//        this.setup();
-//    }
+    ngOnDestroy() {
+        if (this.d3Svg.empty && !this.d3Svg.empty()) {
+            this.d3Svg.selectAll('*').remove();
+        }
+    }
 
-//    showCycle() {
-//        if (this.cycles == null) return false;
-//        if (this.cycles.length == 0) return false;
+    ngOnInit() {
+        this.buildArcs(3);
+    }
 
-//        return true;
-//    }
+    private changeLayout() {
+        this.d3Svg
+            .attr('width', this.width)
+            .attr('height', this.height);
 
-//    private isQuadrantOnly(): boolean {
-//        if (isNaN(this.quadrant)) return false;
 
-//        return this.quadrant > 0;
-//    }
+    }
 
-//    private setup(): void {
-//        var horizontalLine = { x: 0, y: 0 };
-//        var verticalLine = { x: 0, y: 0 };
+    private createTestData(): Cycle[] {
+        var cycles: Cycle[] = new Array<Cycle>();
+        cycles.push(new Cycle({
+            id: 'test1',
+            name: 'Name 1',
+            fullName: 'Full name 1',
+            description: 'Description 1',
+            order: 1,
+            size: 10
+        }));
+        cycles.push(new Cycle({
+            id: 'test2',
+            name: 'Name 2',
+            fullName: 'Full name 2',
+            description: 'Description 2',
+            order: 2,
+            size: 15
+        }));
+        cycles.push(new Cycle({
+            id: 'test3',
+            name: 'Name 3',
+            fullName: 'Full name 3',
+            description: 'Description 3',
+            order: 3,
+            size: 20
+        }));
+        cycles.push(new Cycle({
+            id: 'test4',
+            name: 'Name 4',
+            fullName: 'Full name 4',
+            description: 'Description 4',
+            order: 4,
+            size: 25
+        }));
 
-//        if (this.chartModel) {
-//            this.radius = isNaN(this.chartModel.radius) ? 0 : this.chartModel.radius;
-//            this.cycles = this.chartModel.cycles;
+        return cycles;
 
-//            if (this.isQuadrantOnly()) {
-//                var quadrant = this.chartModel.soloQuadrant();
+    }
 
-//                this.horizontalLine = {
-//                    x: isNaN(quadrant.horizontalLine.x) ? 0 : quadrant.horizontalLine.x,
-//                    y: isNaN(quadrant.horizontalLine.y) ? 0 : quadrant.horizontalLine.y
-//                };
+    private buildArcs(quadrantNumber: number) {
+        let d3 = this.d3;
+        let d3ParentElement: Selection<HTMLElement, any, null, undefined>;
+        let d3G: Selection<SVGGElement, any, null, undefined>;
 
-//                this.verticalLine = {
-//                    x: isNaN(quadrant.verticalLine.x) ? 0 : quadrant.verticalLine.x,
-//                    y: isNaN(quadrant.verticalLine.y) ? 0 : quadrant.verticalLine.y
-//                };
+        if (this.parentNativeElement !== null) {
+            let cycles: Cycle[] = this.createTestData().sort((a, b) => { return b.order - a.order });
 
-//                this.lineLength = this.radius;
-//            } else {
-//                this.horizontalLine = { x: 0, y: this.radius };
-//                this.verticalLine = { x: this.radius, y: 0 };
-//                this.lineLength = isNaN(this.chartModel.size) ? 0 : this.chartModel.size;
-//            }
-//        } else {
-//            this.horizontalLine = { x: 0, y: 0 };
-//            this.verticalLine = { x: 0, y: 0 };
-//            this.lineLength = 0;
-//        }
-//    }
+            var ringRadiusTotal = cycles.reduce(function (previous, current) {
+                return previous + current.size;
+            }, 0);
 
-//    private buildCircle() {
-//        let radianCalculation: number;
-//        let startRadian: number,
-//            endRadian: number,
-//            lineY: number;
+            d3ParentElement = d3.select(this.parentNativeElement);
 
-//        lineY = this.lineY;
-//        if (this.isQuadrantOnly()) {
-//            radianCalculation = (0.5 * (this.quadrantNumber - 1));
-//            startRadian = ((radianCalculation - 0.5) * Math.PI);
-//            endRadian = (radianCalculation * Math.PI);
-//        } else {
-//            startRadian = -0.5 * Math.PI;
-//            endRadian = 1.5 * Math.PI;
-//        }
+            this.d3Svg = d3ParentElement.select<SVGSVGElement>('svg');
 
-//        //console.log("Path Builder: IR: %s | OR: %s | SR: %s | ER: %s", this.innerRadius, this.outerRadius, startRadian, endRadian);
+            this.d3Svg.attr('width', this.width);
+            this.d3Svg.attr('height', this.height);
 
-//        let arc = this.pathContext
-//            .innerRadius(this.innerRadius)
-//            .outerRadius(this.outerRadius)
-//            .startAngle(startRadian)
-//            .endAngle(endRadian);
+            let fillColor = "#a2a2a2";
 
-//        let transformX = this.transformationBase.x * this.radius;
-//        let transformY = this.transformationBase.y * this.radius;
-//        let textStart = Math.abs((this.radius - this.outerRadius) + ((this.outerRadius - this.innerRadius) / 2));
-//        if (isNaN(textStart)) textStart = 0;
+            let radianCalculation: number;
+            let startRadian: number,
+                endRadian: number;
 
-//        this.path = arc();
-//        this.centerOfRing = {
-//            x: textStart,
-//            y: lineY + 10
-//        };
-//        this.transform = {
-//            x: transformX,
-//            y: transformY
-//        }
-//    }
+            if (quadrantNumber > 0) {
+                radianCalculation = (0.5 * (quadrantNumber - 1));
+                startRadian = ((radianCalculation - 0.5) * Math.PI);
+                endRadian = (radianCalculation * Math.PI);
+            } else {
+                startRadian = -0.5 * Math.PI;
+                endRadian = 1.5 * Math.PI;
+            }
 
-//}
+            var arc = d3.arc()
+                .innerRadius((d, i) => {
+                    var currentRadius: number = cycles.reduce(function (previous, current, currentIndex) {
+                        return previous + ((currentIndex < i) ? current.size : 0);  // Exclude this ring
+                    }, 0);
+
+                    var newRadius = (100 * currentRadius) / ringRadiusTotal;
+                    console.log("IR: %s | newRadius", i, newRadius);
+                    return newRadius;
+                })
+                .outerRadius((d, i) => {
+                    console.log("OR: %s", i);
+                    var currentRadius: number = cycles.reduce(function (previous, current, currentIndex) {
+                        return previous + ((currentIndex <= i) ? current.size : 0);  // Include this ring
+                    }, 0);
+
+                    var newRadius = (100 * currentRadius) / ringRadiusTotal;
+                    console.log("OR: %s | newRadius", i, newRadius);
+                    return newRadius;
+                })
+                .startAngle(startRadian)
+                .endAngle(endRadian);
+
+            var g = this.d3Svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
+
+            var background = g.selectAll("path")
+                .data(cycles).enter()
+                .append("path")
+                .attr("fill", function (d, i) {
+                    return TinyColor(fillColor).lighten(7 * i).toString();
+                })
+                .attr("d", <any>arc);
+        };
+    }
+    
+}
