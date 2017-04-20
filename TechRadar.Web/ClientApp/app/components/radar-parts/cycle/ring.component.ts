@@ -1,6 +1,5 @@
 ﻿import { Component, ElementRef, Input, OnChanges, OnDestroy, OnInit, SimpleChange } from '@angular/core';
-import { D3Service, D3, D3DragEvent, D3ZoomEvent, Selection, Arc } from 'd3-ng2-service';
-import { phyllotaxis, PhyllotaxisPoint } from '../../../shared/phyllotaxis'
+import { D3Service, D3, Selection, Arc } from 'd3-ng2-service';
 import { Cycle } from '../../../models';
 import TinyColor = require('tinycolor2');
 
@@ -9,7 +8,7 @@ import TinyColor = require('tinycolor2');
     template: '<svg width="100%" height="100%"></svg>'
 })
 
-export class RingComponent {
+export class RingComponent implements OnChanges, OnDestroy, OnInit {
     @Input() width: number = 400;
     @Input() height: number = 400;
     @Input() phylloRadius: number = 7;
@@ -19,7 +18,6 @@ export class RingComponent {
     private parentNativeElement: any;
     private d3Svg: Selection<SVGSVGElement, any, null, undefined>;
     private d3G: Selection<SVGGElement, any, null, undefined>;
-    private points: PhyllotaxisPoint[];
 
     constructor(element: ElementRef, d3Service: D3Service) {
         this.d3 = d3Service.getD3();

@@ -4,28 +4,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 
 namespace TechRadar.Services
 {
     public class MongoDBContext
     {
-        public static string ConnectionString { get; set; }
-        public static string DatabaseName { get; set; }
-        public static bool IsSSL { get; set; }
+        private DatabaseSettings _settings;
 
         private IMongoDatabase _database { get; }
 
-        public MongoDBContext()
+        public MongoDBContext(IOptions<DatabaseSettings> settings)
         {
+            _settings = settings.Value;
             try
             {
-                MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(ConnectionString));
-                if (IsSSL)
-                {
-                    settings.SslSettings = new SslSettings { EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12 };
-                }
-                var mongoClient = new MongoClient(settings);
-                _database = mongoClient.GetDatabase(DatabaseName);
+                var client = new MongoClient(_settings.ConnectionString);
+                _database = client.GetDatabase(_settings.DatabaseName);
             }
             catch (Exception ex)
             {
@@ -38,21 +33,6 @@ namespace TechRadar.Services
             get
             {
                 return _database.GetCollection<Radar>("Radars");
-            }
-        }
-        public IMongoCollection<Cycle> Cycles
-        {
-            get
-            {
-                return _database.GetCollection<Cycle>("Cycles");
-            }
-        }
-
-        public IMongoCollection<Quadrant> Quadrants
-        {
-            get
-            {
-                return _database.GetCollection<Quadrant>("Quadrants");
             }
         }
 

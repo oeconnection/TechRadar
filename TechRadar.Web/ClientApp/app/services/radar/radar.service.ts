@@ -75,7 +75,6 @@ export class RadarService {
     }
 
     getRadarList(): Observable<Array<Radar>> {
-        console.info("Getting Radars");
         if (this.dataCache.radarList) {
             // if data is available just return it as `Observable`
             return Observable.of(this.dataCache.radarList);
@@ -107,7 +106,6 @@ export class RadarService {
     }
 
     getRadarQuadrantBlips(id: string, quadrantNumber: number): Observable<Array<Blip>> {
-        console.info("Getting Blips");
         var url = this.baseUrl + '/radar/' + id + '/blips/';
         if (quadrantNumber) {
             url = url + quadrantNumber;
@@ -128,7 +126,6 @@ export class RadarService {
             .map((data) => this.toRadar(data.json()))
             .do(data => {
                 this.resetCache();
-                console.log('updateRadar: ' + JSON.stringify(data));
             })
             .catch(this.handleError);
     }
@@ -200,7 +197,6 @@ export class RadarService {
         return this.http.put(url, blip, options)
             .map((data) => this.toBlip(data.json(), 0))
             .do(data => {
-                //this.resetCache();
             })
             .catch(this.handleError);
     }
@@ -214,7 +210,6 @@ export class RadarService {
         return this.http.delete(url, options)
             .map((data) => this.toBlip(data.json(), 0))
             .do(data => {
-                //this.resetCache();
             })
             .catch(this.handleError);
     }

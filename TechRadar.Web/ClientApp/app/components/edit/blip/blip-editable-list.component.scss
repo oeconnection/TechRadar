@@ -1,7 +1,15 @@
-﻿ng2-smart-table table tbody tr td, ng2-smart-table table thead tr th, .pagination {
-    font-size: inherit !important;
+﻿div, a {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+}
+
+ng2-smart-table table tbody tr td, ng2-smart-table table thead tr th, .pagination {
+    font-size: 14px !important;
 }
 
 i.fa {
     font-family: FontAwesome !important;
+}
+
+th.ng2-smart-actions-title-add {
+    vertical-align: middle !important;
 }

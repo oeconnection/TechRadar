@@ -16,7 +16,7 @@ import { platformServer } from '@angular/platform-server';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastModule } from 'ng2-toastr/ng2-toastr';
 import { BootstrapModalModule } from 'ng2-bootstrap-modal';
-import { ConfirmDialogComponent } from './components/modal';
+import { ConfirmDialogComponent, FormErrorDialogComponent } from './components/modal';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 
 @NgModule({
@@ -36,7 +36,8 @@ import { Ng2SmartTableModule } from 'ng2-smart-table';
         BlipComponent,
         RingComponent,
         HomeComponent,
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        FormErrorDialogComponent
     ],
     imports: [
         BrowserModule,
@@ -61,7 +62,8 @@ import { Ng2SmartTableModule } from 'ng2-smart-table';
     providers: [D3Service, RadarService, ImageLoaderService, ThemeSpinnerService, ThemePreloaderService, GlobalState],
     schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA],
     entryComponents: [
-        ConfirmDialogComponent
+        ConfirmDialogComponent,
+        FormErrorDialogComponent
     ]
 })
 export class AppModule {

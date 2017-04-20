@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using TechRadar.Services.Models;
+using TechRadar.Services.Repositories;
 
 namespace TechRadar.Services.Controllers
 {
@@ -14,112 +9,62 @@ namespace TechRadar.Services.Controllers
     public class RadarController : Controller
     {
         private readonly AppSettings _settings;
+        private readonly IRadarRepository _radarRepository;
 
-        public RadarController(IOptions<AppSettings> settings)
+        public RadarController(IRadarRepository repository)
         {
-            _settings = settings.Value;
+            _radarRepository = repository;
         }
 
         // GET: api/radar
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            MongoDBContext dbContext = new MongoDBContext();
-            var filter = new BsonDocument();
-
-            var radarList = await dbContext.Radars.Find(m => true).ToListAsync<Radar>();
+            var radarList = await _radarRepository.GetRadars();
 
             return Ok(radarList);
         }
 
         // GET api/radar/5
         [HttpGet("{id}")]
-        public Radar Get(string id)
+        public async Task<IActionResult> Get(string id)
         {
-            MongoDBContext dbContext = new MongoDBContext();
+            if(string.IsNullOrWhiteSpace(id))
+            {
+                return BadRequest();
+            }
 
-            Radar radar = dbContext.Radars.Find(m => m.Id == id).ToList().FirstOrDefault<Radar>();
+            var radar = await _radarRepository.GetRadarById(id);
 
-            return radar;
+            return Ok(radar);
         }
 
         // GET api/radar/id/blips
         [HttpGet("{id}/blips")]
-        public IEnumerable<Blip> GetBlips(string id)
+        public async Task<IActionResult> GetBlips(string id)
         {
-            MongoDBContext dbContext = new MongoDBContext();
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return BadRequest();
+            }
 
-            var blips = dbContext.Blips.Find(m => m.RadarId == id).ToList();
+            var blips = await _radarRepository.GetBlipsInRadar(id);
 
-            return blips.ToList();
+            return Ok(blips);
         }
 
         // GET api/radar/id/blips/3
         [HttpGet("{id}/blips/{quadrantNumber}")]
-        public IEnumerable<Blip> GetBlips(string id, int quadrantNumber)
+        public async Task<IActionResult> GetBlips(string id, int quadrantNumber)
         {
-            var radar = Get(id);
-            Quadrant quadrant;
-
-            var filterBuilder = Builders<Blip>.Filter;
-
-            if (radar != null)
+            if (string.IsNullOrWhiteSpace(id))
             {
-                var filter = filterBuilder.Eq(x => x.RadarId, id);
-
-                if (radar.Quadrants != null)
-                {
-                    quadrant = radar.Quadrants.FirstOrDefault<Quadrant>(x => x.QuadrantNumber == quadrantNumber);
-                    if (quadrant != null)
-                    {
-                        filter = filter & filterBuilder.Eq(x => x.QuadrantId, quadrant.Id);
-                    }
-                }
-
-                MongoDBContext dbContext = new MongoDBContext();
-
-                var blips = dbContext.Blips.Find(filter).ToList();
-
-                return blips.ToList();
+                return BadRequest();
             }
 
-            return new List<Blip>();
-        }
+            var blips = await _radarRepository.GetBlipsInRadar(id, quadrantNumber);
 
-        // POST api/radar
-        [HttpPost]
-        public void Post([FromBody]string value)
-        {
-        }
-
-        private List<Quadrant> GetDefaultQuadrants()
-        {
-            var quadrantSettings = _settings.DefaultQuadrants;
-            var quadrants = new List<Quadrant>();
-
-            foreach (var quad in quadrantSettings)
-            {
-                quad.Id = ObjectId.GenerateNewId().ToString();
-                quadrants.Add(quad);
-            }
-
-            return quadrants;
-
-        }
-
-        private List<Cycle> GetDefaultCycles()
-        {
-            var cycleSettings = _settings.DefaultCycles;
-            var cycles = new List<Cycle>();
-
-            foreach (var cycle in cycleSettings)
-            {
-                cycle.Id = ObjectId.GenerateNewId().ToString();
-                cycles.Add(cycle);
-            }
-
-            return cycles;
-
+            return Ok(blips);
         }
 
         // PUT api/radar
@@ -131,41 +76,7 @@ namespace TechRadar.Services.Controllers
                 return BadRequest();
             }
 
-            MongoDBContext dbContext = new MongoDBContext();
-
-            var options = new FindOneAndUpdateOptions<Radar>
-            {
-                IsUpsert = true,
-                ReturnDocument = ReturnDocument.After
-            };
-
-            FilterDefinition<Radar> filter;
-            UpdateDefinition<Radar> update;
-            if (string.IsNullOrWhiteSpace(radar.Id))
-            {
-                // Add new
-                filter = Builders<Radar>.Filter.Eq(r => r.Id, ObjectId.GenerateNewId().ToString());
-
-                update = Builders<Radar>.Update
-                    .Set("name", radar.Name)
-                    .Set("group", radar.Group)
-                    .Set("description", radar.Description)
-                    .CurrentDate("lastModified")
-                    .Set("quadrants", GetDefaultQuadrants())
-                    .Set("cycles", GetDefaultCycles());
-            }
-            else
-            {
-                filter = Builders<Radar>.Filter.Eq(r => r.Id, radar.Id);
-
-                update = Builders<Radar>.Update
-                    .Set("name", radar.Name)
-                    .Set("group", radar.Group)
-                    .Set("description", radar.Description)
-                    .CurrentDate("lastModified");
-            }
-
-            var results = await dbContext.Radars.FindOneAndUpdateAsync(filter, update, options);
+            var results = await _radarRepository.UpsertRadar(radar);
 
             return Ok(results);
         }
@@ -179,11 +90,9 @@ namespace TechRadar.Services.Controllers
                 return BadRequest();
             }
 
-            MongoDBContext dbContext = new MongoDBContext();
+            var results = await _radarRepository.DeleteRadar(id);
 
-            var result = await dbContext.Radars.FindOneAndDeleteAsync(r => r.Id == id);
-
-            return Ok(result);
+            return Ok(results);
         }
 
         // PUT api/radar/5545454/quadrant
@@ -198,34 +107,8 @@ namespace TechRadar.Services.Controllers
             {
                 return BadRequest();
             }
-            if (string.IsNullOrWhiteSpace(quadrant.Id))
-            {
-                quadrant.Id = ObjectId.GenerateNewId().ToString();
-            }
 
-            MongoDBContext dbContext = new MongoDBContext();
-
-            var options = new FindOneAndUpdateOptions<Radar>
-            {
-                IsUpsert = true,
-                ReturnDocument = ReturnDocument.After
-            };
-
-            var filterBuilder = Builders<Radar>.Filter;
-            //var filter = filterBuilder.And(filterBuilder.Eq("Id", id), filterBuilder.Eq("quadrants.id", quadrant.Id));
-            var filter = filterBuilder.Where(r => r.Id == id && r.Quadrants.Any(q => q.Id == quadrant.Id));
-
-            var update = Builders<Radar>.Update
-                    //.Set(r => r.Quadrants.FirstOrDefault().Name, quadrant.Name)
-                    //.Set(r => r.Quadrants.FirstOrDefault().QuadrantNumber, quadrant.QuadrantNumber)
-                    //.Set(r => r.Quadrants.FirstOrDefault().Description, quadrant.Description);
-                    .Set("quadrants.$.quadrantNumber", quadrant.QuadrantNumber)
-                    .Set("quadrants.$.name", quadrant.Name)
-                    .Set("quadrants.$.description", quadrant.Description);
-
-            // r => r.Id == id && r.Quadrants.Any(q => q.Id == quadrant.Id),
-
-            var results = await dbContext.Radars.FindOneAndUpdateAsync(filter, update, options);
+            var results = await _radarRepository.UpsertQuadrantInRadar(id, quadrant);
 
             return Ok(results);
         }
@@ -243,53 +126,12 @@ namespace TechRadar.Services.Controllers
                 return BadRequest();
             }
 
-            var isNew = false;
-            if (string.IsNullOrWhiteSpace(cycle.Id))
-            {
-                isNew = true;
-                cycle.Id = ObjectId.GenerateNewId().ToString();
-            }
-
-            MongoDBContext dbContext = new MongoDBContext();
-
-            var filterBuilder = Builders<Radar>.Filter;
-            FilterDefinition<Radar> filter;
-            UpdateDefinition<Radar> update;
-
-            var options = new FindOneAndUpdateOptions<Radar>
-            {
-                IsUpsert = true,
-                ReturnDocument = ReturnDocument.After
-            };
-
-
-            if (isNew)
-            {
-                filter = filterBuilder.Where(r => r.Id == id);
-
-                update = Builders<Radar>.Update
-                    .Push("cycles", cycle);
-            } else
-            {
-                // Update existing
-                filter = filterBuilder.Where(r => r.Id == id && r.Cycles.Any(q => q.Id == cycle.Id));
-
-                update = Builders<Radar>.Update
-                    .Set("cycles.$.order", cycle.Order)
-                    .Set("cycles.$.name", cycle.Name)
-                    .Set("cycles.$.fullName", cycle.FullName)
-                    .Set("cycles.$.description", cycle.Description)
-                    .Set("cycles.$.size", cycle.Size);
-
-            }
-
-            var results = await dbContext.Radars.FindOneAndUpdateAsync(filter, update, options);
+            var results = await _radarRepository.UpsertCycleInRadar(id, cycle);
 
             return Ok(results);
         }
 
         // DELETE api/radar/5545454/cycle/CycleId
-        // DELETE Cycle api/radar/5
         [HttpDelete("{id}/cycle/{cycleId}")]
         public async Task<IActionResult> Delete(string id, string cycleId)
         {
@@ -302,22 +144,9 @@ namespace TechRadar.Services.Controllers
                 return BadRequest();
             }
 
-            MongoDBContext dbContext = new MongoDBContext();
+            var results = await _radarRepository.DeleteCycleFromRadar(id, cycleId);
 
-            var options = new FindOneAndUpdateOptions<Radar>
-            {
-                ReturnDocument = ReturnDocument.After
-            };
-
-            var filterBuilder = Builders<Radar>.Filter;
-            var filter = filterBuilder.Eq(r => r.Id, id);
-
-            var update = Builders<Radar>.Update.PullFilter("cycles",
-                Builders<Cycle>.Filter.Eq(c => c.Id, cycleId));
-
-            var result = await dbContext.Radars.FindOneAndUpdateAsync(filter, update, options);
-
-            return Ok(result);
+            return Ok(results);
         }
 
         // PUT api/radar/5545454/blip
@@ -333,55 +162,7 @@ namespace TechRadar.Services.Controllers
                 return BadRequest();
             }
 
-            var isNew = false;
-            if (string.IsNullOrWhiteSpace(blip.Id))
-            {
-                isNew = true;
-                blip.Id = ObjectId.GenerateNewId().ToString();
-            }
-
-            MongoDBContext dbContext = new MongoDBContext();
-
-            var filterBuilder = Builders<Blip>.Filter;
-            FilterDefinition<Blip> filter;
-            UpdateDefinition<Blip> update;
-
-            var options = new FindOneAndUpdateOptions<Blip>
-            {
-                IsUpsert = true,
-                ReturnDocument = ReturnDocument.After
-            };
-
-            if (isNew)
-            {
-                // Add new
-                filter = Builders<Blip>.Filter.Eq(r => r.Id, ObjectId.GenerateNewId().ToString());
-
-                update = Builders<Blip>.Update
-                    .Set("name", blip.Name)
-                    .Set("description", blip.Description)
-                    .Set("size", blip.Size)
-                    .Set("quadrant", ObjectId.Parse(blip.QuadrantId))
-                    .Set("cycle", ObjectId.Parse(blip.CycleId))
-                    .Set("radar", ObjectId.Parse(blip.RadarId))
-                    .CurrentDate("added")
-                    .CurrentDate("lastModified");
-            }
-            else
-            {
-                filter = Builders<Blip>.Filter.Eq(r => r.Id, blip.Id);
-
-                update = Builders<Blip>.Update
-                    .Set("name", blip.Name)
-                    .Set("description", blip.Description)
-                    .Set("size", blip.Size)
-                    .Set("quadrant", ObjectId.Parse(blip.QuadrantId))
-                    .Set("cycle", ObjectId.Parse(blip.CycleId))
-                    .Set("radar", ObjectId.Parse(blip.RadarId))
-                    .CurrentDate("lastModified");
-            }
-
-            var results = await dbContext.Blips.FindOneAndUpdateAsync(filter, update, options);
+            var results = await _radarRepository.UpsertBlip(id, blip);
 
             return Ok(results);
         }
@@ -400,9 +181,7 @@ namespace TechRadar.Services.Controllers
                 return BadRequest();
             }
 
-            MongoDBContext dbContext = new MongoDBContext();
-
-            var result = await dbContext.Blips.FindOneAndDeleteAsync(r => r.Id == blipId && r.RadarId == radarId);
+            var result = await _radarRepository.DeleteBlipFromRadar(radarId, blipId);
 
             return Ok(result);
         }

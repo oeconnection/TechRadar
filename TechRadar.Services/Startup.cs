@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
 using TechRadar.Services.Models;
+using TechRadar.Services.Repositories;
 
 namespace TechRadar.Services
 {
@@ -23,19 +19,18 @@ namespace TechRadar.Services
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
+
             Configuration = builder.Build();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            MongoDBContext.ConnectionString = Configuration.GetSection("MongoConnection:ConnectionString").Value;
-            MongoDBContext.DatabaseName = Configuration.GetSection("MongoConnection:DatabaseName").Value;
-            MongoDBContext.IsSSL = Convert.ToBoolean(Configuration.GetSection("MongoConnection:IsSSL").Value);
-
             services.AddOptions();
 
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            services.Configure<DatabaseSettings>(Configuration.GetSection("MongoConnection"));
+            services.AddSingleton<IRadarRepository, RadarRepository>();
 
             services.AddCors(options =>
             {

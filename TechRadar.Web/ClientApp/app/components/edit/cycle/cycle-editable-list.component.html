@@ -1,14 +1,4 @@
 ﻿<div class="panel panel-info">
-    <div class="panel-heading" id="headingCycle">
-        <h4 class="panel-title pull-left">Cycles</h4>
-        <button type="button" 
-                class="btn btn-xs btn-primary pull-right" 
-                *ngIf="!isEditingInProgress()"
-                (click)="addCycle()">
-            <i class="fa fa-plus"></i>  Add New
-        </button>
-        <div class="clearfix"></div>
-    </div>
     <div class="panel-body">
         <form class="form-horizontal"
               novalidate autocomplete="off"
@@ -24,7 +14,13 @@
                         <th>Full Name</th>
                         <th>Description</th>
                         <th width="120px">Ring Size (%)</th>
-                        <th width="75px">Actions</th>
+                        <th width="75px"><button type="button"
+        class="btn btn-xs btn-primary pull-right"
+        *ngIf="!isEditingInProgress()"
+        (click)="addCycle()">
+    <i class="fa fa-plus"></i>  Add New
+</button>
+</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -1,6 +1,7 @@
 ﻿
 .page-header {
     margin: 0px;
+    border-bottom: none;
 }
 
 .page-header > div > h2 > a, .page-header > div > h2 > a:visited {
@@ -17,3 +18,29 @@
     display: flex;
     align-items: center;
 }
+
+
+.tab-content {
+    border-width: 1px;
+    border-color: #337ab7 !important;
+    padding: 0px
+}
+
+.nav-tabs > li > a {
+    border: medium none;
+    color: #000;
+}
+
+.nav-tabs > li.active > a {
+    background-color: #337ab7 !important;
+    color: #fff;
+}
+
+.nav-tabs > li > a:hover {
+    color: #000;
+}
+
+.nav-tabs > li.active > a:hover {
+    color: #fff;
+}
+

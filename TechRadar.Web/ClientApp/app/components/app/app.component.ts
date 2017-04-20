@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { RadarService } from '../../services';
 import { Radar } from '../../models';
 import { ImageLoaderService, ThemePreloaderService, ThemeSpinnerService } from '../../services';
@@ -14,17 +14,13 @@ export class AppComponent implements OnInit, OnDestroy {
 
     constructor(private radarService: RadarService,
         private _imageLoader: ImageLoaderService,
-        private _spinner: ThemeSpinnerService,) {
+        private _spinner: ThemeSpinnerService) {
     }
 
     ngOnInit() {
-        this.sub = this.radarService.getRadarList().subscribe(data => {
-            this.radars = data;
-        });
     }
 
     ngOnDestroy(): void {
-        this.sub.unsubscribe();
     }
 
     public ngAfterViewInit(): void {

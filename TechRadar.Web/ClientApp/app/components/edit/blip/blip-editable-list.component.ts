@@ -7,13 +7,14 @@ import 'rxjs/add/observable/fromEvent';
 import 'rxjs/add/observable/merge';
 import { Observable } from 'rxjs/Observable';
 import { Subscription } from 'rxjs/Subscription';
+import { isNumeric } from 'rxjs/util/isNumeric';
 
 import { Radar, Cycle, Quadrant, Blip, IListItem } from '../../../models';
 import * as _ from 'underscore';
 import { GenericValidator } from '../../../shared';
 import { CustomValidators } from 'ng2-validation';
 import { DialogService } from "ng2-bootstrap-modal";
-import { ConfirmDialogComponent } from '../../modal'
+import { ConfirmDialogComponent, FormErrorDialogComponent } from '../../modal'
 
 import { Ng2SmartTableModule, LocalDataSource } from 'ng2-smart-table';
 
@@ -58,7 +59,7 @@ export class BlipEditableListComponent implements OnInit, AfterViewInit {
             required: 'Cycle is required.'
         },
         quadrantId: {
-            required: 'Cycle is required.'
+            required: 'Quadrant is required.'
         }
     };
 
@@ -134,7 +135,7 @@ export class BlipEditableListComponent implements OnInit, AfterViewInit {
                 deleteButtonContent: `<div class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>`
             },
             add: {
-                addButtonContent: `<div class="btn btn-sm btn-primary"><i class="fa fa-plus"></i> Add New</button>`,
+                addButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add New</button>`,
                 createButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></div>`,
                 cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`
             },
@@ -238,17 +239,13 @@ export class BlipEditableListComponent implements OnInit, AfterViewInit {
                         }
                     },
                     class: 'col-md-1'
-                },
-                blipNumber: {
-                    title: '#',
-                    editable: false
                 }
             }
         };
 
     }
 
-    private validateForm(data: Blip): string[] {
+    private validateForm(data: any): string[] {
         let errorMessages: string[] = new Array<string>();
 
         if (data.name == undefined || data.name.length === 0) {
@@ -259,34 +256,48 @@ export class BlipEditableListComponent implements OnInit, AfterViewInit {
             errorMessages.push(this.validationMessages["name"]["minlength"]);
         }
 
-        if (data.size == undefined || data.size === 0) {
+        if (data.size == undefined) {
             errorMessages.push(this.validationMessages["size"]["required"]);
         }
 
-        if (data.name.length < 2) {
-            errorMessages.push(this.validationMessages["name"]["minlength"]);
+        if (!isNumeric(data.size)) {
+            errorMessages.push(this.validationMessages["size"]["number"]);
         }
 
+        if (data.cycleId == undefined || data.cycleId.length === 0) {
+            errorMessages.push(this.validationMessages["cycleId"]["required"]);
+        }
+
+        if (data.quadrantId == undefined || data.quadrantId.length === 0) {
+            errorMessages.push(this.validationMessages["quadrantId"]["required"]);
+        }
 
         return errorMessages;
     }
 
     onSaveConfirmEvent(event) {
-        this.dialogService.addDialog(ConfirmDialogComponent, {
-            title: 'Confirmation',
-            message: `Save blip ${event.newData['name']}?`
-        }).subscribe((isConfirmed) => {
-            if (isConfirmed) {
-                let newData = event.newData;
-                newData.size = parseInt(newData.size);
-                newData.blipNumber = event.data.blipNumber;
-                debugger;
-                this.blipSaveEvent.emit(newData);
-                event.confirm.resolve(newData);
-            } else {
-                event.confirm.reject();
-            }
-        });
+        let messages = this.validateForm(event.newData);
+        if (messages.length == 0) {
+            this.dialogService.addDialog(ConfirmDialogComponent, {
+                title: 'Confirmation',
+                message: `Save blip ${event.newData['name']}?`
+            }).subscribe((isConfirmed) => {
+                if (isConfirmed) {
+                    let newData = event.newData;
+                    newData.size = parseInt(newData.size);
+                    newData.blipNumber = event.data.blipNumber;
+                    this.blipSaveEvent.emit(newData);
+                    event.confirm.resolve(newData);
+                } else {
+                    event.confirm.reject();
+                }
+            });
+        } else {
+            this.dialogService.addDialog(FormErrorDialogComponent, {
+                title: 'Errors Found',
+                messages: messages
+            })
+        }
     }
 
     private buildForm() {

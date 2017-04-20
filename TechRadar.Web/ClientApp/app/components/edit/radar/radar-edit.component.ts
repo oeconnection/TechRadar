@@ -39,15 +39,15 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         name: {
             required: 'Radar name is required.',
             minlength: 'Radar name must be at least two characters.',
-            maxlength: 'Name cannot be more than 15 characters.'
+            maxlength: 'Name cannot be more than 50 characters.'
         },
         group: {
             required: 'Group name is required.',
             minlength: 'Group name must be at least two characters.',
-            maxlength: 'Group cannot be more than 15 characters.'
+            maxlength: 'Group cannot be more than 30 characters.'
         },
         description: {
-            maxlength: 'Description cannot be more than 300 characters.'
+            maxlength: 'Description cannot be more than 500 characters.'
         }
     };
 
@@ -97,15 +97,15 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             name: ['', [
                 Validators.required,
                 Validators.minLength(2),
-                Validators.maxLength(15)
+                Validators.maxLength(50)
             ]],
             group: ['', [
                 Validators.required,
                 Validators.minLength(2),
-                Validators.maxLength(15)
+                Validators.maxLength(30)
             ]],
             description: ['', [
-                Validators.maxLength(300)
+                Validators.maxLength(500)
             ]]
         });
 

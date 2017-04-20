@@ -16,7 +16,6 @@ export class GlobalState {
     notifyDataChanged(event, value) {
         let current = this._data[event];
         if (current !== value) {
-//            console.error('Changing of value: %s => %s', current, value);
             this._data[event] = value;
 
             this._data.next({
@@ -34,7 +33,6 @@ export class GlobalState {
     }
 
     _onEvent(data: any) {
-//        console.log("State On Event: %s", data['event']);
         let subscribers = this._subscriptions.get(data['event']) || [];
 
         subscribers.forEach((callback) => {

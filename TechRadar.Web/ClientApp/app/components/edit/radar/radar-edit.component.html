@@ -112,29 +112,21 @@
         </div>
 
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#cycle" aria-controls="cycle" role="tab" data-toggle="tab">Cycles</a></li>
+            <li role="presentation" class="active"><a href="#blip" aria-controls="blip" role="tab" data-toggle="tab">Blips</a></li>
+            <li role="presentation"><a href="#cycle" aria-controls="cycle" role="tab" data-toggle="tab">Cycles</a></li>
             <li role="presentation"><a href="#quadrant" aria-controls="quadrant" role="tab" data-toggle="tab">Quadrants</a></li>
-            <li role="presentation"><a href="#blip" aria-controls="blip" role="tab" data-toggle="tab">Blips</a></li>
         </ul>
 
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane active" id="cycle">
+            <div role="tabpanel" class="tab-pane active" id="blip">
+                <blip-editable-list *ngIf="showChildren()" [radar]="radar" [blips]="blips" (blipSaveEvent)="saveBlip($event)" (blipDeleteEvent)="deleteBlip($event)"></blip-editable-list>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="cycle">
                 <cycle-editable-list *ngIf="showChildren()" [cycles]="radar.cycles" (cycleSaveEvent)="saveCycle($event)" (cycleDeleteEvent)="deleteCycle($event)"></cycle-editable-list>
             </div>
             <div role="tabpanel" class="tab-pane" id="quadrant">
                 <quadrant-editable-list *ngIf="showChildren()" [quadrants]="radar.quadrants" (quadrantSaveEvent)="saveQuadrant($event)"></quadrant-editable-list>
             </div>
-            <div role="tabpanel" class="tab-pane" id="blip">
-                <blip-editable-list *ngIf="showChildren()" [radar]="radar" [blips]="blips" (blipSaveEvent)="saveBlip($event)" (blipDeleteEvent)="deleteBlip($event)"></blip-editable-list>
-            </div>
         </div>
-
-        <!--<div class="panel-group">
-            <cycle-editable-list *ngIf="showChildren()" [cycles]="radar.cycles" (cycleSaveEvent)="saveCycle($event)" (cycleDeleteEvent)="deleteCycle($event)"></cycle-editable-list>
-
-            <quadrant-editable-list *ngIf="showChildren()" [quadrants]="radar.quadrants" (quadrantSaveEvent)="saveQuadrant($event)"></quadrant-editable-list>
-
-            <blip-editable-list *ngIf="showChildren()" [radar]="radar" [blips]="blips" (blipSaveEvent)="saveBlip($event)" (blipDeleteEvent)="deleteBlip($event)"></blip-editable-list>
-        </div>-->
     </div>
 </div>
