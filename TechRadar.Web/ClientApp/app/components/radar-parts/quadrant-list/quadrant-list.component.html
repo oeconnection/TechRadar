@@ -1,10 +1,16 @@
 ﻿<div id="quadrant-blip-list" [ngClass]="['panel', panelClass]" *ngIf="quadrantData">
-    <a [routerLink]="['/radar', radarId]" [queryParams]="{ quad: quadrantData.quadrantNumber }"><div class="panel-heading">{{ quadrantData.name }}</div></a>
+    <a [routerLink]="['/radar', radarId]" [queryParams]="{ quad: quadrantData.quadrantNumber }">
+        <div *ngIf="quadrantData.description.length > 0" 
+             [ngClass]="['panel-heading', getBlipClassNameByQuadrant(quadrantData)]"     
+             popover="{{ quadrantData.description }}"
+             triggers="mouseenter:mouseleave" 
+             placement="{{ getQuadrantPopoverPlacement(quadrantData) }}">{{ quadrantData.name }}</div>
+        <div *ngIf="quadrantData.description == null || quadrantData.description.length === 0"  class="panel-heading">{{ quadrantData.name }}</div>
+    </a>
     <div class="panel-body">
         <ul class="list-unstyled" *ngFor="let cycle of cycles">
             <li [ngClass]="['ring', getBlipClassNameByQuadrant(quadrantData)]">
-                {{ cycle.fullName }}
-
+                <span popover="{{ cycle.description }}" triggers="mouseenter:mouseleave" placement="{{ getQuadrantPopoverPlacement(quadrantData) }}">{{ cycle.fullName }}</span>
                 <ul class="list-unstyled" *ngFor="let blip of getBlipsByCycleId(cycle.id)">
                     <li>
                         <div

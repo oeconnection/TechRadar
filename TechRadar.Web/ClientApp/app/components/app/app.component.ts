@@ -18,9 +18,13 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.sub = this.radarService.getRadarList().subscribe(data => {
+            this.radars = data;
+        });
     }
 
     ngOnDestroy(): void {
+        this.sub.unsubscribe();
     }
 
     public ngAfterViewInit(): void {

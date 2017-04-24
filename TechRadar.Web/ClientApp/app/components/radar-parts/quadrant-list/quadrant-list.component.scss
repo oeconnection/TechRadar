@@ -155,23 +155,59 @@ i.fourth {
     font-weight: normal;
 }
 
-span.first {
+span.first, .panel-first * .popover {
     background-color: #83ad78;
+    color: #fff;
     stroke: #fff;
 }
 
-span.second {
+span.second, .panel-second * .popover {
     background-color: #3db5be;
+    color: #fff;
     stroke: #fff;
 }
 
-span.third {
+span.third, .panel-third * .popover {
     background-color: #e88744;
+    color: #fff;
     stroke: #fff;
 }
 
-span.fourth {
+span.fourth, .panel-fourth * .popover {
     background-color: #8d2145;
+    color: #fff;
     stroke: #fff;
+}
+
+.panel-first * .popover > .arrow:after {
+    border-right-color: #83ad78;
+}
+
+.panel-second * .popover > .arrow:after {
+    border-left-color: #3db5be;
+}
+
+.panel-third * .popover > .arrow:after {
+    border-left-color: #e88744;
+}
+
+.panel-fourth * .popover > .arrow:after {
+    border-right-color: #8d2145;
+}
+
+.panel-first * .popover {
+    font-size: .9em;
+}
+
+.panel-second * .popover {
+    font-size: .9em;
+}
+
+.panel-third * .popover {
+    font-size: .9em;
+}
+
+.panel-fourth * .popover {
+    font-size: .9em;
 }
 

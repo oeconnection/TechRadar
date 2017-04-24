@@ -5,15 +5,18 @@
     Input,
     OnInit,
     ElementRef,
+    ViewEncapsulation,
     ViewChild
 } from '@angular/core';
 import { Radar, Quadrant, Cycle, Blip, RadarConfig } from '../../../models';
 import { RadarService, GlobalState } from '../../../services';
+import { PopoverModule } from 'ngx-bootstrap'
 
 @Component({
     selector: 'quadrant-list',
     templateUrl: './quadrant-list.component.html',
-    styleUrls: ['./quadrant-list.component.scss']
+    styleUrls: ['./quadrant-list.component.scss'],
+    encapsulation: ViewEncapsulation.None
 })
 export class QuadrantListComponent implements OnChanges {
     @Input() radar: Radar;
@@ -65,6 +68,26 @@ export class QuadrantListComponent implements OnChanges {
 
                 case 4:
                     return 'fourth';
+            }
+        }
+
+        return '';
+    }
+
+    private getQuadrantPopoverPlacement(quadrant: Quadrant) {
+        if (quadrant != null) {
+            switch (quadrant.quadrantNumber) {
+                case 1:
+                    return 'right';
+
+                case 2:
+                    return 'left';
+
+                case 3:
+                    return 'left';
+
+                case 4:
+                    return 'right';
             }
         }
 

@@ -8,7 +8,7 @@ import { HomeComponent } from './components/home/home.component';
 import { RadarDisplayComponent, ChartComponent, QuadrantListComponent, CycleComponent, BlipComponent, RingComponent } from './components/radar-parts'
 import { RadarService, RadarResolve, ImageLoaderService, ThemePreloaderService, ThemeSpinnerService, GlobalState } from './services'
 import { D3Service } from 'd3-ng2-service';
-import { TooltipModule, PaginationModule, AlertModule } from 'ng2-bootstrap';
+import { TooltipModule, PaginationModule, AlertModule, PopoverModule } from 'ng2-bootstrap';
 import { RadarEditComponent, QuadrantEditableListComponent, CycleEditableListComponent, BlipEditableListComponent } from './components/edit';
 import { RadarComponent } from './components/radar';
 import { ReactiveFormsModule } from "@angular/forms";
@@ -57,6 +57,7 @@ import { Ng2SmartTableModule } from 'ng2-smart-table';
         ToastModule.forRoot(),
         TooltipModule.forRoot(),
         PaginationModule.forRoot(),
+        PopoverModule.forRoot(),
         Ng2SmartTableModule
     ],
     providers: [D3Service, RadarService, ImageLoaderService, ThemeSpinnerService, ThemePreloaderService, GlobalState],
