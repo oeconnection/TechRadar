@@ -20,6 +20,7 @@
     "@types/core-js": "~0.9.35",
     "@types/d3": "~4.5",
     "@types/node": "^6.0.42",
+    "@types/tinycolor2": "1.1.1",
     "angular2-platform-node": "~2.0.11",
     "angular2-template-loader": "^0.6.2",
     "aspnet-prerendering": "^2.0.0",

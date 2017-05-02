@@ -1,46 +1,41 @@
 ﻿import {
     Component,
     ElementRef,
-    HostListener,
     Input,
-    OnDestroy,
-    OnInit,
     OnChanges,
     ViewEncapsulation,
     ViewChild
-} from '@angular/core';
-import { D3Service, D3, Selection, Arc, EnterElement, Local } from 'd3-ng2-service';
-import { Blip, Cycle, Quadrant, Radar, IPoint, IRange } from '../../../models';
-import { RadarService, GlobalState } from '../../../services';
-import * as Chance from 'chance';
+    } from "@angular/core";
+import { D3Service, D3 } from "d3-ng2-service";
+import { Blip, Cycle, Quadrant, Radar, IPoint, IRange } from "../../../models";
+import { RadarService, GlobalState } from "../../../services";
+import * as Chance from "chance";
 
 @Component({
-    selector: '[radar-blip]',
-    template: '<svg:g></svg:g>',
-    styleUrls: ['./blip.component.scss'],
+    selector: "[radar-blip]",
+    template: "<svg:g></svg:g>",
+    styleUrls: ["./blip.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
 
 export class BlipComponent implements OnChanges {
-    @Input() blips: Blip[];
     @Input() radar: Radar;
     @Input() width: number;
     @Input() quadrant: number;
-    @ViewChild('g') private container: ElementRef;
+    @ViewChild("g") private container: ElementRef;
 
+    private blips: Blip[];
     private stateSubscribe: any;
     private cycles: Cycle[];
-    private d3: D3;
-    private parentNativeElement: any;
-    private d3ParentElement: Selection<HTMLElement, any, null, undefined>;
-    private d3Svg: Selection<any, any, null, undefined>;
-    private d3G: Selection<any, any, null, undefined>;
+    private readonly d3: D3;
+    private readonly parentNativeElement: any;
+    private d3Svg: any;
     private mouseOnBlip: Blip;
     private radius: number;
-    private tooltip: Selection<any, any, null, undefined>;
+    private tooltip: any;
     private soloQuadrant: Quadrant;
 
-    private readonly activatedBlipEventName = 'activated.blip';
+    private readonly activatedBlipEventName = "activated.blip";
 
     constructor(element: ElementRef, private radarService: RadarService, d3Service: D3Service, private stateManager: GlobalState) {
         this.d3 = d3Service.getD3();
@@ -60,6 +55,7 @@ export class BlipComponent implements OnChanges {
 
     ngOnChanges(): void {
         if (this.radar != null) {
+            this.blips = this.radar.blips;
             this.buildBlips();
         }
     }
@@ -70,29 +66,8 @@ export class BlipComponent implements OnChanges {
         return this.quadrant > 0;
     }
 
-    private showBlip() {
-        //if (this.blip == null) return false;
-        return true;
-    }
-
-    private showShape(): boolean {
-        //if (this.blip == null) return false;
-        //if (this.chartBlip.shape == null) return false;
-        //if (this.chartBlip.shape.x == null || isNaN(this.chartBlip.shape.x)) return false;
-        //if (this.chartBlip.shape.y == null || isNaN(this.chartBlip.shape.y)) return false;
-        return true;
-    }
-
-    private showText(): boolean {
-        //if (this.chartBlip == null) return false;
-        //if (this.chartBlip.text == null) return false;
-        //if (this.chartBlip.text.x == null || isNaN(this.chartBlip.text.x)) return false;
-        //if (this.chartBlip.text.y == null || isNaN(this.chartBlip.text.y)) return false;
-        return true;
-    }
-
     private buildBlips() {
-        this.tooltip = this.d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+        this.tooltip = this.d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
 
         this.radius = this.width / (this.isQuadrantOnly() ? 1 : 2);
 
@@ -105,34 +80,29 @@ export class BlipComponent implements OnChanges {
         }
 
         if (this.parentNativeElement !== null) {
-            this.d3ParentElement = this.d3.select(this.parentNativeElement);
+            let d3ParentElement = this.d3.select(this.parentNativeElement);
 
-            this.d3Svg = this.d3ParentElement.select('g');
-            let checkforPreviousChart = this.d3Svg.selectAll('g');
+            this.d3Svg = d3ParentElement.select("g");
+
+            let checkforPreviousChart = this.d3Svg.selectAll("g");
             if (!checkforPreviousChart.empty()) {
                 checkforPreviousChart.remove();
             }
-    
+
             this.cycles = this.radar.cycles.sort((a, b) => { return a.order - b.order });
 
             let ringRadiusTotal = this.cycles.reduce((previous, current) => {
                 return previous + current.size;
             }, 0);
 
-            let innerRadius: number = 0,
-                outerRadius: number = 0,
-                ringSizeSum: number = 0;
+            let innerRadius = 0,
+                outerRadius = 0,
+                ringSizeSum = 0;
 
             this.cycles.forEach((cycle) => {
                 innerRadius = (this.radius * ringSizeSum) / ringRadiusTotal;
                 outerRadius = (this.radius * (ringSizeSum + cycle.size)) / ringRadiusTotal;
 
-                let measurements = {
-                    innerRadius: innerRadius,
-                    outerRadius: outerRadius
-                }
-
-                // Blip
                 this.createBlipsByCycle(cycle, { min: innerRadius, max: outerRadius }, blips.filter((blip: Blip) => { return blip.cycleId === cycle.id }));
 
                 ringSizeSum = ringSizeSum + cycle.size;
@@ -144,47 +114,43 @@ export class BlipComponent implements OnChanges {
         let adjustments: { x: number; y: number };
         let chartCenter: { x: number; y: number };
 
-
         let quadrant = this.radar.findQuadrantById(blip.quadrantId);
 
         if (quadrant == null) {
             return null;
         }
 
-        let additionalProperties: {
-            adjustment: { x: number, y: number },
-            center: { x: number, y: number },
-            css: string
-        };
         switch (quadrant.quadrantNumber) {
-            case 1:
-                adjustments = { x: -1, y: -1 };
-                chartCenter = { x: this.radius, y: this.radius };
-                break;
+        case 1:
+            adjustments = { x: -1, y: -1 };
+            chartCenter = { x: this.radius, y: this.radius };
+            break;
 
-            case 2:
-                adjustments = { x: 1, y: -1 };
-                chartCenter = { x: 0, y: this.radius };
-                break;
+        case 2:
+            adjustments = { x: 1, y: -1 };
+            chartCenter = { x: 0, y: this.radius };
+            break;
 
-            case 3:
-                adjustments = { x: 1, y: 1 };
-                chartCenter = { x: 0, y: 0 };
-                break;
+        case 3:
+            adjustments = { x: 1, y: 1 };
+            chartCenter = { x: 0, y: 0 };
+            break;
 
-            case 4:
-                adjustments = { x: -1, y: 1 };
-                chartCenter = { x: this.radius, y: 0 };
-                break;
+        case 4:
+            adjustments = { x: -1, y: 1 };
+            chartCenter = { x: this.radius, y: 0 };
+            break;
+
+        default:
+            adjustments = { x: 1, y: 1 };
+            chartCenter = { x: this.radius, y: this.radius };
+
         }
 
         if (!this.isQuadrantOnly()) {
             chartCenter = { x: this.radius, y: this.radius };
         }
-
-        let angleInRad, radius;
-
-        let split = blip.name.split('');
+        let split = blip.name.split("");
         let sum = split.reduce((p, c) => { return p + c.charCodeAt(0); }, 0);
         let chance = new Chance(sum * cycle.name.length * blip.blipNumber);
 
@@ -198,111 +164,112 @@ export class BlipComponent implements OnChanges {
             radiiCalcs.min = radiiCalcs.min + 5;
         }
 
-        angleInRad = Math.PI * chance.integer({ min: 13, max: 85 }) / 180;
-        radius = chance.floating(radiiCalcs);
+        let angleInRad = Math.PI * chance.integer({ min: 13, max: 85 }) / 180;
+        let radius = chance.floating(radiiCalcs);
 
-        let x: number, y: number;
-        x = chartCenter.x + (radius * Math.cos(angleInRad) * adjustments.x);
-        y = chartCenter.y + (radius * Math.sin(angleInRad) * adjustments.y);
+        let x = chartCenter.x + (radius * Math.cos(angleInRad) * adjustments.x);
+        let y = chartCenter.y + (radius * Math.sin(angleInRad) * adjustments.y);
 
         return { x: x, y: y };
     }
 
     private buildBlipTransform(cycle: Cycle, blip: Blip, radii: IRange): string {
-        let location = this.getBlipLocation(cycle, blip, radii);
+        const location = this.getBlipLocation(cycle, blip, radii);
 
-        return "translate(" + location.x + "," + location.y + ")"
+        return `translate(${location.x},${location.y})`;
     }
 
     private trianglePoints(blip: Blip) {
-        let tsize, top, left, right, bottom, points;
+        const tsize = 10 + blip.size;
+        const top = 0 - tsize;
+        const left = (0 - tsize + 1);
+        const right = (0 + tsize + 1);
+        const bottom = (0 + tsize - tsize / 2.5);
 
-        tsize = 13 + blip.size;
-        top = 0 - tsize;
-        left = (0 - tsize + 1);
-        right = (0 + tsize + 1);
-        bottom = (0 + tsize - tsize / 2.5);
-
-        return (0 + 1) + ',' + top + ' ' + left + ',' + bottom + ' ' + right + ',' + bottom;
+        return (0 + 1) + "," + top + " " + left + "," + bottom + " " + right + "," + bottom;
     }
 
     private getBlipClassNameByQuadrantId(quadrantId: string) {
         let quadrant = this.radar.findQuadrantById(quadrantId);
         if (quadrant != null) {
             switch (quadrant.quadrantNumber) {
-                case 1:
-                    return 'first';
+            case 1:
+                return "first";
 
-                case 2:
-                    return 'second';
+            case 2:
+                return "second";
 
-                case 3:
-                    return 'third';
+            case 3:
+                return "third";
 
-                case 4:
-                    return 'fourth';
+            case 4:
+                return "fourth";
             }
         }
 
-        return '';
+        return "";
     }
 
-    private buildCircleItem(element: Selection<any, Blip, any, any>) {
+    private buildCircleItem(element: any) {
         return element
             .filter((blip: Blip) => { return !blip.isNew })
-            .append('circle')
-            .attr('cx','0')
-            .attr('cy', '4')
-            .attr('class', (blip: Blip) => { return this.getBlipClassNameByQuadrantId(blip.quadrantId) })
-            .attr('stroke-width', '1.5')
-            .attr('r', (blip: Blip) => { return blip.size + 13 })
-            .attr('opacity', '1')
+            .append("circle")
+            .attr("cx", "0")
+            .attr("cy", "4")
+            .attr("class", (blip: Blip) => { return this.getBlipClassNameByQuadrantId(blip.quadrantId) })
+            .attr("stroke-width", "1.5")
+            .attr("r", (blip: Blip) => { return blip.size + 10 })
+            .attr("opacity", "1");
     }
 
-    private buildPolygonItem(element: Selection<any, Blip, any, any>) {
+    private buildPolygonItem(element: any) {
         return element
             .filter((blip: Blip) => { return blip.isNew })
-            .append('polygon')
-            .attr('points', (blip: Blip) => { return this.trianglePoints(blip); })
-            .attr('class', (blip: Blip) => { return this.getBlipClassNameByQuadrantId(blip.quadrantId) })
-            .attr('stroke-width', '1.5')
-            .attr('opacity', '1')
+            .append("polygon")
+            .attr("points", (blip: Blip) => { return this.trianglePoints(blip); })
+            .attr("class", (blip: Blip) => { return this.getBlipClassNameByQuadrantId(blip.quadrantId) })
+            .attr("stroke-width", "1.5")
+            .attr("opacity", "1");
     }
 
-    private buildTextItem(element: Selection<any, Blip, any, any>) {
-        return element.append('text')
-            .attr('x', 0)
-            .attr('y', 4)
-            .attr('class', 'blip-text')
-            .attr('text-anchor', 'middle')
+    private buildTextItem(element: any) {
+        return element.append("text")
+            .attr("x", 0)
+            .attr("y", (blip: Blip) => { return blip.isNew ? 4 : 7 })
+            .attr("class", "blip-text")
+            .attr("text-anchor", "middle")
             .text((blip: Blip) => { return blip.blipNumber })
-            .append('svg:title')
-            .text((blip: Blip) => { return blip.name })
+            .append("svg:title")
+            .text((blip: Blip) => { return blip.name });
 
     }
 
-    private createBlipsByCycle(cycle: Cycle, radii: IRange, blips: Blip[] ) {
+    private createBlipsByCycle(cycle: Cycle, radii: IRange, blips: Blip[]) {
 
-        let blipA = this.d3Svg.append('g').selectAll('a')
+        let blipA = this.d3Svg.append("g").selectAll("a")
             .data(blips).enter()
-            .append('a')
+            .append("a")
             .attr("class", "blip-group")
             .attr("placement", "top")
             .attr("container", "body")
-            .attr('opacity', (blip: Blip, i): string => {
-                return this.blipOpacity(blip).toString();
-            })
-            .on('mouseover', (blip: Blip, index: number) => {
-                this.onMouseOverBlip(blip);
-            })
-            .on('mouseout', (blip: Blip, index: number) => {
-                this.onMouseOutBlip();
-            })
-        let circleElement = this.buildCircleItem(blipA);
+            .attr("opacity",
+                (blip: Blip): string => {
+                    return this.blipOpacity(blip).toString();
+                })
+            .on("mouseover",
+                (blip: Blip) => {
+                    this.onMouseOverBlip(blip);
+                })
+            .on("mouseout",
+                () => {
+                    this.onMouseOutBlip();
+                });
 
-        let polygonElement = this.buildPolygonItem(blipA);
+        this.buildCircleItem(blipA);
 
-        let textElement = this.buildTextItem(blipA);
+        this.buildPolygonItem(blipA);
+
+        this.buildTextItem(blipA);
 
         blipA.attr("transform", (blip: Blip) => { return this.buildBlipTransform(cycle, blip, radii) });
     }
@@ -314,21 +281,21 @@ export class BlipComponent implements OnChanges {
             if (this.d3.event != null) {
                 this.tooltip.transition()
                     .duration(200)
-                    .style('opacity', .9);
+                    .style("opacity", .9);
 
-                this.tooltip.html(blip.blipNumber + '. ' + blip.name)
-                    .style('left', (this.d3.event.pageX) + "px")
-                    .style('top', (this.d3.event.pageY - 28) + "px");
+                this.tooltip.html(blip.blipNumber + ". " + blip.name)
+                    .style("left", (this.d3.event.pageX) + "px")
+                    .style("top", (this.d3.event.pageY - 28) + "px");
             }
 
             this.mouseOnBlip = blip;
-            this.d3Svg.selectAll('.blip-group').style('opacity', (item: Blip) => {
-                return blip.blipNumber == item.blipNumber ? 1 : 0.5;
+            this.d3Svg.selectAll(".blip-group").style("opacity", (item: Blip) => {
+                return blip.blipNumber === item.blipNumber ? 1 : 0.5;
             });
         }
     }
 
-    public onMouseOverBlip(blip: Blip): void {
+    onMouseOverBlip(blip: Blip): void {
         this.showHoverActions(blip);
         this.stateManager.notifyDataChanged(this.activatedBlipEventName, blip);
     }
@@ -336,23 +303,23 @@ export class BlipComponent implements OnChanges {
     private endHoverActions() {
         this.tooltip.transition()
             .duration(500)
-            .style('opacity', 0);
+            .style("opacity", 0);
 
         this.mouseOnBlip = null;
-        this.d3Svg.selectAll('.blip-group').style('opacity', 1);
+        this.d3Svg.selectAll(".blip-group").style("opacity", 1);
     }
 
-    public onMouseOutBlip(): void {
+    onMouseOutBlip(): void {
         this.endHoverActions();
         this.stateManager.notifyDataChanged(this.activatedBlipEventName, null);
     }
 
-    public blipOpacity(blip: Blip): number {
+    blipOpacity(blip: Blip): number {
         if (this.mouseOnBlip == null) {
             return 1;
         }
 
-        if (this.mouseOnBlip.blipNumber == blip.blipNumber) {
+        if (this.mouseOnBlip.blipNumber === blip.blipNumber) {
             return 1;
         } else {
             return .5;

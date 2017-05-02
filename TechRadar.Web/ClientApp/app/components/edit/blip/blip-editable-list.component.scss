@@ -1,9 +1,18 @@
-﻿div, a {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+﻿$font-size: 12px;
+
+ng2-smart-table table tbody tr {
+    td {
+        font-size: $font-size !important;
+
+    }
+
+    th {
+        font-size: $font-size !important;
+    }
 }
 
-ng2-smart-table table tbody tr td, ng2-smart-table table thead tr th, .pagination {
-    font-size: 14px !important;
+.pagination {
+    font-size: $font-size !important;
 }
 
 i.fa {
@@ -12,4 +21,20 @@ i.fa {
 
 th.ng2-smart-actions-title-add {
     vertical-align: middle !important;
+}
+
+ng2-smart-table-title {
+    font-size: $font-size !important;
+}
+
+div.ng2-smart-title {
+    font-size: $font-size !important;
+}
+
+div.ng2-smart-filter {
+    font-size: $font-size !important;
+
+    select, textarea, optgroup, input {
+        font-size: $font-size !important;
+    }
 }

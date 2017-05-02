@@ -5,25 +5,23 @@ import {
     OnInit,
     OnChanges,
     OnDestroy,
-    AfterViewInit,
     ViewChild,
-    SimpleChanges,
-    NgZone
-} from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Radar, Quadrant, RadarConfig, Blip } from '../../../models';
-import { RadarService } from '../../../services';
-import { D3Service, D3 } from 'd3-ng2-service';
-import { Observable } from 'rxjs/Rx';
-import { isPlatformBrowser } from '@angular/common';
+    SimpleChanges
+} from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
+import { Radar, RadarConfig, Blip, Quadrant } from "../../../models";
+import { RadarService } from "../../../services";
+import { D3Service, D3 } from "d3-ng2-service";
+import { Observable } from "rxjs/Rx";
+import { isPlatformBrowser } from "@angular/common";
 
 @Component({
-    selector: 'app-radar',
-    templateUrl: './radar-display.component.html',
-    styleUrls: ['./radar-display.component.scss']
+    selector: "app-radar",
+    templateUrl: "./radar-display.component.html",
+    styleUrls: ["./radar-display.component.scss"]
 })
 export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
-    @ViewChild('chartArea') chartElement: ElementRef;
+    @ViewChild("chartArea") chartElement: ElementRef;
     @Input() id: string;
     @Input() quadrant: number;
 
@@ -39,6 +37,7 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     private height: number;
     private blips: Blip[];
     private show: boolean;
+    private chosenQuadrant: Quadrant;
 
     constructor(private route: ActivatedRoute, private radarService: RadarService, private d3Service: D3Service) {
         this.show = false;
@@ -47,14 +46,14 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        var subscribers: any[];
-
-        if (changes['id']) {
+        if (changes["id"]) {
             this.getData();
         } else {
-            if (changes['quadrant']) {
-                this.quadrant = changes['quadrant'].currentValue;
-              //  this.chartData.setQuadrant(changes['quadrant'].currentValue);
+            if (changes["quadrant"]) {
+                this.quadrant = changes["quadrant"].currentValue;
+                if (this.quadrant != null) {
+                    this.chosenQuadrant = this.radarData.findQuadrantByNumber(this.quadrant);
+                }
             }
         }
 
@@ -68,10 +67,8 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     private quadrantName() {
-        if (this.radarData != null && this.isQuadrantOnly())
-        {
-            var quadrant = this.radarData.findQuadrantByNumber(this.quadrant);
-            return quadrant == null ? null : quadrant.name;
+        if (this.radarData != null && this.isQuadrantOnly()) {
+            return this.chosenQuadrant.name;
         } else {
             return null;
         }
@@ -79,8 +76,7 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
 
     private quadrantDescription() {
         if (this.radarData != null && this.isQuadrantOnly()) {
-            var quadrant = this.radarData.findQuadrantByNumber(this.quadrant);
-            return quadrant == null ? null : quadrant.description;
+            return this.chosenQuadrant.description;
         } else {
             return null;
         }
@@ -96,14 +92,13 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
             this.radarService.getRadar(this.id),
             this.radarService.getRadarBlips(this.id)
         ).subscribe(data => {
-            this.radarData = data[0];
-            this.setBlipData(data[1]);
+            this.radarData = data[0] as Radar;
+            this.setBlipData(data[1] as Blip[]);
 
             if (this.radarData) {
                 this.setProperties();
             };
             this.showChart = true;
-            console.log("Show should be true");
         });
     }
 
@@ -112,7 +107,7 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
         if (!this.isQuadrantOnly()) return true;
 
         if (Array.isArray(quadrantNumbers)) {
-            if (quadrantNumbers.length == 0) return false;
+            if (quadrantNumbers.length === 0) return false;
 
             return quadrantNumbers.some((item) => {
                 return this.quadrant === item;
@@ -124,7 +119,7 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     private showQuadrantList(quadrantNumber: number): boolean {
         if (!this.isQuadrantOnly()) return true;
 
-        return (!quadrantNumber || this.quadrant == quadrantNumber);
+        return (!quadrantNumber || this.quadrant === quadrantNumber);
     }
 
     private setProperties() {
@@ -165,7 +160,7 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
             let newBlip = blip;
             newBlip.blipNumber = blipNumber++;
             this.blips.push(newBlip);
-        })
+        });
     }
 
 

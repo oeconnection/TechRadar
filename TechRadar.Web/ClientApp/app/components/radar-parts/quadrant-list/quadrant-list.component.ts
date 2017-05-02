@@ -1,21 +1,16 @@
 ﻿import {
     Component,
     OnChanges,
-    AfterViewInit,
     Input,
-    OnInit,
-    ElementRef,
-    ViewEncapsulation,
-    ViewChild
-} from '@angular/core';
-import { Radar, Quadrant, Cycle, Blip, RadarConfig } from '../../../models';
-import { RadarService, GlobalState } from '../../../services';
-import { PopoverModule } from 'ngx-bootstrap'
+    ViewEncapsulation
+} from "@angular/core";
+import { Radar, Quadrant, Cycle, Blip } from "../../../models";
+import { GlobalState } from "../../../services";
 
 @Component({
-    selector: 'quadrant-list',
-    templateUrl: './quadrant-list.component.html',
-    styleUrls: ['./quadrant-list.component.scss'],
+    selector: "quadrant-list",
+    templateUrl: "./quadrant-list.component.html",
+    styleUrls: ["./quadrant-list.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
 export class QuadrantListComponent implements OnChanges {
@@ -28,10 +23,10 @@ export class QuadrantListComponent implements OnChanges {
     private radarId: string;
     private panelClass: string;
     private activeBlip: Blip;
-    private readonly activatedBlipEventName = 'activated.blip';
+    private readonly activatedBlipEventName = "activated.blip";
 
     constructor(private stateManager: GlobalState) {
-        this.panelClass = '';
+        this.panelClass = "";
         this.activeBlip = null;
 
         this.stateManager.subscribe(this.activatedBlipEventName, (blip: Blip) => {
@@ -50,7 +45,7 @@ export class QuadrantListComponent implements OnChanges {
             this.cycles = this.radar.cycles;
             this.radarId = this.radar.id;
 
-            this.panelClass = 'panel-' + this.getBlipClassNameByQuadrant(this.quadrantData);
+            this.panelClass = `panel-${this.getBlipClassNameByQuadrant(this.quadrantData)}`;
         }
     }
 
@@ -58,40 +53,40 @@ export class QuadrantListComponent implements OnChanges {
         if (quadrant != null) {
             switch (quadrant.quadrantNumber) {
                 case 1:
-                    return 'first';
+                    return "first";
 
                 case 2:
-                    return 'second';
+                    return "second";
 
                 case 3:
-                    return 'third';
+                    return "third";
 
                 case 4:
-                    return 'fourth';
+                    return "fourth";
             }
         }
 
-        return '';
+        return "";
     }
 
     private getQuadrantPopoverPlacement(quadrant: Quadrant) {
         if (quadrant != null) {
             switch (quadrant.quadrantNumber) {
                 case 1:
-                    return 'right';
+                    return "right";
 
                 case 2:
-                    return 'left';
+                    return "left";
 
                 case 3:
-                    return 'left';
+                    return "left";
 
                 case 4:
-                    return 'right';
+                    return "right";
             }
         }
 
-        return '';
+        return "";
     }
 
     public onMouseOverBlip(blip: Blip): void {
@@ -112,6 +107,6 @@ export class QuadrantListComponent implements OnChanges {
     }
 
     private getBlipsByCycleId(id: string): Blip[] {
-        return this.blips.filter(x => x.cycleId == id);
+        return this.blips.filter(x => x.cycleId === id);
     }
 }
