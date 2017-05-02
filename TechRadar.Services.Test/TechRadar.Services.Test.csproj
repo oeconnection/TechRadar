@@ -6,11 +6,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="1.1.11" />
-    <PackageReference Include="MSTest.TestFramework" Version="1.1.11" />
+    <PackageReference Include="MongoDB.Driver" Version="2.4.3" />
+    <PackageReference Include="Moq" Version="4.7.8" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.1.17" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.1.17" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TechRadar.Services.Artifacts\TechRadar.Services.Artifacts.csproj" />
     <ProjectReference Include="..\TechRadar.Services\TechRadar.Services.csproj" />
   </ItemGroup>
 

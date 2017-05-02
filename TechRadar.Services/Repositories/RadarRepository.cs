@@ -3,22 +3,18 @@ using System.Linq;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Threading.Tasks;
-using TechRadar.Services.Models;
-using Microsoft.Extensions.Options;
+using TechRadar.Services.Artifacts.Interfaces;
+using TechRadar.Services.Artifacts.Models;
 
 namespace TechRadar.Services.Repositories
 {
     public class RadarRepository : IRadarRepository
     {
-        private AppSettings _appSettings;
-        private DatabaseSettings _databaseSettings;
-        private readonly MongoDBContext _context = null;
+        private readonly IMongoDbContext _context;
 
-        public RadarRepository(IOptions<AppSettings> appSettings, IOptions<DatabaseSettings> databaseSettings)
+        public RadarRepository(IMongoDbContext context)
         {
-            _appSettings = appSettings.Value;
-            _databaseSettings = databaseSettings.Value;
-            _context = new MongoDBContext(databaseSettings);
+            _context = context;
         }
 
         public async Task<Blip> DeleteBlipFromRadar(string radarId, string blipId)
@@ -49,33 +45,26 @@ namespace TechRadar.Services.Repositories
 
         public async Task<IEnumerable<Blip>> GetBlipsInRadar(string id)
         {
-            return await _context.Blips.Find<Blip>(m => m.RadarId == id).ToListAsync<Blip>();
+            return await _context.Blips.Find(m => m.RadarId == id).ToListAsync();
         }
 
         public async Task<IEnumerable<Blip>> GetBlipsInRadar(string id, int quadrantNumber)
         {
-            Radar radar = _context.Radars.Find(m => m.Id == id).First<Radar>();
-            Quadrant quadrant;
+            var radar = _context.Radars.Find(m => m.Id == id).First<Radar>();
 
             var filterBuilder = Builders<Blip>.Filter;
 
-            if (radar != null)
+            if (radar == null) return new List<Blip>();
+
+            var filter = filterBuilder.Eq(x => x.RadarId, id);
+
+            var quadrant = radar.Quadrants?.FirstOrDefault(x => x.QuadrantNumber == quadrantNumber);
+            if (quadrant != null)
             {
-                var filter = filterBuilder.Eq(x => x.RadarId, id);
-
-                if (radar.Quadrants != null)
-                {
-                    quadrant = radar.Quadrants.FirstOrDefault<Quadrant>(x => x.QuadrantNumber == quadrantNumber);
-                    if (quadrant != null)
-                    {
-                        filter = filter & filterBuilder.Eq(x => x.QuadrantId, quadrant.Id);
-                    }
-                }
-
-                return await _context.Blips.Find(filter).ToListAsync<Blip>();
+                filter = filter & filterBuilder.Eq(x => x.QuadrantId, quadrant.Id);
             }
 
-            return new List<Blip>();
+            return await _context.Blips.Find(filter).ToListAsync();
         }
 
         public async Task<Radar> GetRadarById(string id)
@@ -85,21 +74,12 @@ namespace TechRadar.Services.Repositories
 
         public async Task<IEnumerable<Radar>> GetRadars()
         {
-            return await _context.Radars.Find(m => true).ToListAsync<Radar>();
+            return await _context.Radars.Find(m => true).ToListAsync();
         }
 
-        public async Task<Blip> UpsertBlip(string id, Blip blip)
+        public async Task<Blip> InsertBlip(string id, Blip blip)
         {
-            var isNew = false;
-            if (string.IsNullOrWhiteSpace(blip.Id))
-            {
-                isNew = true;
-                blip.Id = ObjectId.GenerateNewId().ToString();
-            }
-
-            var filterBuilder = Builders<Blip>.Filter;
-            FilterDefinition<Blip> filter;
-            UpdateDefinition<Blip> update;
+            blip.Id = ObjectId.GenerateNewId().ToString();
 
             var options = new FindOneAndUpdateOptions<Blip>
             {
@@ -107,50 +87,46 @@ namespace TechRadar.Services.Repositories
                 ReturnDocument = ReturnDocument.After
             };
 
-            if (isNew)
-            {
-                // Add new
-                filter = Builders<Blip>.Filter.Eq(r => r.Id, ObjectId.GenerateNewId().ToString());
+            var filter = Builders<Blip>.Filter.Eq(r => r.Id, ObjectId.GenerateNewId().ToString());
 
-                update = Builders<Blip>.Update
-                    .Set("name", blip.Name)
-                    .Set("description", blip.Description)
-                    .Set("size", blip.Size)
-                    .Set("quadrant", ObjectId.Parse(blip.QuadrantId))
-                    .Set("cycle", ObjectId.Parse(blip.CycleId))
-                    .Set("radar", ObjectId.Parse(blip.RadarId))
-                    .CurrentDate("added")
-                    .CurrentDate("lastModified");
-            }
-            else
-            {
-                filter = Builders<Blip>.Filter.Eq(r => r.Id, blip.Id);
-
-                update = Builders<Blip>.Update
-                    .Set("name", blip.Name)
-                    .Set("description", blip.Description)
-                    .Set("size", blip.Size)
-                    .Set("quadrant", ObjectId.Parse(blip.QuadrantId))
-                    .Set("cycle", ObjectId.Parse(blip.CycleId))
-                    .Set("radar", ObjectId.Parse(blip.RadarId))
-                    .CurrentDate("lastModified");
-            }
+            var update = Builders<Blip>.Update
+                .Set("name", blip.Name)
+                .Set("description", blip.Description)
+                .Set("size", blip.Size)
+                .Set("quadrant", ObjectId.Parse(blip.QuadrantId))
+                .Set("cycle", ObjectId.Parse(blip.CycleId))
+                .Set("radar", ObjectId.Parse(blip.RadarId))
+                .CurrentDate("added")
+                .CurrentDate("lastModified");
 
             return await _context.Blips.FindOneAndUpdateAsync(filter, update, options);
         }
 
-        public async Task<Radar> UpsertCycleInRadar(string id, Cycle cycle)
+        public async Task<Blip> UpdateBlip(string id, Blip blip)
         {
-            var isNew = false;
-            if (string.IsNullOrWhiteSpace(cycle.Id))
+            var options = new FindOneAndUpdateOptions<Blip>
             {
-                isNew = true;
-                cycle.Id = ObjectId.GenerateNewId().ToString();
-            }
+                IsUpsert = true,
+                ReturnDocument = ReturnDocument.After
+            };
 
-            var filterBuilder = Builders<Radar>.Filter;
-            FilterDefinition<Radar> filter;
-            UpdateDefinition<Radar> update;
+            var filter = Builders<Blip>.Filter.Eq(r => r.Id, blip.Id);
+
+            var update = Builders<Blip>.Update
+                .Set("name", blip.Name)
+                .Set("description", blip.Description)
+                .Set("size", blip.Size)
+                .Set("quadrant", ObjectId.Parse(blip.QuadrantId))
+                .Set("cycle", ObjectId.Parse(blip.CycleId))
+                .Set("radar", ObjectId.Parse(blip.RadarId))
+                .CurrentDate("lastModified");
+
+            return await _context.Blips.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Radar> InsertCycleInRadar(string id, Cycle cycle)
+        {
+            cycle.Id = ObjectId.GenerateNewId().ToString();
 
             var options = new FindOneAndUpdateOptions<Radar>
             {
@@ -158,37 +134,36 @@ namespace TechRadar.Services.Repositories
                 ReturnDocument = ReturnDocument.After
             };
 
+            var filter = Builders<Radar>.Filter.Where(r => r.Id == id);
 
-            if (isNew)
-            {
-                filter = filterBuilder.Where(r => r.Id == id);
-
-                update = Builders<Radar>.Update
-                    .Push("cycles", cycle);
-            }
-            else
-            {
-                // Update existing
-                filter = filterBuilder.Where(r => r.Id == id && r.Cycles.Any(q => q.Id == cycle.Id));
-
-                update = Builders<Radar>.Update
-                    .Set("cycles.$.order", cycle.Order)
-                    .Set("cycles.$.name", cycle.Name)
-                    .Set("cycles.$.fullName", cycle.FullName)
-                    .Set("cycles.$.description", cycle.Description)
-                    .Set("cycles.$.size", cycle.Size);
-
-            }
+            var update = Builders<Radar>.Update.Push("cycles", cycle);
 
             return await _context.Radars.FindOneAndUpdateAsync(filter, update, options);
         }
 
-        public async Task<Radar> UpsertQuadrantInRadar(string id, Quadrant quadrant)
+        public async Task<Radar> UpdateCycleInRadar(string id, Cycle cycle)
         {
-            if (string.IsNullOrWhiteSpace(quadrant.Id))
+            var options = new FindOneAndUpdateOptions<Radar>
             {
-                quadrant.Id = ObjectId.GenerateNewId().ToString();
-            }
+                IsUpsert = true,
+                ReturnDocument = ReturnDocument.After
+            };
+
+            var filter = Builders<Radar>.Filter.Where(r => r.Id == id && r.Cycles.Any(q => q.Id == cycle.Id));
+
+            var update = Builders<Radar>.Update
+                .Set("cycles.$.order", cycle.Order)
+                .Set("cycles.$.name", cycle.Name)
+                .Set("cycles.$.fullName", cycle.FullName)
+                .Set("cycles.$.description", cycle.Description)
+                .Set("cycles.$.size", cycle.Size);
+
+            return await _context.Radars.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Radar> InsertQuadrantInRadar(string id, Quadrant quadrant)
+        {
+            quadrant.Id = ObjectId.GenerateNewId().ToString();
 
             var options = new FindOneAndUpdateOptions<Radar>
             {
@@ -196,18 +171,70 @@ namespace TechRadar.Services.Repositories
                 ReturnDocument = ReturnDocument.After
             };
 
-            var filterBuilder = Builders<Radar>.Filter;
-            var filter = filterBuilder.Where(r => r.Id == id && r.Quadrants.Any(q => q.Id == quadrant.Id));
+            var filter = Builders<Radar>.Filter.Where(r => r.Id == id && r.Quadrants.Any(q => q.Id == quadrant.Id));
 
             var update = Builders<Radar>.Update
                     .Set("quadrants.$.quadrantNumber", quadrant.QuadrantNumber)
                     .Set("quadrants.$.name", quadrant.Name)
+                    .CurrentDate("quadrants.$.added")
+                    .CurrentDate("quadrants.$.lastmodified")
                     .Set("quadrants.$.description", quadrant.Description);
 
             return await _context.Radars.FindOneAndUpdateAsync(filter, update, options);
         }
 
-        public async Task<Radar> UpsertRadar(Radar radar)
+        public async Task<Radar> UpdateQuadrantInRadar(string id, Quadrant quadrant)
+        {
+            var options = new FindOneAndUpdateOptions<Radar>
+            {
+                IsUpsert = true,
+                ReturnDocument = ReturnDocument.After
+            };
+
+            var filter = Builders<Radar>.Filter.Where(r => r.Id == id && r.Quadrants.Any(q => q.Id == quadrant.Id));
+
+            var update = Builders<Radar>.Update
+                .Set("quadrants.$.quadrantNumber", quadrant.QuadrantNumber)
+                .Set("quadrants.$.name", quadrant.Name)
+                .CurrentDate("quadrants.$.lastmodified")
+                .Set("quadrants.$.description", quadrant.Description);
+
+            return await _context.Radars.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Radar> InsertRadar(Radar radar)
+        {
+            if (radar == null)
+            {
+                return null;
+            }
+
+            // Give sub objects new ids
+            GiveQuadrantsNewIds(radar);
+            GiveCyclesNewIds(radar);
+
+            var options = new FindOneAndUpdateOptions<Radar>
+            {
+                IsUpsert = true,
+                ReturnDocument = ReturnDocument.After
+            };
+
+            // Add new
+            var filter = Builders<Radar>.Filter.Eq(r => r.Id, ObjectId.GenerateNewId().ToString());
+
+            var update = Builders<Radar>.Update
+                .Set("name", radar.Name)
+                .Set("group", radar.Group)
+                .Set("description", radar.Description)
+                .CurrentDate("added")
+                .CurrentDate("lastModified")
+                .Set("quadrants", radar.Quadrants)
+                .Set("cycles", radar.Cycles);
+
+            return await _context.Radars.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Radar> UpdateRadar(Radar radar)
         {
             if (radar == null)
             {
@@ -220,64 +247,31 @@ namespace TechRadar.Services.Repositories
                 ReturnDocument = ReturnDocument.After
             };
 
-            FilterDefinition<Radar> filter;
-            UpdateDefinition<Radar> update;
-            if (string.IsNullOrWhiteSpace(radar.Id))
-            {
-                // Add new
-                filter = Builders<Radar>.Filter.Eq(r => r.Id, ObjectId.GenerateNewId().ToString());
+            var filter = Builders<Radar>.Filter.Eq(r => r.Id, radar.Id);
 
-                update = Builders<Radar>.Update
-                    .Set("name", radar.Name)
-                    .Set("group", radar.Group)
-                    .Set("description", radar.Description)
-                    .CurrentDate("lastModified")
-                    .Set("quadrants", GetDefaultQuadrants())
-                    .Set("cycles", GetDefaultCycles());
-            }
-            else
-            {
-                filter = Builders<Radar>.Filter.Eq(r => r.Id, radar.Id);
-
-                update = Builders<Radar>.Update
-                    .Set("name", radar.Name)
-                    .Set("group", radar.Group)
-                    .Set("description", radar.Description)
-                    .CurrentDate("lastModified");
-            }
+            var update = Builders<Radar>.Update
+                .Set("name", radar.Name)
+                .Set("group", radar.Group)
+                .Set("description", radar.Description)
+                .CurrentDate("lastModified");
 
             return await _context.Radars.FindOneAndUpdateAsync(filter, update, options);
         }
 
-        private List<Quadrant> GetDefaultQuadrants()
+        private static void GiveQuadrantsNewIds(Radar radar)
         {
-            var quadrantSettings = _appSettings.DefaultQuadrants;
-            var quadrants = new List<Quadrant>();
-
-            foreach (var quad in quadrantSettings)
+            foreach (var quad in radar.Quadrants)
             {
                 quad.Id = ObjectId.GenerateNewId().ToString();
-                quadrants.Add(quad);
             }
-
-            return quadrants;
-
         }
 
-        private List<Cycle> GetDefaultCycles()
+        private static void GiveCyclesNewIds(Radar radar)
         {
-            var cycleSettings = _appSettings.DefaultCycles;
-            var cycles = new List<Cycle>();
-
-            foreach (var cycle in cycleSettings)
+            foreach (var cycle in radar.Cycles)
             {
                 cycle.Id = ObjectId.GenerateNewId().ToString();
-                cycles.Add(cycle);
             }
-
-            return cycles;
-
         }
-
     }
 }

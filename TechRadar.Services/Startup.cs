@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using TechRadar.Services.Models;
+using TechRadar.Services.Artifacts.Interfaces;
+using TechRadar.Services.Artifacts.Models;
 using TechRadar.Services.Repositories;
+using TechRadar.Services.DbContext;
 
 namespace TechRadar.Services
 {
@@ -30,6 +32,9 @@ namespace TechRadar.Services
 
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
             services.Configure<DatabaseSettings>(Configuration.GetSection("MongoConnection"));
+
+            services.AddScoped<IMongoDbContext, MongoDbContext>();
+
             services.AddSingleton<IRadarRepository, RadarRepository>();
 
             services.AddCors(options =>

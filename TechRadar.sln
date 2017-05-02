@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TechRadar.Services", "TechR
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechRadar.Services.Test", "TechRadar.Services.Test\TechRadar.Services.Test.csproj", "{84571EAC-73E6-4B89-97AC-1E1477A77805}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechRadar.Services.Artifacts", "TechRadar.Services.Artifacts\TechRadar.Services.Artifacts.csproj", "{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{84571EAC-73E6-4B89-97AC-1E1477A77805}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84571EAC-73E6-4B89-97AC-1E1477A77805}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84571EAC-73E6-4B89-97AC-1E1477A77805}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

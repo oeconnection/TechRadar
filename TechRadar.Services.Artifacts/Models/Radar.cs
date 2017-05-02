@@ -1,8 +1,8 @@
-﻿using MongoDB.Bson;
+﻿using System.Collections.Generic;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using System.Collections.Generic;
 
-namespace TechRadar.Services.Models
+namespace TechRadar.Services.Artifacts.Models
 {
     [BsonIgnoreExtraElements]
     public class Radar

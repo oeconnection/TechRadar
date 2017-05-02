@@ -1,4 +1,4 @@
-﻿namespace TechRadar.Services.Models
+﻿namespace TechRadar.Services.Artifacts.Models
 {
     public class DatabaseSettings
     {
