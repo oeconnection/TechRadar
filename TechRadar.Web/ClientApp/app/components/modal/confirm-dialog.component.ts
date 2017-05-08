@@ -1,13 +1,13 @@
-﻿import { Component } from '@angular/core';
+﻿import { Component } from "@angular/core";
 import { DialogComponent, DialogService } from "ng2-bootstrap-modal";
 
-export interface ConfirmModel {
+export interface IConfirmModel {
     title: string;
     message: string;
 }
 
 @Component({
-    selector: 'confirm',
+    selector: "confirm",
     template: `<div class="modal-dialog">
                 <div class="modal-content">
                    <div class="modal-header">
@@ -24,7 +24,7 @@ export interface ConfirmModel {
                  </div>
                 </div>`
 })
-export class ConfirmDialogComponent extends DialogComponent<ConfirmModel, boolean> implements ConfirmModel {
+export class ConfirmDialogComponent extends DialogComponent<IConfirmModel, boolean> implements IConfirmModel {
     title: string;
     message: string;
     constructor(dialogService: DialogService) {

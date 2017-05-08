@@ -28,5 +28,7 @@ export class Blip {
 
         var diff = moment(new Date()).diff(moment(this.added), 'months');
         this.isNew = diff <= 3;
+
+        this.blipNumber = 0;
     }
 }

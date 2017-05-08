@@ -1,221 +1,244 @@
-﻿import { Component, OnInit, ViewChildren, ElementRef, ViewContainerRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl, FormArray, Validators, FormControlName } from '@angular/forms';
-import { ToastsManager, Toast } from 'ng2-toastr/ng2-toastr';
-
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/observable/fromEvent';
-import 'rxjs/add/observable/merge';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
-
-import { Radar, Cycle } from '../../../models';
-import * as _ from 'underscore';
-import { GenericValidator } from '../../../shared';
-import { CustomValidators } from 'ng2-validation';
+﻿import { Component, OnInit, OnChanges, Input, Output, EventEmitter, ViewEncapsulation } from "@angular/core";
 import { DialogService } from "ng2-bootstrap-modal";
-import { ConfirmDialogComponent } from '../../modal'
-
+import { FormErrorDialogComponent, ConfirmDialogComponent } from "../../modal"
+import { Cycle, Blip } from "../../../models";
+import { LocalDataSource } from "ng2-smart-table";
+import { NumericEditorComponent } from "../../grid-editors"
 @Component({
-    selector: 'cycle-editable-list',
-    templateUrl: './cycle-editable-list.component.html'
+    selector: "cycle-editable-list",
+    template: `<ng2-smart-table [settings]="settings" [source]="source" 
+                        (createConfirm)="onCreateConfirmEvent($event)"
+                        (deleteConfirm)="onDeleteConfirmEvent($event)"
+                        (editConfirm)="onSaveConfirmEvent($event)"
+                        ></ng2-smart-table>`,
+    styleUrls: ["./cycle-editable-list.component.scss"],
+    encapsulation: ViewEncapsulation.None
 })
-export class CycleEditableListComponent implements OnInit, AfterViewInit {
-    @ViewChildren(FormControlName, { read: ElementRef }) formInputElements: ElementRef[];
-    @Input() cycles: Cycle[];
-    @Output() cycleSaveEvent = new EventEmitter<Cycle>();
-    @Output() cycleDeleteEvent = new EventEmitter<Cycle>();
+export class CycleEditableListComponent implements OnInit, OnChanges {
+    @Input()
+    cycles: Cycle[];
 
-    errorMessage: string;
-    cycleForm: FormGroup;
+    @Input()
+    blips: Blip[];
 
-    displayMessage: { [key: string]: string } = {};
-    cycleInEditMode: string;
+    @Output()
+    cycleSaveEvent = new EventEmitter<Cycle>();
 
-    private newCycleId: string = 'newid';
+    @Output()
+    cycleDeleteEvent = new EventEmitter<Cycle>();
+
+    source: LocalDataSource;
+    settings = {};
+
+
+    private newCycleId = "newid";
 
     private validationMessages: { [key: string]: { [key: string]: string } } = {
         name: {
-            required: 'Cycle name is required.',
-            minlength: 'Cycle name must be at least three characters.'
+            required: "Cycle name is required.",
+            minlength: "Cycle name must be at least three characters.",
+            maxlength: "Cycle name must not be more than 15 characters."
         },
         fullName: {
-            required: 'Cycle full name is required.',
-            minlength: 'Cycle full name must be at least three characters.'
+            required: "Cycle full name is required.",
+            minlength: "Cycle full name must be at least three characters."
         },
         order: {
-            required: 'Cycle order is required.',
-            minlength: 'Cycle full name must be at least three characters.'
+            required: "Cycle order is required and must be a number.",
+            min: "Cycle order must be at least zero."
+        },
+        size: {
+            required: "Ring size is required and must be a number.",
+            min: "Ring size must be at least zero."
+        },
+        id: {
+            exists: "Cannot delete cycle while in use."
         }
     };
 
-    genericValidator: GenericValidator;
-    confirmResult: boolean = null;
-
-    constructor(private fb: FormBuilder,
-        private toastr: ToastsManager,
-        private vcr: ViewContainerRef,
-        private dialogService: DialogService
-    ) {
-        this.toastr.setRootViewContainerRef(vcr);
-        this.genericValidator = new GenericValidator(this.validationMessages);
-        this.cycleInEditMode = '';
+    constructor(private dialogService: DialogService) {
     }
 
     ngOnInit(): void {
-        this.buildForm();
+        this.setTableSettings();
+    }
+    ngOnChanges(): void {
+        this.source = new LocalDataSource(this.cycles);
     }
 
-    ngAfterViewInit(): void {
-        // Watch for the blur event from any input element on the form.
-        let controlBlurs: Observable<any>[] = this.formInputElements
-            .map((formControl: ElementRef) => Observable.fromEvent(formControl.nativeElement, 'blur'));
+    private setTableSettings() {
+        this.settings = {
+            mode: "inline",
+            attr: {
+                class: "table table-striped"
+            },
+            actions: {
+                position: "right"
+            },
+            edit: {
+                confirmSave: true,
+                editButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></div>`,
+                cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`,
+                saveButtonContent: `<div class="btn btn-xs btn-info"><i class="fa fa-check"></i></button>`
+            },
+            delete: {
+                confirmDelete: true,
+                deleteButtonContent: `<div class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>`
+            },
+            add: {
+                confirmCreate: true,
+                addButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add New</button>`,
+                createButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></div>`,
+                cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`
+            },
+            columns: {
+                order: {
+                    title: "Order",
+                    type: "html",
+                    editor: {
+                        type: "custom",
+                        component: NumericEditorComponent
+                    },
+                    class: "col-md-1"
+                },
+                name: {
+                    title: "Axis Name",
+                    editable: true,
+                    class: "col-md-2"
+                },
+                fullName: {
+                    title: "Full Name",
+                    editable: true,
+                    class: "col-md-2"
+                },
+                description: {
+                    title: "Description",
+                    editable: true,
+                    class: "col-md-5"
+                },
+                size: {
+                    title: "Ring Size (%)",
+                    editable: true,
+                    type: "html",
+                    editor: {
+                        type: "custom",
+                        component: NumericEditorComponent
+                    },
+                    class: "col-md-1"
+                }
+            }
+        };
 
-        // Merge the blur event observable with the valueChanges observable
-        Observable.merge(this.cycleForm.valueChanges, ...controlBlurs).debounceTime(800).subscribe(value => {
-            this.displayMessage = this.genericValidator.processMessages(this.cycleForm);
-        });
     }
 
-    private buildForm() {
-        this.cycleForm = this.fb.group({
-            id: '',
-            name: ['', [
-                Validators.required,
-                Validators.minLength(3)
-            ]],
-            fullName: ['', [
-                Validators.required,
-                Validators.minLength(3)
-            ]],
-            order: ['', [
-                Validators.required,
-                CustomValidators.min(0)
-            ]],
-            size: ['', [
-                Validators.required,
-                CustomValidators.number
-            ]],
-            description: ''
-        });
+    private validateForm(data: any): string[] {
+        const errorMessages = new Array<string>();
 
-    }
-
-    isEditing(id: string) {
-        if (this.cycleInEditMode == '') return false;
-
-        return this.cycleInEditMode == id;
-    }
-
-    isEditingInProgress() {
-        return this.cycleInEditMode != '';
-    }
-
-    private findCycleById(id: string): Cycle {
-        var list = this.cycles.filter(cycle => _.isEqual(cycle.id, id));
-
-        if (Array.isArray(list) && list.length > 0) {
-            return (list[0]);
+        if (data.name == undefined || data.name.length === 0) {
+            errorMessages.push(this.validationMessages["name"]["required"]);
         }
 
-        return null;
-    }
-
-    private setFormForRow(id) {
-        this.cycleForm.reset();
-
-        var cycle = this.findCycleById(id);
-
-        if (cycle != undefined) {
-            this.cycleForm.patchValue({
-                id: cycle.id,
-                name: cycle.name,
-                fullName: cycle.fullName,
-                order: cycle.order,
-                description: cycle.description,
-                size: cycle.size
-            });
+        if (data.name.length < 2) {
+            errorMessages.push(this.validationMessages["name"]["minlength"]);
         }
 
-        this.cycleInEditMode = id;
+        if (data.name.length > 15) {
+            errorMessages.push(this.validationMessages["name"]["maxlength"]);
+        }
+
+        if (data.order == undefined || isNaN(data.order)) {
+            errorMessages.push(this.validationMessages["order"]["required"]);
+        }
+
+        if (data.order < 0) {
+            errorMessages.push(this.validationMessages["order"]["min"]);
+        }
+
+        if (data.size == undefined || isNaN(data.size)) {
+            errorMessages.push(this.validationMessages["size"]["required"]);
+        }
+
+        if (data.size < 0) {
+            errorMessages.push(this.validationMessages["size"]["min"]);
+        }
+
+        return errorMessages;
     }
 
-    onCycleEditClicked(event, id: string) {
-        this.setFormForRow(id);
+    private validateDelete(data: any): string[] {
+        const errorMessages = new Array<string>();
+
+        if (data == null) {
+            return null;
+        }
+
+        if (data.Id === undefined || data.Id === "") {
+            return null;
+        }
+
+        let blipInUse = this.blips.find(blip => blip.cycleId === data.id);
+
+        if (blipInUse !== undefined) {
+            errorMessages.push(this.validationMessages["id"]["exists"]);
+        }
+        return errorMessages;
     }
 
-    onCycleSaveClicked(event) {
-        this.saveCycle();
-
-        this.cycleInEditMode = '';
+    onSaveConfirmEvent(event) {
+        const messages = this.validateForm(event.newData);
+        if (messages.length === 0) {
+            let newItem = new Cycle(event.newData);
+            this.cycleSaveEvent.emit(newItem);
+            event.confirm.resolve(newItem);
+        } else {
+            this.dialogService.addDialog(FormErrorDialogComponent,
+                {
+                    title: "Errors Found",
+                    messages: messages
+                });
+        }
     }
 
-    onCycleDeleteClicked(event, cycle) {
-        this.dialogService.addDialog(ConfirmDialogComponent, {
-            title: 'Confirmation',
-            message: `Delete cycle ${cycle.name}?`
-        })
+
+    onDeleteConfirmEvent(event, cycle) {
+        const item = event.data;
+        const messages = this.validateForm(event.newData);
+        if (messages.length === 0) {
+            let newItem = new Cycle(event.newData);
+            this.cycleSaveEvent.emit(newItem);
+            event.confirm.resolve(newItem);
+        } else {
+            this.dialogService.addDialog(FormErrorDialogComponent,
+                {
+                    title: "Errors Found",
+                    messages: messages
+                });
+        }
+
+        this.dialogService.addDialog(ConfirmDialogComponent,
+                {
+                    title: "Confirmation",
+                    message: `Delete cycle ${item.name}?`
+                })
             .subscribe((isConfirmed) => {
                 if (isConfirmed) {
-                    this.deleteCycle(cycle);
+                    this.cycleDeleteEvent.emit(item);
                 }
             });
-
-        this.cycleInEditMode = '';
     }
 
-    onCycleCancelClicked(event, id: string) {
-        if (id === this.newCycleId) {
-            var cycle = this.findCycleById(id);
-
-            var index: number = this.cycles.indexOf(cycle);
-            if (index > -1) {
-                this.cycles.splice(index, 1);
-            }
+    onCreateConfirmEvent(event) {
+        const messages = this.validateForm(event.newData);
+        if (messages.length === 0) {
+            let newItem = new Cycle(event.newData);
+            this.cycleSaveEvent.emit(newItem);
+            event.confirm.resolve(newItem);
+        } else {
+            this.dialogService.addDialog(FormErrorDialogComponent,
+                {
+                    title: "Errors Found",
+                    messages: messages
+                });
         }
-        this.cycleForm.reset();
-        this.cycleInEditMode = '';
-    }
-
-    addCycle() {
-        this.cycles.splice(0, 0, new Cycle({
-            id: this.newCycleId,
-            name: 'New',
-            fullName: 'Enter a more detailed title here',
-            description: 'Enter an explanation here',
-            order: 0,
-            size: 10
-        }))
-
-        this.setFormForRow(this.newCycleId);
-    }
-
-    saveCycle(): void {
-        var cycle: Cycle;
-        if (this.cycleForm.dirty && this.cycleForm.valid) {
-            let p = Object.assign({}, cycle, this.cycleForm.value);
-
-            if (p.id == this.newCycleId) {
-                p.id = null;
-            }
-
-            this.cycleSaveEvent.emit(p);
-        } else if (!this.cycleForm.dirty) {
-            this.onSaveComplete(null);
-        }
-    }
-
-    deleteCycle(cycle: Cycle): void {
-        var cycle: Cycle;
-        this.cycleDeleteEvent.emit(cycle);
-        this.onDeleteComplete();
-    }
-
-    onSaveComplete(cycle: Cycle): void {
-        // Reset the form to clear the flags
-        this.cycleForm.reset();
-    }
-
-    onDeleteComplete(): void {
-        this.toastr.success('Cycle deletion successful');
     }
 }

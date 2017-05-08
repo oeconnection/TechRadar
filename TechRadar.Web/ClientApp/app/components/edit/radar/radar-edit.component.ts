@@ -1,35 +1,36 @@
-﻿import { Component, OnInit, AfterViewInit, OnDestroy, ViewChildren, ElementRef, ViewContainerRef } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl, FormArray, Validators, FormControlName } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastsManager, Toast } from 'ng2-toastr/ng2-toastr';
+﻿import { Component, OnInit, AfterViewInit, OnDestroy, ViewChildren, ElementRef, ViewContainerRef } from "@angular/core";
+import { FormBuilder, FormGroup, Validators, FormControlName } from "@angular/forms";
+import { ActivatedRoute, Router } from "@angular/router";
+import { ToastsManager } from "ng2-toastr/ng2-toastr";
 
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/observable/fromEvent';
-import 'rxjs/add/observable/merge';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
+import "rxjs/add/operator/debounceTime";
+import "rxjs/add/observable/fromEvent";
+import "rxjs/add/observable/merge";
+import { Observable } from "rxjs/Observable";
+import { Subscription } from "rxjs/Subscription";
 
-import { IRadar, Radar, Quadrant, Cycle, Blip } from '../../../models';
-import { RadarService } from '../../../services';
+import { IRadar, Radar, Blip } from "../../../models";
+import { RadarService } from "../../../services";
 
-import { GenericValidator } from '../../../shared';
+import { GenericValidator } from "../../../shared";
 import { DialogService } from "ng2-bootstrap-modal";
-import { ConfirmDialogComponent } from '../../modal'
+import { ConfirmDialogComponent } from "../../modal"
 
 @Component({
-    templateUrl: './radar-edit.component.html',
-    styleUrls: ['./radar-edit.component.scss']
+    templateUrl: "./radar-edit.component.html",
+    styleUrls: ["./radar-edit.component.scss"]
 })
 export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     @ViewChildren(FormControlName, { read: ElementRef }) formInputElements: ElementRef[];
 
-    pageTitle: string = 'Radar Edit';
+    pageTitle: string = "Radar Edit";
     errorMessage: string;
     radarForm: FormGroup;
 
     radar: IRadar;
     blips: Blip[];
     private sub: Subscription;
+    private dataSubscription: Subscription;
     private radarName: string;
     private radarDescription: string;
     private radarId: string;
@@ -37,17 +38,17 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     displayMessage: { [key: string]: string } = {};
     private validationMessages: { [key: string]: { [key: string]: string } } = {
         name: {
-            required: 'Radar name is required.',
-            minlength: 'Radar name must be at least two characters.',
-            maxlength: 'Name cannot be more than 50 characters.'
+            required: "Radar name is required.",
+            minlength: "Radar name must be at least two characters.",
+            maxlength: "Name cannot be more than 50 characters."
         },
         group: {
-            required: 'Group name is required.',
-            minlength: 'Group name must be at least two characters.',
-            maxlength: 'Group cannot be more than 30 characters.'
+            required: "Group name is required.",
+            minlength: "Group name must be at least two characters.",
+            maxlength: "Group cannot be more than 30 characters."
         },
         description: {
-            maxlength: 'Description cannot be more than 500 characters.'
+            maxlength: "Description cannot be more than 500 characters."
         }
     };
 
@@ -71,7 +72,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         // Read the radar id from the query parameter
         this.sub = this.route.queryParams.subscribe(
             params => {
-                let id = params['id'];
+                let id = params["id"];
                 this.getRadar(id);
             }
         );
@@ -79,32 +80,35 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.sub.unsubscribe();
+        if (this.dataSubscription !== null) {
+            this.dataSubscription.unsubscribe();
+        }
     }
 
     ngAfterViewInit(): void {
         // Watch for the blur event from any input element on the form.
         let controlBlurs: Observable<any>[] = this.formInputElements
-            .map((formControl: ElementRef) => Observable.fromEvent(formControl.nativeElement, 'blur'));
+            .map((formControl: ElementRef) => Observable.fromEvent(formControl.nativeElement, "blur"));
 
         // Merge the blur event observable with the valueChanges observable
-        Observable.merge(this.radarForm.valueChanges, ...controlBlurs).debounceTime(800).subscribe(value => {
+        Observable.merge(this.radarForm.valueChanges, ...controlBlurs).debounceTime(800).subscribe(() => {
             this.displayMessage = this.genericValidator.processMessages(this.radarForm);
         });
     }
 
     private buildForm() {
         this.radarForm = this.fb.group({
-            name: ['', [
+            name: ["", [
                 Validators.required,
                 Validators.minLength(2),
                 Validators.maxLength(50)
             ]],
-            group: ['', [
+            group: ["", [
                 Validators.required,
                 Validators.minLength(2),
                 Validators.maxLength(30)
             ]],
-            description: ['', [
+            description: ["", [
                 Validators.maxLength(500)
             ]]
         });
@@ -114,13 +118,12 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     onDeleteClick() {
         if (this.radar != undefined) {
             this.dialogService.addDialog(ConfirmDialogComponent, {
-                title: 'Confirmation',
+                title: "Confirmation",
                 message: `Really delete the radar: ${this.radar.name}?`
             })
                 .subscribe((isConfirmed) => {
                     if (isConfirmed) {
                         this.onDeleteComplete();
-                        //this.deleteRadar();
                     }
                 });
         }        
@@ -140,34 +143,33 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         return true;
     }
 
-    isDeleteDisabled() {
-        var disabled = (
+    isDeleteDisabled(): boolean {
+        return (
             this.radar == undefined ||
             this.radar == null ||
             this.radar.id == undefined || 
             this.radar.id == null
         );
-        return disabled;
     }
 
     getRadar(id: string): void {
         if (id == undefined || id == null) {
             this.onRadarRetrieved(null);
         } else {
-            Observable.forkJoin(
+            this.dataSubscription = Observable.forkJoin(
                 this.radarService.getRadar(id),
                 this.radarService.getRadarBlips(id)
             ).subscribe(
                 (data) => {
-                    this.onRadarRetrieved(data[0]);
-                    this.blips = data[1].sort((a: Blip, b: Blip) => {
+                    this.onRadarRetrieved((data[0]) as Radar);
+                    this.blips = ((data[1]) as Blip[]).sort((a: Blip, b: Blip) => {
                         if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) return -1;
                         if (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) return 1;
                         return 0;
                     });
                 },
-                (error: any) => this.errorMessage = <any>error
-                )
+                (error: any) => this.errorMessage = error
+            );
         }
     }
 
@@ -186,12 +188,12 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         if (this.radar == undefined) {
-            this.pageTitle = 'Add Radar';
+            this.pageTitle = "Add Radar";
 
             this.radarForm.patchValue({
-                name: '',
-                group: '',
-                description: ''
+                name: "",
+                group: "",
+                description: ""
             });
         } else {
             this.pageTitle = `Edit Radar: ${this.radar.name}`;
@@ -207,7 +209,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     deleteRadar(): void {
         this.radarService.deleteRadar(this.radar).subscribe(
             () => this.onDeleteComplete(),
-            (error: any) => this.errorMessage = <any>error
+            (error: any) => this.errorMessage = error
         );
     }
 
@@ -218,7 +220,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
 
             this.radarService.saveRadar(p).subscribe(
                 (data) => this.onSaveComplete(data),
-                (error: any) => this.errorMessage = <any>error
+                (error: any) => this.errorMessage = error
             );
         } else if (!this.radarForm.dirty) {
             this.onSaveComplete(null);
@@ -228,18 +230,18 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     saveQuadrant(quadrant): void {
         this.radarService.saveQuadrantToRadar(this.radar.id, quadrant).subscribe(
             (data) => this.onSaveComplete(data),
-            (error: any) => this.errorMessage = <any>error
+            (error: any) => this.errorMessage = error
         );
     }
 
     onSaveComplete(radar: Radar): void {
         // Reset the form to clear the flags
         this.radarForm.reset();
-        var navigate = false;
+        let navigate = false;
 
         if (radar == undefined || radar == null) {
             this.onRadarRetrieved(this.radar);
-            this.toastr.error('Save failed');
+            this.toastr.error("Save failed");
         } else {
             if (this.radar == undefined) {
                 navigate = true;
@@ -248,43 +250,43 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             this.radar = radar;
             this.onRadarRetrieved(radar);
 
-            this.toastr.success('Saved successful').then((toast: Toast) => {
+            this.toastr.success("Saved successful").then(() => {
                 if (navigate) {
                     console.log("Navigated to %s", this.radar.id);
-                    this.router.navigate(['/edit/radar'], { queryParams: { id: this.radar.id } });
+                    this.router.navigate(["/edit/radar"], { queryParams: { id: this.radar.id } });
                 }
             });
         }
     }
 
     onDeleteComplete(): void {
-        this.toastr.success('Deletion successful').then((toast: Toast) => {
-            this.router.navigate(['/edit/radar']);
+        this.toastr.success("Deletion successful").then(() => {
+            this.router.navigate(["/edit/radar"]);
         });
     }
 
     saveCycle(cycle): void {
         this.radarService.saveCycleToRadar(this.radar.id, cycle).subscribe(
             (data) => this.onSaveComplete(data),
-            (error: any) => this.errorMessage = <any>error
+            (error: any) => this.errorMessage = error
         );
     }
 
     deleteCycle(cycle): void {
         this.radarService.deleteCycleFromRadar(this.radar.id, cycle.id).subscribe(
             (data) => this.onSubDeleteComplete(data),
-            (error: any) => this.errorMessage = <any>error
+            (error: any) => this.errorMessage = error
         );
     }
 
     onSubDeleteComplete(radar: Radar): void {
         // Reset the form to clear the flags
         this.radarForm.reset();
-        var navigate = false;
+        let navigate = false;
 
         if (radar == undefined || radar == null) {
             this.onRadarRetrieved(this.radar);
-            this.toastr.error('Delete failed');
+            this.toastr.error("Delete failed");
         } else {
             if (this.radar == undefined) {
                 navigate = true;
@@ -293,74 +295,71 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             this.radar = radar;
             this.onRadarRetrieved(radar);
 
-            this.toastr.success('Delete successful').then((toast: Toast) => {
+            this.toastr.success("Delete successful").then(() => {
                 if (navigate) {
-                    this.router.navigate(['/edit/radar'], { queryParams: { id: this.radar.id } });
+                    this.router.navigate(["/edit/radar"], { queryParams: { id: this.radar.id } });
                 }
             });
         }
     }
 
     saveBlip(blip: Blip, callback): void {
+        console.warn(JSON.stringify(blip));
         this.radarService.saveBlipToRadar(this.radar.id, blip).subscribe(
             (data) => this.onSaveBlipComplete(data),
-            (error: any) => this.errorMessage = <any>error
+            (error: any) => this.errorMessage = error
         );
     }
 
     deleteBlip(blip): void {
+        console.warn(JSON.stringify(blip));
         this.radarService.deleteBlipFromRadar(this.radar.id, blip.id).subscribe(
             (data) => this.onBlipDeleteComplete(data),
-            (error: any) => this.errorMessage = <any>error
+            (error: any) => this.errorMessage = error
         );
     }
 
     private inPlaceUpdateOfBlip(blip: Blip): void {
-        // Needed for grid to update correctly
-        this.blips.forEach((item, index, blips) => {
-            if (item.id === "newid" || blip.id === item.id) {
-                let existingBlip = this.blips[index];
-                existingBlip.id = blip.id;
-                existingBlip.name = blip.name;
-                existingBlip.description = blip.description;
-                existingBlip.added = blip.added;
-                existingBlip.cycleId = blip.cycleId;
-                existingBlip.quadrantId = blip.quadrantId;
-                existingBlip.radarId = blip.radarId;
-                existingBlip.size = blip.size;
-                existingBlip.blipNumber = blip.blipNumber;
+        let newBlips = new Array<Blip>();
+        this.blips.forEach((item) => {
+            if (item.id == undefined || item.id === "" || item.id === "newid" || blip.id === item.id) {
+                newBlips.push(blip);
+            } else {
+                newBlips.push(item);
             }
         });
+
+        this.blips = newBlips;
     }
 
     onSaveBlipComplete(blip: Blip): void {
         if (blip == undefined || blip == null) {
             this.onRadarRetrieved(this.radar);
-            this.toastr.error('Save failed');
+            this.toastr.error("Save failed");
         } else {
             this.inPlaceUpdateOfBlip(blip);
 
-            this.onRadarRetrieved(this.radar);
+            this.toastr.success("Saved successful");
 
-            this.toastr.success('Saved successful');
+            this.onRadarRetrieved(this.radar);
         }
     }
 
     onBlipDeleteComplete(blip: Blip): void {
-        // Reset the form to clear the flags
         if (blip == undefined || blip == null) {
             this.onRadarRetrieved(this.radar);
-            this.toastr.error('Save failed');
+            this.toastr.error("Save failed");
         } else {
-            this.blips.forEach((item, index, blips) => {
-                if (blip.id === item.id) {
-                    this.blips.splice(index, 1);
+            let newBlips = new Array<Blip>();
+            this.blips.forEach((item) => {
+                if (blip.id !== item.id) {
+                    newBlips.push(item);
                 }
-            })
+            });
+            this.blips = newBlips;
+            this.toastr.success("Delete successful");
 
             this.onRadarRetrieved(this.radar);
-
-            this.toastr.success('Delete successful');
         }
     }
 

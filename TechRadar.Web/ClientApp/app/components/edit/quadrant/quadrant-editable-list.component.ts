@@ -1,139 +1,111 @@
-﻿import { Component, OnInit, ViewChildren, ElementRef, ViewContainerRef, Input, Output, EventEmitter, AfterViewInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl, FormArray, Validators, FormControlName } from '@angular/forms';
-import { ToastsManager, Toast } from 'ng2-toastr/ng2-toastr';
-
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/observable/fromEvent';
-import 'rxjs/add/observable/merge';
-import { Observable } from 'rxjs/Observable';
-import { Subscription } from 'rxjs/Subscription';
-
-import { Radar, Quadrant, Cycle } from '../../../models';
-import * as _ from 'underscore';
-import { GenericValidator } from '../../../shared';
+﻿import { Component, OnInit, OnChanges, Input, Output, EventEmitter } from "@angular/core";
+import { DialogService } from "ng2-bootstrap-modal";
+import { FormErrorDialogComponent } from "../../modal"
+import { Quadrant } from "../../../models";
+import { LocalDataSource } from "ng2-smart-table";
 
 @Component({
-    selector: 'quadrant-editable-list',
-    templateUrl: './quadrant-editable-list.component.html'
+    selector: "quadrant-editable-list",
+    template: `<ng2-smart-table [settings]="settings" [source]="source" (editConfirm)="onSaveConfirmEvent($event)" ></ng2-smart-table>`,
+    styleUrls: ["./quadrant-editable-list.component.scss"]
 })
-export class QuadrantEditableListComponent implements OnInit, AfterViewInit {
-    @ViewChildren(FormControlName, { read: ElementRef }) formInputElements: ElementRef[];
-    @Input() quadrants: Quadrant[];
-    @Output() quadrantSaveEvent = new EventEmitter<Quadrant>();
+export class QuadrantEditableListComponent implements OnInit, OnChanges {
+    @Input()
+    quadrants: Quadrant[];
 
-    errorMessage: string;
-    quadrantForm: FormGroup;
+    @Output()
+    quadrantSaveEvent = new EventEmitter<Quadrant>();
 
-    displayMessage: { [key: string]: string } = {};
-    quadrantInEditMode: string;
+    source: LocalDataSource;
+    settings = {};
 
     private validationMessages: { [key: string]: { [key: string]: string } } = {
         name: {
-            required: 'Quadrant name is required.',
-            minlength: 'Quadrant name must be at least three characters.'
+            required: "Quadrant name is required.",
+            minlength: "Quadrant name must be at least three characters."
         }
     };
 
-    genericValidator: GenericValidator;
-
-    constructor(private fb: FormBuilder,
-        private toastr: ToastsManager,
-        private vcr: ViewContainerRef
-    ) {
-        this.toastr.setRootViewContainerRef(vcr);
-        this.genericValidator = new GenericValidator(this.validationMessages);
-        this.quadrantInEditMode = '';
+    constructor(private dialogService: DialogService) {
     }
 
     ngOnInit(): void {
-        this.buildForm();
+        this.setTableSettings();
     }
 
-    ngAfterViewInit(): void {
-        // Watch for the blur event from any input element on the form.
-        let controlBlurs: Observable<any>[] = this.formInputElements
-            .map((formControl: ElementRef) => Observable.fromEvent(formControl.nativeElement, 'blur'));
-
-        // Merge the blur event observable with the valueChanges observable
-        Observable.merge(this.quadrantForm.valueChanges, ...controlBlurs).debounceTime(800).subscribe(value => {
-            this.displayMessage = this.genericValidator.processMessages(this.quadrantForm);
-        });
+    ngOnChanges(): void {
+        this.source = new LocalDataSource(this.quadrants);
     }
 
-    private buildForm() {
-        this.quadrantForm = this.fb.group({
-            id: '',
-            quadrantNumber: 1,
-            name: ['', [
-                Validators.required,
-                Validators.minLength(3)
-            ]],
-            description: ''
-        });
+    private setTableSettings() {
+        this.settings = {
+            mode: "inline",
+            hideSubHeader: true,
+            attr: {
+                class: "table table-striped"
+            },
+            actions: {
+                add: false,
+                delete: false,
+                edit: true,
+                position: "right"
+            },
+            edit: {
+                confirmSave: true,
+                editButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></div>`,
+                cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`,
+                saveButtonContent: `<div class="btn btn-xs btn-info"><i class="fa fa-check"></i></button>`
+            },
+            columns: {
+                quadrantNumber: {
+                    title: "Quadrant #",
+                    editable: false,
+                    class: "col-md-1"
+                },
+                name: {
+                    title: "Name",
+                    editable: true,
+                    class: "col-md-4"
+                },
+                description: {
+                    title: "Description",
+                    editable: true,
+                    class: "col-md-6"
+                }
+            },
+            pager: {
+                display: false
+    }
+        };
 
     }
 
-    isEditing(id: string) {
-        if (this.quadrantInEditMode == '') return false;
+    private validateForm(data: any): string[] {
+        const errorMessages = new Array<string>();
 
-        return this.quadrantInEditMode == id;
-    }
-
-    isEditingInProgress() {
-        return this.quadrantInEditMode != '';
-    }
-
-    private findQuadrantById(id: string): Quadrant {
-        var list = this.quadrants.filter(quad => _.isEqual(quad.id, id));
-
-        if (Array.isArray(list) && list.length > 0) {
-            return (list[0]);
+        if (data.name == undefined || data.name.length === 0) {
+            errorMessages.push(this.validationMessages["name"]["required"]);
         }
 
-        return null;
-    }
-
-    onQuadrantEditClicked(event, id: string) {
-        this.quadrantForm.reset();
-
-        var quadrant = this.findQuadrantById(id);
-
-        if (quadrant != undefined) {
-            this.quadrantForm.patchValue({
-                id: quadrant.id,
-                name: quadrant.name,
-                quadrantNumber: quadrant.quadrantNumber,
-                description: quadrant.description
-            });
+        if (data.name.length < 2) {
+            errorMessages.push(this.validationMessages["name"]["minlength"]);
         }
 
-        this.quadrantInEditMode = id;
+        return errorMessages;
     }
 
-    onQuadrantSaveClicked(event) {
-        this.saveQuadrant();
-
-        this.quadrantInEditMode = '';
-    }
-
-    onQuadrantCancelClicked(event) {
-        this.quadrantForm.reset();
-        this.quadrantInEditMode = '';
-    }
-
-    saveQuadrant(): void {
-        var quadrant: Quadrant;
-        if (this.quadrantForm.dirty && this.quadrantForm.valid) {
-            let p = Object.assign({}, quadrant, this.quadrantForm.value);
-
-            this.quadrantSaveEvent.emit(p);
-        } else if (!this.quadrantForm.dirty) {
-            this.onSaveComplete(null);
+    onSaveConfirmEvent(event) {
+        const messages = this.validateForm(event.newData);
+        if (messages.length === 0) {
+            let newItem = new Quadrant(event.newData);
+            this.quadrantSaveEvent.emit(newItem);
+            event.confirm.resolve(newItem);
+        } else {
+            this.dialogService.addDialog(FormErrorDialogComponent,
+                {
+                    title: "Errors Found",
+                    messages: messages
+                });
         }
-    }
-
-    onSaveComplete(quadrant: Quadrant): void {
-        // Reset the form to clear the flags
-        this.quadrantForm.reset();
     }
 }

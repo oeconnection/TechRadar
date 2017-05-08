@@ -1,10 +1,9 @@
-﻿import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Radar, Quadrant, Cycle } from '../../models';
+﻿import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
-    selector: 'radar',
-    templateUrl: './radar.component.html'
+    selector: "radar",
+    templateUrl: "./radar.component.html"
 })
 export class RadarComponent implements OnInit {
     private id: string;
@@ -15,11 +14,11 @@ export class RadarComponent implements OnInit {
 
     ngOnInit() {
         this.route.params.subscribe(params => {
-            this.id = params['id'];
+            this.id = params["id"];
         });
 
         this.route.queryParams.subscribe(params => {
-            this.quadrant = +params['quad'];
+            this.quadrant = +params["quad"];
         });
     }
 }

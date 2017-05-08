@@ -1,18 +1,18 @@
-﻿import { Component } from '@angular/core';
+﻿import { Component } from "@angular/core";
 import { DialogComponent, DialogService } from "ng2-bootstrap-modal";
 
-export interface FormErrorDialogModel {
+export interface IFormErrorDialogModel {
     title: string;
     messages: string[];
 }
 
 @Component({
-    selector: 'confirm',
+    selector: "confirm",
     template: `<div class="modal-dialog">
                 <div class="modal-content">
                    <div class="modal-header">
                      <button type="button" class="close" (click)="close()" >&times;</button>
-                     <h4 class="modal-title">{{title || 'Confirm'}}</h4>
+                     <h4 class="modal-title">{{title || 'Errors'}}</h4>
                    </div>
                    <div class="modal-body">
                      <p *ngFor="let message of messages">{{message}}</p>
@@ -23,7 +23,7 @@ export interface FormErrorDialogModel {
                  </div>
                 </div>`
 })
-export class FormErrorDialogComponent extends DialogComponent<FormErrorDialogModel, boolean> implements FormErrorDialogModel {
+export class FormErrorDialogComponent extends DialogComponent<IFormErrorDialogModel, boolean> implements IFormErrorDialogModel {
     title: string;
     messages: string[];
 

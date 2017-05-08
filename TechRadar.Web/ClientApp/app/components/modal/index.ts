@@ -1,3 +1,3 @@
-﻿export * from './confirm-dialog.component';
-export * from './form-error-dialog.component';
+﻿export * from "./confirm-dialog.component";
+export * from "./form-error-dialog.component";
 

@@ -1,11 +1,13 @@
 ﻿<div class="container-fluid">
     <div class="page-header row vertical-align">
         <div class="pull-left col-md-11 col-sm-11">
-            <h2><a [routerLink]="['/radar', radarId]">{{ radarName }}</a></h2>
+            <h2>
+                <a [routerLink]="['/radar', radarId]">{{ radarName }}</a>
+            </h2>
             <p>{{ radarDescription }}</p>
         </div>
         <div class="pull-right col-md-1 col-sm-1">
-            <a [routerLink]="['/radar', radarId]" class="btn btn-primary pull-right"><i class="fa fa-eye"></i>  View</a>
+            <a [routerLink]="['/radar', radarId]" class="btn btn-primary pull-right"><i class="fa fa-eye"></i> View</a>
         </div>
     </div>
 
@@ -31,7 +33,7 @@
                                        id="nameId"
                                        type="text"
                                        placeholder="Name (required)"
-                                       formControlName="name" />
+                                       formControlName="name"/>
                                 <span class="help-block" *ngIf="displayMessage.name">
                                     {{displayMessage.name}}
                                 </span>
@@ -47,7 +49,7 @@
                                        id="group"
                                        type="text"
                                        placeholder="Group (required)"
-                                       formControlName="group" />
+                                       formControlName="group"/>
                                 <span class="help-block" *ngIf="displayMessage.group">
                                     {{displayMessage.group}}
                                 </span>
@@ -61,7 +63,7 @@
                                 <textarea class="form-control"
                                           id="descriptionId"
                                           placeholder="Description"
-                                          rows=3
+                                          rows="3"
                                           formControlName="description"></textarea>
                                 <span class="help-block" *ngIf="displayMessage.description">
                                     {{ displayMessage.description}}
@@ -82,14 +84,14 @@
                                 <span>
                                     <button class="btn btn-primary"
                                             type="submit"
-                                            style="width:80px;margin-right:10px"
+                                            style="width: 80px; margin-right: 10px"
                                             [disabled]="!(radarForm.dirty && radarForm.valid)">
                                         Save
                                     </button>
                                 </span>
                                 <span>
                                     <a class="btn btn-default"
-                                       style="width:80px"
+                                       style="width: 80px"
                                        (click)="onCancelClick()">
                                         Cancel
                                     </a>
@@ -97,7 +99,7 @@
                                 <span>
                                     <button class="btn btn-danger"
                                             type="button"
-                                            style="width:80px"
+                                            style="width: 80px"
                                             [disabled]="isDeleteDisabled()"
                                             (click)="onDeleteClick()">
                                         Delete
@@ -107,25 +109,43 @@
                         </div>
                     </fieldset>
                 </form>
-                <div class='has-error' *ngIf='errorMessage'>{{errorMessage}}</div>
+                <div class="has-error" *ngIf="errorMessage">{{errorMessage}}</div>
             </div>
         </div>
 
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#blip" aria-controls="blip" role="tab" data-toggle="tab">Blips</a></li>
-            <li role="presentation"><a href="#cycle" aria-controls="cycle" role="tab" data-toggle="tab">Cycles</a></li>
-            <li role="presentation"><a href="#quadrant" aria-controls="quadrant" role="tab" data-toggle="tab">Quadrants</a></li>
+            <li role="presentation" class="active">
+                <a href="#blip" aria-controls="blip" role="tab" data-toggle="tab">Blips</a>
+            </li>
+            <li role="presentation">
+                <a href="#cycle" aria-controls="cycle" role="tab" data-toggle="tab">Cycles</a>
+            </li>
+            <li role="presentation">
+                <a href="#quadrant" aria-controls="quadrant" role="tab" data-toggle="tab">Quadrants</a>
+            </li>
         </ul>
 
         <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="blip">
-                <blip-editable-list *ngIf="showChildren()" [radar]="radar" [blips]="blips" (blipSaveEvent)="saveBlip($event)" (blipDeleteEvent)="deleteBlip($event)"></blip-editable-list>
+                <div class="panel panel-info">
+                    <div class="panel-body">
+                        <blip-editable-list *ngIf="showChildren()" [radar]="radar" [blips]="blips" (blipSaveEvent)="saveBlip($event)" (blipDeleteEvent)="deleteBlip($event)"></blip-editable-list>
+                    </div>
+                </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="cycle">
-                <cycle-editable-list *ngIf="showChildren()" [cycles]="radar.cycles" (cycleSaveEvent)="saveCycle($event)" (cycleDeleteEvent)="deleteCycle($event)"></cycle-editable-list>
+                <div class="panel panel-info">
+                    <div class="panel-body">
+                        <cycle-editable-list *ngIf="showChildren()" [cycles]="radar.cycles" [blips]="blips" (cycleSaveEvent)="saveCycle($event)" (cycleDeleteEvent)="deleteCycle($event)"></cycle-editable-list>
+                    </div>
+                </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="quadrant">
-                <quadrant-editable-list *ngIf="showChildren()" [quadrants]="radar.quadrants" (quadrantSaveEvent)="saveQuadrant($event)"></quadrant-editable-list>
+                <div class="panel panel-info">
+                    <div class="panel-body">
+                        <quadrant-editable-list *ngIf="showChildren()" [quadrants]="radar.quadrants" [blips]="blips" (quadrantSaveEvent)="saveQuadrant($event)"></quadrant-editable-list>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

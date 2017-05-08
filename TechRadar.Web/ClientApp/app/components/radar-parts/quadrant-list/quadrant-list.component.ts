@@ -103,7 +103,7 @@ export class QuadrantListComponent implements OnChanges {
         if (this.activeBlip == null) {
             return false;
         }
-        return this.activeBlip.blipNumber == blip;
+        return this.activeBlip.blipNumber === blip;
     }
 
     private getBlipsByCycleId(id: string): Blip[] {

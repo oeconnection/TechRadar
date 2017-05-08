@@ -1,1 +1,1 @@
-﻿export { RadarDisplayComponent } from './radar-display.component';
+﻿export { RadarDisplayComponent } from "./radar-display.component";

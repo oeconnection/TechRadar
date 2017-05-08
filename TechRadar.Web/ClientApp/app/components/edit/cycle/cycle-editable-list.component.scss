@@ -3,7 +3,6 @@
 ng2-smart-table table tbody tr {
     td {
         font-size: $font-size !important;
-
     }
 
     th {
@@ -42,6 +41,12 @@ div.ng2-smart-filter {
 input-editor {
     font-size: $font-size !important;
 
+    select, textarea, optgroup, input {
+        font-size: $font-size !important;
+    }
+}
+
+table-cell-custom-editor ng-component {
     select, textarea, optgroup, input {
         font-size: $font-size !important;
     }

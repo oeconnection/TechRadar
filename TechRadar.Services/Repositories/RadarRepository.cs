@@ -87,7 +87,7 @@ namespace TechRadar.Services.Repositories
                 ReturnDocument = ReturnDocument.After
             };
 
-            var filter = Builders<Blip>.Filter.Eq(r => r.Id, ObjectId.GenerateNewId().ToString());
+            var filter = Builders<Blip>.Filter.Eq(r => r.Id, blip.Id);
 
             var update = Builders<Blip>.Update
                 .Set("name", blip.Name)
@@ -95,7 +95,7 @@ namespace TechRadar.Services.Repositories
                 .Set("size", blip.Size)
                 .Set("quadrant", ObjectId.Parse(blip.QuadrantId))
                 .Set("cycle", ObjectId.Parse(blip.CycleId))
-                .Set("radar", ObjectId.Parse(blip.RadarId))
+                .Set("radar", ObjectId.Parse(id))
                 .CurrentDate("added")
                 .CurrentDate("lastModified");
 

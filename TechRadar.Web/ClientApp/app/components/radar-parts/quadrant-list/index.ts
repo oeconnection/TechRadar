@@ -1,1 +1,1 @@
-﻿export { QuadrantListComponent } from './quadrant-list.component';
+﻿export { QuadrantListComponent } from "./quadrant-list.component";

@@ -1,1 +1,1 @@
-﻿export { BlipComponent } from './blip.component';
+﻿export { BlipComponent } from "./blip.component";

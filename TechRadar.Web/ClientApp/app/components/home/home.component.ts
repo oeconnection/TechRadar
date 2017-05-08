@@ -1,11 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { RadarService } from '../../services';
-import { Radar, Quadrant, Cycle } from '../../models';
+import { Component, OnInit, OnDestroy } from "@angular/core";
+import { RadarService } from "../../services";
+import { Radar } from "../../models";
 
 @Component({
-    selector: 'home',
-    templateUrl: './home.component.html',
-    styleUrls: ['./home.component.scss']
+    selector: "home",
+    templateUrl: "./home.component.html",
+    styleUrls: ["./home.component.scss"]
 })
 export class HomeComponent implements OnInit, OnDestroy {
     private sub: any;
