@@ -114,7 +114,7 @@ export class BlipEditableListComponent implements OnInit, OnChanges {
             add: {
                 confirmCreate: true,
                 addButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add New</button>`,
-                createButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></div>`,
+                createButtonContent: `<div class="btn btn-xs btn-info"><i class="fa fa-check"></i></button>`,
                 cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`
             },
             columns: {
