@@ -8,7 +8,7 @@ import {
     ViewChild,
     SimpleChanges
 } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { Radar, RadarConfig, Blip, Quadrant } from "../../../models";
 import { RadarService } from "../../../services";
 import { D3Service, D3 } from "d3-ng2-service";
@@ -39,7 +39,10 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     private show: boolean;
     private chosenQuadrant: Quadrant;
 
-    constructor(private route: ActivatedRoute, private radarService: RadarService, private d3Service: D3Service) {
+    constructor(private route: ActivatedRoute,
+        private router: Router,
+        private radarService: RadarService,
+        private d3Service: D3Service) {
         this.show = false;
         this.showChart = false;
         this.d3 = d3Service.getD3(); 
@@ -60,6 +63,9 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     }
 
     ngOnInit() {
+        if (this.id === undefined || this.id === null) {
+            this.router.navigate(["/"]);
+        }
     }
 
     ngOnDestroy(): void {
@@ -97,6 +103,8 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
 
             if (this.radarData) {
                 this.setProperties();
+            } else {
+                this.router.navigate(["/"]);
             };
             this.showChart = true;
         });

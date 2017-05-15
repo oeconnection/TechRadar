@@ -40,7 +40,12 @@ namespace TechRadar.Services.Repositories
 
         public async Task<Radar> DeleteRadar(string id)
         {
-            return await _context.Radars.FindOneAndDeleteAsync(r => r.Id == id);
+            var deleteBlips = _context.Blips.DeleteManyAsync(x => x.RadarId == id);
+            var deleteRadar = _context.Radars.FindOneAndDeleteAsync(r => r.Id == id);
+
+            await Task.WhenAll(deleteBlips, deleteRadar);
+
+            return await deleteRadar;
         }
 
         public async Task<IEnumerable<Blip>> GetBlipsInRadar(string id)

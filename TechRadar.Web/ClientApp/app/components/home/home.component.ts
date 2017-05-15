@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { RadarService } from "../../services";
+import { RadarService, GlobalState } from "../../services";
 import { Radar } from "../../models";
 
 @Component({
@@ -10,18 +10,23 @@ import { Radar } from "../../models";
 export class HomeComponent implements OnInit, OnDestroy {
     private sub: any;
     private radars: Array<Radar>;
+    private readonly radarListDataName = "global.radars";
 
-    constructor(private radarService: RadarService) {
+    constructor(
+        private radarService: RadarService,
+        private stateManager: GlobalState) {
     }
 
     ngOnInit() {
-        this.sub = this.radarService.getRadarList().subscribe(data => {
-            this.radars = data;
+        this.stateManager.subscribe(this.radarListDataName, (radars: Radar[]) => {
+            this.radars = radars;
         });
     }
 
     ngOnDestroy(): void {
-        this.sub.unsubscribe();
+        if (this.sub !== null && this.sub != undefined) {
+            this.sub.unsubscribe();
+        }
     }
 
     isRadarReady(radar: Radar): boolean {

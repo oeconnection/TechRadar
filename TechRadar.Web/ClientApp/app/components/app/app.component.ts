@@ -1,36 +1,55 @@
-import { Component, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
-import { RadarService } from '../../services';
-import { Radar } from '../../models';
-import { ImageLoaderService, ThemePreloaderService, ThemeSpinnerService } from '../../services';
+import { Component, OnInit, OnDestroy, OnChanges } from "@angular/core";
+import { RadarService, GlobalState } from "../../services";
+import { Radar } from "../../models";
+import { ImageLoaderService, ThemePreloaderService, ThemeSpinnerService } from "../../services";
 
 @Component({
-    selector: 'app',
-    templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss']
+    selector: "app",
+    templateUrl: "./app.component.html",
+    styleUrls: ["./app.component.scss"]
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit, OnDestroy, OnChanges {
     private sub: any;
     private radars: Array<Radar>;
+    private readonly radarListDataName = "global.radars";
 
     constructor(private radarService: RadarService,
-        private _imageLoader: ImageLoaderService,
-        private _spinner: ThemeSpinnerService) {
+        private imageLoader: ImageLoaderService,
+        private spinner: ThemeSpinnerService,
+        private stateManager: GlobalState) {
+
+        this.stateManager.subscribe(this.radarListDataName, (radars: Radar[]) => {
+            if (radars == null) {
+                // reset radar data
+                this.sub = this.radarService.getRadarList().subscribe(data => {
+                    this.stateManager.notifyDataChanged(this.radarListDataName, data);
+                });
+            } else {
+                // Mouse Over
+                this.radars = radars;
+            }
+        });
+
     }
 
     ngOnInit() {
-        this.sub = this.radarService.getRadarList().subscribe(data => {
-            this.radars = data;
-        });
+        // First call
+        this.stateManager.notifyDataChanged(this.radarListDataName, null);
+    }
+
+    ngOnChanges() {
     }
 
     ngOnDestroy(): void {
-        this.sub.unsubscribe();
+        if (this.sub !== null && this.sub !== undefined) {
+            this.sub.unsubscribe();
+        }
     }
 
-    public ngAfterViewInit(): void {
+    ngAfterViewInit(): void {
         // hide spinner once all loaders are completed
-        ThemePreloaderService.load().then((values) => {
-            this._spinner.hide();
+        ThemePreloaderService.load().then(() => {
+            this.spinner.hide();
         });
     }
 }

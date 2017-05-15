@@ -10,7 +10,7 @@ import { Observable } from "rxjs/Observable";
 import { Subscription } from "rxjs/Subscription";
 
 import { IRadar, Radar, Blip, Cycle, Quadrant } from "../../../models";
-import { RadarService } from "../../../services";
+import { RadarService, GlobalState } from "../../../services";
 
 import { GenericValidator } from "../../../shared";
 import { DialogService } from "ng2-bootstrap-modal";
@@ -51,6 +51,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             maxlength: "Description cannot be more than 500 characters."
         }
     };
+    private readonly radarListDataName = "global.radars";
 
     genericValidator: GenericValidator;
 
@@ -60,7 +61,8 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         private radarService: RadarService,
         private toastr: ToastsManager,
         private vcr: ViewContainerRef,
-        private dialogService: DialogService
+        private dialogService: DialogService,
+        private stateManager: GlobalState
     ) {
         this.toastr.setRootViewContainerRef(vcr);
         this.genericValidator = new GenericValidator(this.validationMessages);
@@ -79,8 +81,10 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.sub.unsubscribe();
-        if (this.dataSubscription !== null) {
+        if (this.sub !== null && this.sub !== undefined) {
+            this.sub.unsubscribe();
+        }
+        if (this.dataSubscription !== null && this.dataSubscription !== undefined) {
             this.dataSubscription.unsubscribe();
         }
     }
@@ -123,7 +127,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             })
                 .subscribe((isConfirmed) => {
                     if (isConfirmed) {
-                        this.onDeleteComplete();
+                        this.deleteRadar();
                     }
                 });
         }        
@@ -174,10 +178,12 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     onRadarRetrieved(radar: IRadar): void {
-        this.radar = radar;
-        this.radarId = radar.id;
-        this.radarName = radar.name;
-        this.radarDescription = radar.description;
+        if (radar != undefined) {
+            this.radar = radar;
+            this.radarId = radar.id;
+            this.radarName = radar.name;
+            this.radarDescription = radar.description;
+        }
 
         this.resetForm();
     }
@@ -251,6 +257,8 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             this.onRadarRetrieved(radar);
 
             this.toastr.success("Saved successful").then(() => {
+                this.stateManager.notifyDataChanged(this.radarListDataName, null);
+
                 if (navigate) {
                     this.router.navigate(["/edit/radar"], { queryParams: { id: this.radar.id } });
                 } else {
@@ -263,7 +271,8 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
 
     onDeleteComplete(): void {
         this.toastr.success("Deletion successful").then(() => {
-            this.router.navigate(["/edit/radar"]);
+            this.stateManager.notifyDataChanged(this.radarListDataName, null);
+            this.router.navigate(["/"]);
         });
     }
 
