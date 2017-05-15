@@ -169,14 +169,14 @@ export class CycleEditableListComponent implements OnInit, OnChanges {
         const errorMessages = new Array<string>();
 
         if (data == null) {
-            return null;
+            return errorMessages;
         }
 
-        if (data.Id === undefined || data.Id === "") {
-            return null;
+        if (data.id === undefined || data.id === "") {
+            return errorMessages;
         }
 
-        let blipInUse = this.blips.find(blip => blip.cycleId === data.id);
+        const blipInUse = this.blips.find(blip => blip.cycleId === data.id);
 
         if (blipInUse !== undefined) {
             errorMessages.push(this.validationMessages["id"]["exists"]);
@@ -187,7 +187,7 @@ export class CycleEditableListComponent implements OnInit, OnChanges {
     onSaveConfirmEvent(event) {
         const messages = this.validateForm(event.newData);
         if (messages.length === 0) {
-            let newItem = new Cycle(event.newData);
+            const newItem = new Cycle(event.newData);
             this.cycleSaveEvent.emit(newItem);
             event.confirm.resolve(newItem);
         } else {
@@ -199,14 +199,20 @@ export class CycleEditableListComponent implements OnInit, OnChanges {
         }
     }
 
-
     onDeleteConfirmEvent(event, cycle) {
         const item = event.data;
-        const messages = this.validateForm(event.newData);
+        const messages = this.validateDelete(item);
         if (messages.length === 0) {
-            let newItem = new Cycle(event.newData);
-            this.cycleSaveEvent.emit(newItem);
-            event.confirm.resolve(newItem);
+            this.dialogService.addDialog(ConfirmDialogComponent,
+                    {
+                        title: "Confirmation",
+                        message: `Delete cycle ${item.name}?`
+                    })
+                .subscribe((isConfirmed) => {
+                    if (isConfirmed) {
+                        this.cycleDeleteEvent.emit(item);
+                    }
+                });
         } else {
             this.dialogService.addDialog(FormErrorDialogComponent,
                 {
@@ -214,17 +220,6 @@ export class CycleEditableListComponent implements OnInit, OnChanges {
                     messages: messages
                 });
         }
-
-        this.dialogService.addDialog(ConfirmDialogComponent,
-                {
-                    title: "Confirmation",
-                    message: `Delete cycle ${item.name}?`
-                })
-            .subscribe((isConfirmed) => {
-                if (isConfirmed) {
-                    this.cycleDeleteEvent.emit(item);
-                }
-            });
     }
 
     onCreateConfirmEvent(event) {

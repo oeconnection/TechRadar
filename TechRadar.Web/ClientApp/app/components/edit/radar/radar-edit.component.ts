@@ -9,7 +9,7 @@ import "rxjs/add/observable/merge";
 import { Observable } from "rxjs/Observable";
 import { Subscription } from "rxjs/Subscription";
 
-import { IRadar, Radar, Blip } from "../../../models";
+import { IRadar, Radar, Blip, Cycle, Quadrant } from "../../../models";
 import { RadarService } from "../../../services";
 
 import { GenericValidator } from "../../../shared";
@@ -252,8 +252,10 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
 
             this.toastr.success("Saved successful").then(() => {
                 if (navigate) {
-                    console.log("Navigated to %s", this.radar.id);
                     this.router.navigate(["/edit/radar"], { queryParams: { id: this.radar.id } });
+                } else {
+                    this.resetCycleArray();
+                    this.resetQuadrantArray();
                 }
             });
         }
@@ -265,18 +267,36 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    saveCycle(cycle): void {
+    saveCycle(cycle: Cycle): void {
         this.radarService.saveCycleToRadar(this.radar.id, cycle).subscribe(
             (data) => this.onSaveComplete(data),
             (error: any) => this.errorMessage = error
         );
     }
 
-    deleteCycle(cycle): void {
+    deleteCycle(cycle: Cycle): void {
         this.radarService.deleteCycleFromRadar(this.radar.id, cycle.id).subscribe(
             (data) => this.onSubDeleteComplete(data),
             (error: any) => this.errorMessage = error
         );
+    }
+
+    private resetCycleArray(): void {
+        const cycles = new Array<Cycle>();
+        this.radar.cycles.forEach((item) => {
+            cycles.push(item);
+        });
+
+        this.radar.cycles = cycles;
+    }
+
+    private resetQuadrantArray(): void {
+        const quadrants = new Array<Quadrant>();
+        this.radar.quadrants.forEach((item) => {
+            quadrants.push(item);
+        });
+
+        this.radar.quadrants = quadrants;
     }
 
     onSubDeleteComplete(radar: Radar): void {
@@ -298,13 +318,15 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             this.toastr.success("Delete successful").then(() => {
                 if (navigate) {
                     this.router.navigate(["/edit/radar"], { queryParams: { id: this.radar.id } });
+                } else {
+                    this.resetCycleArray();
+                    this.resetQuadrantArray();
                 }
             });
         }
     }
 
     saveBlip(blip: Blip, callback): void {
-        console.warn(JSON.stringify(blip));
         this.radarService.saveBlipToRadar(this.radar.id, blip).subscribe(
             (data) => this.onSaveBlipComplete(data),
             (error: any) => this.errorMessage = error
@@ -312,7 +334,6 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     deleteBlip(blip): void {
-        console.warn(JSON.stringify(blip));
         this.radarService.deleteBlipFromRadar(this.radar.id, blip.id).subscribe(
             (data) => this.onBlipDeleteComplete(data),
             (error: any) => this.errorMessage = error
@@ -320,7 +341,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     private inPlaceUpdateOfBlip(blip: Blip): void {
-        let newBlips = new Array<Blip>();
+        const newBlips = new Array<Blip>();
         this.blips.forEach((item) => {
             if (item.id == undefined || item.id === "" || item.id === "newid" || blip.id === item.id) {
                 newBlips.push(blip);

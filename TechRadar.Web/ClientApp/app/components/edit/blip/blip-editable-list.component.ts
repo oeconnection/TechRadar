@@ -66,14 +66,16 @@ export class BlipEditableListComponent implements OnInit, OnChanges {
 
     ngOnChanges(): void {
         this.source = new LocalDataSource(this.blips);
-        this.buildLists();
+        this.setTableSettings();
     }
 
     private buildLists() {
+        this.cycleList = new Array<IListItem>();
         this.radar.cycles.forEach((cycle: Cycle) => {
             this.cycleList.push({ value: cycle.id, title: cycle.fullName });
         });
 
+        this.quadrantList = new Array<IListItem>();
         this.radar.quadrants.forEach((quadrant: Quadrant) => {
             this.quadrantList.push({ value: quadrant.id, title: quadrant.name });
         });
