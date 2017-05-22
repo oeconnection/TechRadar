@@ -1,1 +1,1 @@
-﻿export * from './generic-validator';
+﻿export * from "./generic-validator";

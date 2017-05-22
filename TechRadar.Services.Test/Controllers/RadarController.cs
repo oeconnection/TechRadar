@@ -105,7 +105,7 @@ namespace TechRadar.Services.Test.Controllers
                 Id = null,
                 Name = radar.Name,
                 Description = radar.Description,
-                Group = radar.Group
+                Sized = radar.Sized
             };
 
             _repository
@@ -135,11 +135,11 @@ namespace TechRadar.Services.Test.Controllers
         [TestMethod]
         public async Task UpsertRadar__UpdateExisting()
         {
-            const string newGroupName = "Changed In Test";
+            const string newDescriptionName = "Changed In Test";
             var radars = RadarTestHelpers.CreateTestRadarCollection(_radarIds);
             var radar = radars.FirstOrDefault(x => x.Name == "Test Radar 1");
 
-            radar.Group = newGroupName;
+            radar.Description = newDescriptionName;
 
             _repository
                 .Setup(r => r.UpdateRadar(radar))
@@ -155,7 +155,7 @@ namespace TechRadar.Services.Test.Controllers
             var returnedRadar = ((OkObjectResult)result).Value as Radar;
             Assert.IsNotNull(returnedRadar, "Radar returned as null");
             Assert.AreEqual(returnedRadar.Id, radar.Id, "Incorrect radar returned");
-            Assert.AreEqual(returnedRadar.Group, newGroupName, "Changed radar not returned");
+            Assert.AreEqual(returnedRadar.Description, newDescriptionName, "Changed radar not returned");
         }
 
         [TestMethod]

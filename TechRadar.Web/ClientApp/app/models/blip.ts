@@ -1,4 +1,3 @@
-import { Cycle } from './cycle';
 import moment = require("moment");
 
 export class Blip {
@@ -17,7 +16,7 @@ export class Blip {
         this.id = id;
 
         this.name = name;
-        this.description = description ? description : '';
+        this.description = description ? description : "";
         this.added = added;
         this.size = size ? size : 1;
 
@@ -26,7 +25,7 @@ export class Blip {
 
         this.radarId = radarId;
 
-        var diff = moment(new Date()).diff(moment(this.added), 'months');
+        var diff = moment(new Date()).diff(moment(this.added), "months");
         this.isNew = diff <= 3;
 
         this.blipNumber = 0;

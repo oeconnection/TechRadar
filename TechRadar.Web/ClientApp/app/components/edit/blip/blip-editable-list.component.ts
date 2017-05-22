@@ -27,6 +27,9 @@ export class BlipEditableListComponent implements OnInit, OnChanges {
     @Input()
     radar: Radar;
 
+    @Input()
+    sized: boolean;
+
     @Output()
     blipSaveEvent = new EventEmitter<Blip>();
 
@@ -81,7 +84,7 @@ export class BlipEditableListComponent implements OnInit, OnChanges {
         });
 
         this.usageSizeList = [
-            { value: 1, title: "1 - Least used" },
+            { value: 1, title: "1 - Minimal Usage" },
             { value: 2, title: "2" },
             { value: 3, title: "3" },
             { value: 4, title: "4" },
@@ -93,134 +96,172 @@ export class BlipEditableListComponent implements OnInit, OnChanges {
     private setTableSettings() {
         this.buildLists();
 
-        this.settings = {
-            mode: "inline",
-            attr: {
-                class: "table table-striped"
-            },
-            actions: {
-                position: "right"
-            },
-            edit: {
-                confirmSave: true,
-                editButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></div>`,
-                cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`,
-                saveButtonContent: `<div class="btn btn-xs btn-info"><i class="fa fa-check"></i></button>`
-            },
-            delete: {
-                confirmDelete: true,
-                deleteButtonContent: `<div class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>`
-            },
-            add: {
-                confirmCreate: true,
-                addButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add New</button>`,
-                createButtonContent: `<div class="btn btn-xs btn-info"><i class="fa fa-check"></i></button>`,
-                cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`
-            },
-            columns: {
-                name: {
-                    title: "Name",
-                    editable: true,
-                    class: "col-md-3"
-                },
-                description: {
-                    title: "Description",
-                    editable: true,
-                    class: "col-md-3"
-                },
-                cycleId: {
-                    title: "Cycle",
-                    editable: true,
-                    type: "html",
-                    editor: {
-                        type: "list",
-                        config: {
-                            list: this.cycleList
-                        }
-                    },
-                    valuePrepareFunction: (value) => {
-                        let display = value;
-
-                        this.cycleList.forEach((item) => {
-                            if (item.value === value) {
-                                display = item.title;
-                            }
-
-                        });
-                        return display;
-                    },
-                    filter: {
-                        type: "list",
-                        config: {
-                            selectText: "Select Cycle...",
-                            list: this.cycleList
-                        }
-                    },
-                    class: "col-md-2"
-                },
-                quadrantId: {
-                    title: "Quadrant",
-                    editable: true,
-                    type: "html",
-                    editor: {
-                        type: "list",
-                        config: {
-                            list: this.quadrantList
-                        }
-                    },
-                    valuePrepareFunction: (value) => {
-                        let display = value;
-
-                        this.quadrantList.forEach((item) => {
-                            if (item.value === value) {
-                                display = item.title;
-                            }
-
-                        });
-                        return display;
-                    },
-                    filter: {
-                        type: "list",
-                        config: {
-                            selectText: "Select Quadrant...",
-                            list: this.quadrantList
-                        }
-                    },
-                    class: "col-md-2"
-                },
-                size: {
-                    title: "Usage",
-                    editable: true,
-                    type: "html",
-                    editor: {
-                        type: "list",
-                        config: {
-                            list: this.usageSizeList
-                        }
-                    },
-                    valuePrepareFunction: (value) => {
-                        let display = value;
-
-                        this.usageSizeList.forEach((item) => {
-                            if (item.value === value) {
-                                display = item.title;
-                            }
-
-                        });
-                        return display;
-                    },
-                    filter: {
-                        type: "list",
-                        config: {
-                            selectText: "Select...",
-                            list: this.usageSizeList
-                        }
-                    },
-                    class: "col-md-1"
-                }
-            }
+        const editAction = {
+            confirmSave: true,
+            editButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-pencil-square-o"></i></div>`,
+            cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`,
+            saveButtonContent: `<div class="btn btn-xs btn-info"><i class="fa fa-check"></i></button>`
         };
 
+        const deleteAction = {
+            confirmDelete: true,
+            deleteButtonContent: `<div class="btn btn-xs btn-danger"><i class="fa fa-trash"></i></button>`
+        }
+
+        const createAction = {
+            confirmCreate: true,
+            addButtonContent: `<div class="btn btn-xs btn-primary"><i class="fa fa-plus"></i> Add New</button>`,
+            createButtonContent: `<div class="btn btn-xs btn-info"><i class="fa fa-check"></i></button>`,
+            cancelButtonContent: `<div class="btn btn-xs btn-default"><i class="fa fa-remove"></i></div>`
+        }
+
+        const nameField = {
+            title: "Name",
+            editable: true,
+            class: "col-md-3"
+        };
+
+        const descriptionField = {
+            title: "Description",
+            editable: true,
+            class: "col-md-3"
+        };
+
+        const cycleIdField = {
+            title: "Cycle",
+            editable: true,
+            type: "html",
+            editor: {
+                type: "list",
+                config: {
+                    list: this.cycleList
+                }
+            },
+            valuePrepareFunction: (value) => {
+                let display = value;
+
+                this.cycleList.forEach((item) => {
+                    if (item.value === value) {
+                        display = item.title;
+                    }
+
+                });
+                return display;
+            },
+            filter: {
+                type: "list",
+                config: {
+                    selectText: "Select Cycle...",
+                    list: this.cycleList
+                }
+            },
+            class: "col-md-2"
+        };
+
+        const quadrantIdField = {
+            title: "Quadrant",
+            editable: true,
+            type: "html",
+            editor: {
+                type: "list",
+                config: {
+                    list: this.quadrantList
+                }
+            },
+            valuePrepareFunction: (value) => {
+                let display = value;
+
+                this.quadrantList.forEach((item) => {
+                    if (item.value === value) {
+                        display = item.title;
+                    }
+
+                });
+                return display;
+            },
+            filter: {
+                type: "list",
+                config: {
+                    selectText: "Select Quadrant...",
+                    list: this.quadrantList
+                }
+            },
+            class: "col-md-2"
+        };
+
+        const sizeField = {
+            title: "Usage",
+                class: "col-md-1",
+                editable: true,
+                type: "html",
+                editor: {
+                type: "list",
+                    config: {
+                    list: this.usageSizeList
+                }
+            },
+            valuePrepareFunction: (value) => {
+                    let display = value;
+
+                    this.usageSizeList.forEach((item) => {
+                        if (item.value === value) {
+                            display = item.title;
+                        }
+
+                    });
+                    return display;
+                },
+                filter: {
+                type: "list",
+                    config: {
+                    selectText: "Select...",
+                        list: this.usageSizeList
+                }
+            }
+        }
+
+        if (this.sized) {
+            this.settings = {
+                mode: "inline",
+                attr: {
+                    class: "table table-striped"
+                },
+                actions: {
+                    position: "right"
+                },
+                edit: editAction,
+                delete: deleteAction,
+                add: createAction,
+
+                columns: {
+                    name: nameField,
+                    description: descriptionField,
+                    cycleId: cycleIdField,
+                    quadrantId: quadrantIdField,
+                    size: sizeField
+                }
+            };
+        } else {
+            this.settings = {
+                mode: "inline",
+                attr: {
+                    class: "table table-striped"
+                },
+                actions: {
+                    position: "right"
+                },
+                edit: editAction,
+                delete: deleteAction,
+                add: createAction,
+
+                columns: {
+                    name: nameField,
+                    description: descriptionField,
+                    cycleId: cycleIdField,
+                    quadrantId: quadrantIdField
+                }
+            };
+        }
     }
 
     private validateForm(data: any): string[] {
@@ -234,12 +275,14 @@ export class BlipEditableListComponent implements OnInit, OnChanges {
             errorMessages.push(this.validationMessages["name"]["minlength"]);
         }
 
-        if (data.size == undefined) {
-            errorMessages.push(this.validationMessages["size"]["required"]);
-        }
+        if (this.sized) {
+            if (data.size == undefined) {
+                errorMessages.push(this.validationMessages["size"]["required"]);
+            }
 
-        if (!isNumeric(data.size)) {
-            errorMessages.push(this.validationMessages["size"]["number"]);
+            if (!isNumeric(data.size)) {
+                errorMessages.push(this.validationMessages["size"]["number"]);
+            }
         }
 
         if (data.cycleId == undefined || data.cycleId.length === 0) {
@@ -256,11 +299,16 @@ export class BlipEditableListComponent implements OnInit, OnChanges {
     private objectToBlip(data: any): Blip {
         const newData = data;
 
+        let size = 1;
+        if (this.sized) {
+            size = parseInt(newData.size);
+        }
+
         return new Blip(
             data.id,
             data.name,
             data.description,
-            parseInt(newData.size),
+            size,
             new Date(),
             data.cycleId,
             data.quadrantId,

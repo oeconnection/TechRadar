@@ -10,7 +10,7 @@ import { Observable } from "rxjs/Observable";
 import { Subscription } from "rxjs/Subscription";
 
 import { IRadar, Radar, Blip, Cycle, Quadrant } from "../../../models";
-import { RadarService, GlobalState } from "../../../services";
+import { RadarService } from "../../../services";
 
 import { GenericValidator } from "../../../shared";
 import { DialogService } from "ng2-bootstrap-modal";
@@ -34,6 +34,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
     private radarName: string;
     private radarDescription: string;
     private radarId: string;
+    private radarSized: boolean;
 
     displayMessage: { [key: string]: string } = {};
     private validationMessages: { [key: string]: { [key: string]: string } } = {
@@ -41,11 +42,6 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             required: "Radar name is required.",
             minlength: "Radar name must be at least two characters.",
             maxlength: "Name cannot be more than 50 characters."
-        },
-        group: {
-            required: "Group name is required.",
-            minlength: "Group name must be at least two characters.",
-            maxlength: "Group cannot be more than 30 characters."
         },
         description: {
             maxlength: "Description cannot be more than 500 characters."
@@ -61,8 +57,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
         private radarService: RadarService,
         private toastr: ToastsManager,
         private vcr: ViewContainerRef,
-        private dialogService: DialogService,
-        private stateManager: GlobalState
+        private dialogService: DialogService
     ) {
         this.toastr.setRootViewContainerRef(vcr);
         this.genericValidator = new GenericValidator(this.validationMessages);
@@ -107,14 +102,10 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
                 Validators.minLength(2),
                 Validators.maxLength(50)
             ]],
-            group: ["", [
-                Validators.required,
-                Validators.minLength(2),
-                Validators.maxLength(30)
-            ]],
             description: ["", [
                 Validators.maxLength(500)
-            ]]
+            ]],
+            sized: [""]
         });
 
     }
@@ -183,6 +174,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             this.radarId = radar.id;
             this.radarName = radar.name;
             this.radarDescription = radar.description;
+            this.radarSized = radar.sized;
         }
 
         this.resetForm();
@@ -198,18 +190,29 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
 
             this.radarForm.patchValue({
                 name: "",
-                group: "",
+                sized: false,
                 description: ""
             });
+
+            this.radarSized = false;
         } else {
             this.pageTitle = `Edit Radar: ${this.radar.name}`;
 
             this.radarForm.patchValue({
                 name: this.radar.name,
-                group: this.radar.group,
+                sized: this.radar.sized,
                 description: this.radar.description
             });
+
+            this.radarSized = this.radar.sized;
         }
+
+    }
+
+    changeSizing(event, item) {
+        let checked = event.toElement.checked;
+        this.radarSized = checked;
+        console.log(`Item ${checked}`);
     }
 
     deleteRadar(): void {
@@ -257,7 +260,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
             this.onRadarRetrieved(radar);
 
             this.toastr.success("Saved successful").then(() => {
-                this.stateManager.notifyDataChanged(this.radarListDataName, null);
+                //this.stateManager.notifyDataChanged(this.radarListDataName, null);
 
                 if (navigate) {
                     this.router.navigate(["/edit/radar"], { queryParams: { id: this.radar.id } });
@@ -271,7 +274,7 @@ export class RadarEditComponent implements OnInit, AfterViewInit, OnDestroy {
 
     onDeleteComplete(): void {
         this.toastr.success("Deletion successful").then(() => {
-            this.stateManager.notifyDataChanged(this.radarListDataName, null);
+            //this.stateManager.notifyDataChanged(this.radarListDataName, null);
             this.router.navigate(["/"]);
         });
     }

@@ -1,8 +1,7 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using MongoDB.Bson;
 using TechRadar.Services.Artifacts.Models;
 
 namespace TechRadar.Services.Test.Helpers
@@ -16,7 +15,7 @@ namespace TechRadar.Services.Test.Helpers
                 Id = id,
                 Name = string.Format("Test Radar {0}", index),
                 Description = string.Format("Test Radar {0} Description", index),
-                Group = "Tests",
+                Sized = true,
                 Cycles = new List<Cycle>
                 {
                     CreateTestCycle(index, 0, true),

@@ -5,7 +5,8 @@
     ViewEncapsulation
 } from "@angular/core";
 import { Radar, Quadrant, Cycle, Blip } from "../../../models";
-import { GlobalState } from "../../../services";
+import { IHoverState, ON_HOVER, OFF_HOVER } from "../../../services/state-management";
+import { Store } from "@ngrx/store";
 
 @Component({
     selector: "quadrant-list",
@@ -21,17 +22,21 @@ export class QuadrantListComponent implements OnChanges {
     private blips: Blip[];
     private cycles: Cycle[];
     private radarId: string;
+    private sizedRadar: boolean;
     private panelClass: string;
     private activeBlip: Blip;
     private readonly activatedBlipEventName = "activated.blip";
 
-    constructor(private stateManager: GlobalState) {
+    constructor(private store: Store<IHoverState>) {
+
         this.panelClass = "";
         this.activeBlip = null;
+        this.sizedRadar = false;
 
-        this.stateManager.subscribe(this.activatedBlipEventName, (blip: Blip) => {
-            this.activeBlip = blip;
-        });
+        store.select("hoverStoreReducer")
+            .subscribe((data: IHoverState) => {
+                this.activeBlip = data.activeBlip;
+            });
     }
 
     ngOnChanges() {
@@ -44,7 +49,7 @@ export class QuadrantListComponent implements OnChanges {
             this.blips = this.radar.findBlipsByQuadrantId(this.quadrantData.id);
             this.cycles = this.radar.cycles;
             this.radarId = this.radar.id;
-
+            this.sizedRadar = this.radar.sized;
             this.panelClass = `panel-${this.getBlipClassNameByQuadrant(this.quadrantData)}`;
         }
     }
@@ -91,12 +96,14 @@ export class QuadrantListComponent implements OnChanges {
 
     public onMouseOverBlip(blip: Blip): void {
         this.activeBlip = blip;
-        this.stateManager.notifyDataChanged(this.activatedBlipEventName, blip);
+//        this.stateManager.notifyDataChanged(this.activatedBlipEventName, blip);
+        this.store.dispatch({ type: ON_HOVER, payload: { activeBlip: blip } });
     }
 
     public onMouseOutBlip(): void {
         this.activeBlip = null;
-        this.stateManager.notifyDataChanged(this.activatedBlipEventName, null);
+//        this.stateManager.notifyDataChanged(this.activatedBlipEventName, null);
+        this.store.dispatch({ type: OFF_HOVER });
     }
 
     public isActiveBlip(blip: number): boolean {

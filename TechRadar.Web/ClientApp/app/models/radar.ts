@@ -1,20 +1,20 @@
-import { Blip } from './blip';
-import { Quadrant } from './quadrant';
-import { Cycle } from './cycle';
+import { Blip } from "./blip";
+import { Quadrant } from "./quadrant";
+import { Cycle } from "./cycle";
 
 export class Radar {
     id: string;
     name: string;
-    group: string;
+    sized: boolean;
     description: string;
     quadrants: Quadrant[];
     cycles: Cycle[];
     blips: Blip[];
 
-    constructor(id: string, name: string, group: string, description: string, quadrants?: Quadrant[], cycles?: Cycle[]) {
+    constructor(id: string, name: string, sized: boolean, description: string, quadrants?: Quadrant[], cycles?: Cycle[]) {
         this.id = id;
         this.name = name;
-        this.group = group;
+        this.sized = sized;
         this.description = description;
         this.cycles = cycles;
         this.quadrants = quadrants;

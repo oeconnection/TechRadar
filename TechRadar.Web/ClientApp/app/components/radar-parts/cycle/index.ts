@@ -1,1 +1,1 @@
-﻿export { CycleComponent } from './cycle.component';
+﻿export { CycleComponent } from "./cycle.component";

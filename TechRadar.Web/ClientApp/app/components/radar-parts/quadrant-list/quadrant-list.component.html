@@ -31,6 +31,9 @@
                             <div class="collapse" id="collapse{{ blip.id }}">
                                 <div class="well blip-description">
                                     {{ blip.description }}
+                                    <div *ngIf="sizedRadar">
+                                        <strong>Usage Level: </strong>{{ blip.size }}
+                                    </div>
                                 </div>
                             </div>
                         </div>

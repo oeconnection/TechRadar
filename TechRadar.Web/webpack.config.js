@@ -36,7 +36,6 @@ module.exports = (env) => {
                         use: 'css-loader!sass-loader?sourceMap'
                     })
                 },
-                //{ test: /\.css$/, use: ['to-string-loader', 'css-loader'] },
                 {
                     test: /\.woff(2)?(\?v=.+)?$/,
                     use: 'url-loader?limit=10000&mimetype=application/font-woff'
@@ -68,6 +67,7 @@ module.exports = (env) => {
             })
         ] : [
             // Plugins that apply in production builds only
+            new webpack.NormalModuleReplacementPlugin(/environment.dev/, "environment.prod"),
             new webpack.optimize.UglifyJsPlugin()
         ])
     });

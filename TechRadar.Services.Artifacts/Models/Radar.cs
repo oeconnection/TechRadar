@@ -14,8 +14,8 @@ namespace TechRadar.Services.Artifacts.Models
         [BsonElement("name")]
         public string Name { get; set; }
 
-        [BsonElement("group")]
-        public string Group { get; set; }
+        [BsonElement("sized")]
+        public bool Sized { get; set; }
 
         [BsonElement("description")]
         public string Description { get; set; }

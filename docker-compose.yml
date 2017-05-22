@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  techradar.web:
+    image: techradar.web
+    build:
+      context: ./TechRadar.Web
+      dockerfile: Dockerfile
+
+  techradar.services:
+    image: techradar.services
+    build:
+      context: ./TechRadar.Services
+      dockerfile: Dockerfile

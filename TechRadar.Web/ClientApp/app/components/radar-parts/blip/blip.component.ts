@@ -8,8 +8,10 @@
     } from "@angular/core";
 import { D3Service, D3 } from "d3-ng2-service";
 import { Blip, Cycle, Quadrant, Radar, IPoint, IRange } from "../../../models";
-import { RadarService, GlobalState } from "../../../services";
+import { RadarService } from "../../../services";
+import { IHoverState, ON_HOVER, OFF_HOVER } from "../../../services/state-management";
 import * as Chance from "chance";
+import { Store } from "@ngrx/store";
 
 @Component({
     selector: "[radar-blip]",
@@ -37,20 +39,25 @@ export class BlipComponent implements OnChanges {
 
     private readonly activatedBlipEventName = "activated.blip";
 
-    constructor(element: ElementRef, private radarService: RadarService, d3Service: D3Service, private stateManager: GlobalState) {
+    constructor(element: ElementRef,
+        private radarService: RadarService,
+        d3Service: D3Service,
+        private store: Store<IHoverState>) {
+
         this.d3 = d3Service.getD3();
         this.parentNativeElement = element.nativeElement;
         this.mouseOnBlip = null;
 
-        this.stateManager.subscribe(this.activatedBlipEventName, (blip: Blip) => {
-            if (blip == null) {
-                // Mouseout
-                this.endHoverActions();
-            } else {
-                // Mouse Over
-                this.showHoverActions(blip);
-            }
-        });
+        store.select("hoverStoreReducer")
+            .subscribe((data: IHoverState) => {
+                if (data.activeBlip == null) {
+                    // Mouseout
+                    this.endHoverActions();
+                } else {
+                    // Mouse Over
+                    this.showHoverActions(data.activeBlip);
+                };
+            });
     }
 
     ngOnChanges(): void {
@@ -180,7 +187,7 @@ export class BlipComponent implements OnChanges {
     }
 
     private trianglePoints(blip: Blip) {
-        const tsize = 10 + blip.size;
+        const tsize = 10 + (this.radar.sized ? (2 ^ blip.size) : 1);
         const top = 0 - tsize;
         const left = (0 - tsize + 1);
         const right = (0 + tsize + 1);
@@ -218,7 +225,7 @@ export class BlipComponent implements OnChanges {
             .attr("cy", "4")
             .attr("class", (blip: Blip) => { return this.getBlipClassNameByQuadrantId(blip.quadrantId) })
             .attr("stroke-width", "1.5")
-            .attr("r", (blip: Blip) => { return blip.size + 10 })
+            .attr("r", (blip: Blip) => { return (this.radar.sized ? (2 * (2 ^ blip.size)) + 10 : 11); })
             .attr("opacity", "1");
     }
 
@@ -290,28 +297,35 @@ export class BlipComponent implements OnChanges {
 
             this.mouseOnBlip = blip;
             this.d3Svg.selectAll(".blip-group").style("opacity", (item: Blip) => {
-                return blip.blipNumber === item.blipNumber ? 1 : 0.5;
+                return blip.blipNumber === item.blipNumber ? 1 : 0.3;
             });
         }
     }
 
     onMouseOverBlip(blip: Blip): void {
         this.showHoverActions(blip);
-        this.stateManager.notifyDataChanged(this.activatedBlipEventName, blip);
+        //this.stateManager.notifyDataChanged(this.activatedBlipEventName, blip);
+        this.store.dispatch({ type: ON_HOVER, payload: { activeBlip: blip } });
     }
 
     private endHoverActions() {
-        this.tooltip.transition()
-            .duration(500)
-            .style("opacity", 0);
+        if (this.tooltip != null) {
+            this.tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        }
 
         this.mouseOnBlip = null;
-        this.d3Svg.selectAll(".blip-group").style("opacity", 1);
+
+        if (this.d3Svg != null) {
+            this.d3Svg.selectAll(".blip-group").style("opacity", 1);
+        }
     }
 
     onMouseOutBlip(): void {
         this.endHoverActions();
-        this.stateManager.notifyDataChanged(this.activatedBlipEventName, null);
+//        this.stateManager.notifyDataChanged(this.activatedBlipEventName, null);
+        this.store.dispatch({ type: OFF_HOVER });
     }
 
     blipOpacity(blip: Blip): number {

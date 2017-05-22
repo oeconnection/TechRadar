@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { RadarService, GlobalState } from "../../services";
+import { RadarService } from "../../services";
 import { Radar } from "../../models";
 
 @Component({
@@ -13,13 +13,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     private readonly radarListDataName = "global.radars";
 
     constructor(
-        private radarService: RadarService,
-        private stateManager: GlobalState) {
+        private radarService: RadarService) {
+
     }
 
     ngOnInit() {
-        this.stateManager.subscribe(this.radarListDataName, (radars: Radar[]) => {
-            this.radars = radars;
+        this.sub = this.radarService.getRadarList().subscribe(data => {
+            this.radars = data;
         });
     }
 
@@ -32,5 +32,4 @@ export class HomeComponent implements OnInit, OnDestroy {
     isRadarReady(radar: Radar): boolean {
         return !(radar.cycles == null || radar.quadrants == null);
     }
-
 }

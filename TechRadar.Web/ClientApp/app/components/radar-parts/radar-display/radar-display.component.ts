@@ -9,7 +9,7 @@ import {
     SimpleChanges
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { Radar, RadarConfig, Blip, Quadrant } from "../../../models";
+import { Radar, Blip, Quadrant } from "../../../models";
 import { RadarService } from "../../../services";
 import { D3Service, D3 } from "d3-ng2-service";
 import { Observable } from "rxjs/Rx";
@@ -32,7 +32,6 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     private routingParams: any;
     private dataSub: any;
     private radarData: Radar;
-    private chartConfig: RadarConfig;
     private width: number;
     private height: number;
     private blips: Blip[];

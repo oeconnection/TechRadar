@@ -229,7 +229,7 @@ namespace TechRadar.Services.Repositories
 
             var update = Builders<Radar>.Update
                 .Set("name", radar.Name)
-                .Set("group", radar.Group)
+                .Set("sized", radar.Sized)
                 .Set("description", radar.Description)
                 .CurrentDate("added")
                 .CurrentDate("lastModified")
@@ -256,7 +256,7 @@ namespace TechRadar.Services.Repositories
 
             var update = Builders<Radar>.Update
                 .Set("name", radar.Name)
-                .Set("group", radar.Group)
+                .Set("sized", radar.Sized)
                 .Set("description", radar.Description)
                 .CurrentDate("lastModified");
 

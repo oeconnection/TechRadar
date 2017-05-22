@@ -1,5 +1,3 @@
-import { Blip } from './blip';
-
 export class Quadrant {
     id: string;
     quadrantNumber: number;
