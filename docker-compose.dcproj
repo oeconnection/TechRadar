@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" Sdk="Microsoft.Docker.Sdk">
   <PropertyGroup Label="Globals">
-    <ProjectGuid>d0975619-09db-4c1b-8ebe-ad42798482c2</ProjectGuid>
+    <ProjectGuid>09669eb9-35f8-4ba8-b420-3b267de47278</ProjectGuid>
     <DockerLaunchBrowser>True</DockerLaunchBrowser>
     <DockerServiceUrl>http://localhost:{ServicePort}</DockerServiceUrl>
     <DockerServiceName>techradar.web</DockerServiceName>
