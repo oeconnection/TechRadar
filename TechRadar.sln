@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechRadar.Services.Test", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechRadar.Services.Artifacts", "TechRadar.Services.Artifacts\TechRadar.Services.Artifacts.csproj", "{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{09669EB9-35F8-4BA8-B420-3B267DE47278}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,10 +33,6 @@ Global
 		{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}.Release|Any CPU.Build.0 = Release|Any CPU
-		{09669EB9-35F8-4BA8-B420-3B267DE47278}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{09669EB9-35F8-4BA8-B420-3B267DE47278}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{09669EB9-35F8-4BA8-B420-3B267DE47278}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{09669EB9-35F8-4BA8-B420-3B267DE47278}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
