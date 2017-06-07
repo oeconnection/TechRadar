@@ -14,6 +14,7 @@ import { RadarService } from "../../../services";
 import { D3Service, D3 } from "d3-ng2-service";
 import { Observable } from "rxjs/Rx";
 import { isPlatformBrowser } from "@angular/common";
+import { ThemeSpinnerService } from "../../../services";
 
 @Component({
     selector: "app-radar",
@@ -25,7 +26,6 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     @Input() id: string;
     @Input() quadrant: number;
 
-    private showChart: boolean;
     private d3: D3; 
     private radarName: string;
     private radarDescription: string;
@@ -35,21 +35,19 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
     private width: number;
     private height: number;
     private blips: Blip[];
-    private show: boolean;
     private chosenQuadrant: Quadrant;
 
     constructor(private route: ActivatedRoute,
         private router: Router,
         private radarService: RadarService,
-        private d3Service: D3Service) {
-        this.show = false;
-        this.showChart = false;
+        private d3Service: D3Service,
+        private spinner: ThemeSpinnerService) {
         this.d3 = d3Service.getD3(); 
     }
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes["id"]) {
-            this.getData();
+            this.getData(changes);
         } else {
             if (changes["quadrant"]) {
                 this.quadrant = changes["quadrant"].currentValue;
@@ -58,7 +56,6 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
                 }
             }
         }
-
     }
 
     ngOnInit() {
@@ -91,8 +88,8 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
         return !isNaN(this.quadrant) && this.quadrant > 0;
     }
 
-    private getData() {
-        this.showChart = false;
+    private getData(changes: SimpleChanges) {
+        this.spinner.show();
         this.dataSub = Observable.forkJoin(
             this.radarService.getRadar(this.id),
             this.radarService.getRadarBlips(this.id)
@@ -105,7 +102,14 @@ export class RadarDisplayComponent implements OnInit, OnDestroy, OnChanges {
             } else {
                 this.router.navigate(["/"]);
             };
-            this.showChart = true;
+
+            if (changes["quadrant"]) {
+                this.quadrant = changes["quadrant"].currentValue;
+                if (this.quadrant != null) {
+                    this.chosenQuadrant = this.radarData.findQuadrantByNumber(this.quadrant);
+                }
+            }
+            this.spinner.hide();
         });
     }
 

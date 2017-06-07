@@ -17,7 +17,10 @@ module.exports = (env) => {
         },
         module: {
             rules: [
-                { test: /\.ts$/, include: /ClientApp/, use: ['awesome-typescript-loader?silent=true', 'angular2-template-loader'] },
+                {
+                    test: /\.ts$/, include: /ClientApp/,
+                    use: ['awesome-typescript-loader?silent=true', 'angular2-template-loader']
+                },
                 { test: /\.html$/, use: 'html-loader?minimize=false' },
                 {
                     test: /\.css$/,
@@ -67,8 +70,12 @@ module.exports = (env) => {
             })
         ] : [
             // Plugins that apply in production builds only
-            new webpack.NormalModuleReplacementPlugin(/environment.dev/, "environment.prod"),
-            new webpack.optimize.UglifyJsPlugin()
+                new webpack.NormalModuleReplacementPlugin(/environment.dev/, function (result) {
+                    // Replace Dev config variables with prod ones
+                    result.request = result.request.replace(/environment.dev/, 'environment.prod');
+            }),
+//                new webpack.NormalModuleReplacementPlugin(/ClientApp\/environments\/environment.dev/, "./environment.prod"),
+                new webpack.optimize.UglifyJsPlugin()
         ])
     });
 

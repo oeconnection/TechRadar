@@ -2,5 +2,5 @@
 
 export const environment: IEnvironment = {
     target: "prod",
-    apiRoot: "http://localhost:46825/api"
+    apiRoot: "http://kingmoonracer.oecdev.oeconnection.com:46825/api"
 };

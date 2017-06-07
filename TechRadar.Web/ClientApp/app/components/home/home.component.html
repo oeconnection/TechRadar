@@ -24,7 +24,7 @@
     <h4><strong>Quadrants</strong></h4>
     <ul>
         <li *ngFor="let quadrant of radar.quadrants">
-            <a [routerLink]="['/radar', radar.id, quadrant.quadrantNumber]"><strong>{{ quadrant.name }}</strong></a> - {{ quadrant.description }}
+            <a [routerLink]="['/radar', radar.id]" [queryParams]="{ quad: quadrant.quadrantNumber }"><strong>{{ quadrant.name }}</strong></a> - {{ quadrant.description }}
         </li>
     </ul>
     <hr />

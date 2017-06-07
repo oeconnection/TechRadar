@@ -1,10 +1,11 @@
-import 'zone.js';
+import 'core-js/es6';
 import 'reflect-metadata';
-//import 'angular2-universal-polyfills/browser';
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic'
 import { AppModule } from './app/app.module';
 import 'bootstrap';
+import 'zone.js';
+
 const rootElemTagName = 'app'; // Update this if you change your root component selector
 
 // Enable either Hot Module Reloading or production mode

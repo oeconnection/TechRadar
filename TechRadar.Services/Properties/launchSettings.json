@@ -22,7 +22,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://w7lriderb:46826"
+      "applicationUrl": "http://localhost:46826"
     }
   }
 }

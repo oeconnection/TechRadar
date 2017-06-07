@@ -1,6 +1,6 @@
 ﻿<div #chart [ngClass]="chartAlignment">
     <svg [attr.width]="width" [attr.height]="width">
-        <svg:g radar-cycles [cycles]="data.cycles" [quadrant]="quadrant" [width]="width"></svg:g>
+        <svg:g radar-cycles [cycles]="data?.cycles" [quadrant]="quadrant" [width]="width"></svg:g>
         <svg:g radar-blip [radar]="data" [quadrant]="quadrant" [width]="width"></svg:g>
     </svg>
 </div>

@@ -31,7 +31,9 @@ export class CycleComponent implements OnChanges {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        this.buildChart();
+        if (this.cycles != null) {
+            this.buildChart();
+        }
     }
 
     private buildChart() {
