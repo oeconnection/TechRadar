@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from "@angular/core";
-import { RadarService } from "../../services";
+import { RadarService, ThemeSpinnerService } from "../../services";
 import { Radar } from "../../models";
 
 @Component({
@@ -13,13 +13,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     private readonly radarListDataName = "global.radars";
 
     constructor(
-        private radarService: RadarService) {
+        private radarService: RadarService,
+        private spinner: ThemeSpinnerService) {
 
     }
 
     ngOnInit() {
+        this.spinner.show();
         this.sub = this.radarService.getRadarList().subscribe(data => {
             this.radars = data;
+            this.spinner.hide();
         });
     }
 

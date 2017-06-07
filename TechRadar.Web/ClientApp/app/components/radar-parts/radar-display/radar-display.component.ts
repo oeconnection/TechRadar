@@ -10,11 +10,10 @@ import {
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Radar, Blip, Quadrant } from "../../../models";
-import { RadarService } from "../../../services";
+import { RadarService, ThemeSpinnerService } from "../../../services";
 import { D3Service, D3 } from "d3-ng2-service";
 import { Observable } from "rxjs/Rx";
 import { isPlatformBrowser } from "@angular/common";
-import { ThemeSpinnerService } from "../../../services";
 
 @Component({
     selector: "app-radar",

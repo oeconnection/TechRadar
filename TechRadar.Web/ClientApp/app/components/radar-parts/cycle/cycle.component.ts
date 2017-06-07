@@ -62,7 +62,6 @@ export class CycleComponent implements OnChanges {
 
             this.startAngle = ((radianCalculation - 0.5) * Math.PI);
             this.endAngle = (radianCalculation * Math.PI);
-            console.log("Start: %s | End: %s", this.startAngle, this.endAngle);
             this.radius = this.width;
 
             switch (this.quadrant) {
