@@ -50,16 +50,20 @@ export class RadarService {
         return radar;
     }
 
-    private mapRadarList(response: Response): any {
+    private mapRadarList(response: Response): Radar[] {
         // when the cached data is available we don't need the `Observable` reference anymore
         this.observable = null;
 
         if (response.status === 200) {
-            this.dataCache.radarList = response.json().map(this.toRadar);
+            this.dataCache.radarList = response.json().map(this.toRadar).sort((a: Radar, b: Radar) => {
+                if (a.name.toLocaleLowerCase() < b.name.toLocaleLowerCase()) return -1;
+                if (a.name.toLocaleLowerCase() > b.name.toLocaleLowerCase()) return 1;
+                return 0;
+            });
             return this.dataCache.radarList;
         }
 
-        return "FAILURE";
+        return null;
     }
 
     private handleError(error: Response | any) {
