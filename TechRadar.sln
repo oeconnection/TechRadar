@@ -1,15 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.12
+VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TechRadar.Web", "TechRadar.Web\TechRadar.Web.csproj", "{EEB0082B-DB97-4B1F-81FE-D58122FBDEF1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TechRadar.Services", "TechRadar.Services\TechRadar.Services.csproj", "{4C23A975-B3CB-4B80-8349-8327ABF5AEB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechRadar.Services.Test", "TechRadar.Services.Test\TechRadar.Services.Test.csproj", "{84571EAC-73E6-4B89-97AC-1E1477A77805}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TechRadar.Services.Test", "TechRadar.Services.Test\TechRadar.Services.Test.csproj", "{84571EAC-73E6-4B89-97AC-1E1477A77805}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechRadar.Services.Artifacts", "TechRadar.Services.Artifacts\TechRadar.Services.Artifacts.csproj", "{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TechRadar.Services.Artifacts", "TechRadar.Services.Artifacts\TechRadar.Services.Artifacts.csproj", "{2F9BD49C-E14D-4AB6-B2F0-098B97D54433}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{16DEDE07-B6DD-4453-A112-C23B27F43888}"
+	ProjectSection(SolutionItems) = preProject
+		copyright.licenseheader = copyright.licenseheader
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
